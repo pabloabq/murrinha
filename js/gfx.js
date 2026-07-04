@@ -112,6 +112,54 @@ export function drawTextO(ctx, text, x, y, color, outline, scale = 1) {
   drawText(ctx, text, x, y, color, scale);
 }
 
+// ---------------- fonte de logo (gorda, estilo SNES) ----------------
+// Traço de 2px, 9 linhas de altura. Só as letras usadas nos títulos.
+const BOLD = {
+  'A': '.1111.,111111,11..11,11..11,111111,111111,11..11,11..11,11..11',
+  'D': '11111.,111111,11..11,11..11,11..11,11..11,11..11,111111,11111.',
+  'E': '111111,111111,11....,11111.,11111.,11....,11....,111111,111111',
+  'G': '.11111,111111,11....,11....,11.111,11.111,11..11,111111,.11111',
+  'H': '11..11,11..11,11..11,111111,111111,11..11,11..11,11..11,11..11',
+  'I': '111111,111111,..11..,..11..,..11..,..11..,..11..,111111,111111',
+  'M': '11....11,111..111,11111111,11.11.11,11....11,11....11,11....11,11....11,11....11',
+  'N': '11...11,111..11,1111.11,11.1111,11..111,11...11,11...11,11...11,11...11',
+  'O': '.1111.,111111,11..11,11..11,11..11,11..11,11..11,111111,.1111.',
+  'R': '11111.,111111,11..11,11..11,111111,11111.,11.11.,11..11,11..11',
+  'U': '11..11,11..11,11..11,11..11,11..11,11..11,11..11,111111,.1111.',
+  'Z': '111111,111111,....11,...11.,..11..,.11...,11....,111111,111111',
+};
+
+// Gera um canvas com o texto em letras gordas: dourado com brilho em cima,
+// sombra embaixo, contorno escuro e sombra projetada — a cara dos logos SNES.
+export function bigText(str, fill = '#f2d24e', light = '#fff8b0', shade = '#c8892a', outline = '#4a1008') {
+  const s = normText(str);
+  const glyphs = [...s].map(ch => ch === ' ' ? null : (BOLD[ch] || null));
+  const widths = glyphs.map(g => g ? g.split(',')[0].length : 4);
+  const totalW = widths.reduce((a, b) => a + b + 2, 0) + 3;
+  const c = document.createElement('canvas');
+  c.width = totalW; c.height = 14;
+  const x = c.getContext('2d');
+  const put = (gx, gy, color) => { x.fillStyle = color; x.fillRect(gx, gy, 1, 1); };
+  let cx = 2;
+  for (let gi = 0; gi < glyphs.length; gi++) {
+    const g = glyphs[gi];
+    if (!g) { cx += widths[gi] + 2; continue; }
+    const rows = g.split(',');
+    // contorno + sombra projetada
+    for (let j = 0; j < 9; j++) for (let i = 0; i < rows[j].length; i++) {
+      if (rows[j][i] !== '1') continue;
+      for (const [dx, dy] of [[-1,0],[1,0],[0,-1],[0,1],[1,1]]) put(cx + i + dx, 2 + j + dy, outline);
+      put(cx + i + 2, 2 + j + 2, 'rgba(20,10,20,0.45)');
+    }
+    for (let j = 0; j < 9; j++) for (let i = 0; i < rows[j].length; i++) {
+      if (rows[j][i] !== '1') continue;
+      put(cx + i, 2 + j, j < 2 ? light : j > 6 ? shade : fill);
+    }
+    cx += widths[gi] + 2;
+  }
+  return c;
+}
+
 // Caixa de diálogo estilo SNES
 export function drawBox(ctx, x, y, w, h, bg = '#182848', border = '#f8f8f8') {
   ctx.fillStyle = border;
