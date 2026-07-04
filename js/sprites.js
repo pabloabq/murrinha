@@ -251,6 +251,75 @@ export const ticket = sp([
   'kvzvvvvzvk',
   'kkkkkkkkkk',
 ]);
+// nota de dinheiro (vale 10 fichas)
+export const nota = sp([
+  'kkkkkkkkkkkk',
+  'kvvvvvvvvvvk',
+  'kvVzzzzzzVvk',
+  'kvzvvkkvvzvk',
+  'kvzvkzzkvzvk',
+  'kvzvvkkvvzvk',
+  'kvVzzzzzzVvk',
+  'kvvvvvvvvvvk',
+  'kkkkkkkkkkkk',
+]);
+// maçã do lanche (aguenta um susto no lugar do Murrinha)
+export const maca = sp([
+  '....kk..',
+  '...kvk..',
+  '..kkkk..',
+  '.krrrrk.',
+  'krrRrrrk',
+  'krRrrrrk',
+  'krrrrrrk',
+  '.krrrrk.',
+  '..kkkk..',
+]);
+// orelhão laranja (o telefone público icônico)
+export const orelhao = sp([
+  '...kkkkkkkk...',
+  '..koooooooook.',
+  '.koooooooooook',
+  '.kookkkkkkoook',
+  'kook......kook',
+  'kook.kkk..kook',
+  'kook.kxk..kook',
+  'kook.kxk..kook',
+  'kook.kkk..kook',
+  'koook....koook',
+  '.kookkkkkkook.',
+  '....kxxk......',
+  '....kxxk......',
+  '....kxxk......',
+  '....kxxk......',
+  '....kxxk......',
+  '....kxxk......',
+  '...kxxxxk.....',
+]);
+// Cego da Ficha (NPC: óculos escuros, bengala, bandeja de fichas)
+export const cego = sp([
+  '....kkkkkkkk....',
+  '...khhhhhhhhk...',
+  '..khhhhhhhhhhk..',
+  '..khhsssssshhk..',
+  '..kkkkkkkkkkkk..',
+  '..kskkkkkkkksk..',
+  '..kssssssssssk..',
+  '..kssskkkksssk..',
+  '...kssssssssk...',
+  '....kkkkkkkk....',
+  '...kxxxxxxxxk...',
+  '..ksxxxxxxxxsk..',
+  '..ksxxxxxxxxsk.k',
+  '..ksxxxxxxxxsk.k',
+  '.kyyyyyyyyyyk..k',
+  '.kkkkkkkkkkkk..k',
+  '...kxxxxxxk....k',
+  '...kxxxxxxk....k',
+  '...kxxk.kxxk...k',
+  '...kxxk.kxxk...k',
+  '..kxxxk.kxxxk..k',
+]);
 
 // placa de checkpoint (PARADA)
 export const checkSign = sp([
@@ -290,34 +359,38 @@ export const checkSignOn = sprite([
   '......kk......',
 ], PAL);
 
-// ==================== LEÃO DO CAD (20x24) ====================
-export const leao = sp([
-  '....kkkk............',
-  '...kuuuuk...........',
-  '..kuUuuUuk..........',
-  '..kuuuuuuk..........',
-  '..kukuukuk..........',
-  '..kuuuuuuk..........',
-  '..kuukkuuk..........',
-  '...kuuuuk...........',
-  '..kUuuuuUk......kk..',
-  '.kuuuuuuuuk....kUuk.',
-  'kuuuuuuuuuuk...kuuk.',
-  'kuuuuuuuuuuk...kuuk.',
-  'kuuuuuuuuuuuk..kuuk.',
-  'kuuuuuuuuuuuuk.kuuk.',
-  'kuuuuuuuuuuuuukkuuk.',
-  'kuuuuuuuuuuuuuuuuuk.',
-  'kuukuuuuuuuuuuuuuk..',
-  'kuukuuuuuuuuuuuuk...',
-  'kuukuuukuukuuuuk....',
-  'kuukuuukuukuuuk.....',
-  'kUUkUUUkUUkUUUk.....',
-  'kkkkkkkkkkkkkkk.....',
-  'kUUUUUUUUUUUUUUk....',
-  'kkkkkkkkkkkkkkkk....',
-]);
-export const leaoL = flipped(leao);
+// ==================== LEÃO DO CAD (20x26, de frente, carranca) ====================
+// Juba marrom, rosto bege, boca aberta com dentes — os guardiões da marquise.
+const LEAO_PAL = { ...PAL, J: '#8a6434', j: '#a87c48' };
+export const leao = sprite([
+  '....kJJJJJJJJJJk....',
+  '...kJjjjjjjjjjjJk...',
+  '..kJjjuuuuuuuujjJk..',
+  '..kJjuuuuuuuuuujJk..',
+  '..kJjuuuuuuuuuujJk..',
+  '..kJjukkuuuukkujJk..',
+  '..kJjukkuuuukkujJk..',
+  '..kJjuuuUUUUuuujJk..',
+  '..kJjuuUkkkkUuujJk..',
+  '..kJjuukkkkkkuujJk..',
+  '..kJjuukwkkwkuujJk..',
+  '..kJjuukkkkkkuujJk..',
+  '..kJjuukwkkwkuujJk..',
+  '..kJjuuUkkkkUuujJk..',
+  '..kJjjuUUUUUUujjJk..',
+  '...kJjjjjjjjjjjJk...',
+  '....kJJJJJJJJJJk....',
+  '...kuuuuuuuuuuuuk...',
+  '..kuuuuuuuuuuuuuuk..',
+  '..kuukUuuuuuuUkuuk..',
+  '..kuukuuuuuuuukuuk..',
+  '..kuukuuuuuuuukuuk..',
+  '..kUUkUUUUUUUUkUUk..',
+  '.kkkkkkkkkkkkkkkkkk.',
+  '.kUUUUUUUUUUUUUUUUk.',
+  '.kkkkkkkkkkkkkkkkkk.',
+], LEAO_PAL);
+export const leaoL = leao; // de frente: os dois lados são iguais
 
 // busto do fundador (14x20, bronze sobre pedestal)
 export const busto = sp([
@@ -449,6 +522,73 @@ export const portPombo = sp([
   '........................',
 ]);
 
+// ==================== VEÍCULOS DA FLORIANO ====================
+function carro(cor) {
+  return tile(x => {
+    x.fillStyle = '#141420';
+    x.fillRect(1, 4, 30, 9);
+    x.fillStyle = cor;
+    x.fillRect(2, 5, 28, 7);
+    x.fillRect(8, 1, 16, 5);
+    x.fillStyle = '#141420'; x.fillRect(7, 0, 18, 1); x.fillRect(7, 0, 1, 5); x.fillRect(24, 0, 1, 5);
+    x.fillStyle = '#bfe8f8'; x.fillRect(9, 2, 6, 3); x.fillRect(17, 2, 6, 3);
+    x.fillStyle = '#141420';
+    x.fillRect(5, 11, 6, 5); x.fillRect(21, 11, 6, 5);
+    x.fillStyle = '#8a8a96'; x.fillRect(7, 13, 2, 2); x.fillRect(23, 13, 2, 2);
+    x.fillStyle = '#f8e858'; x.fillRect(2, 6, 2, 2); // farol
+  }, 32, 16);
+}
+export const carros = [carro('#c03028'), carro('#2a52c0'), carro('#e8e4da'), carro('#2e8a5c')];
+export const moto = tile(x => {
+  x.fillStyle = '#141420';
+  x.fillRect(2, 8, 5, 5); x.fillRect(13, 8, 5, 5);
+  x.fillStyle = '#c03028'; x.fillRect(5, 5, 10, 4);
+  x.fillStyle = '#141420'; x.fillRect(13, 2, 2, 4);
+  x.fillStyle = '#f2c184'; x.fillRect(8, 0, 4, 4); // piloto
+  x.fillStyle = '#141420'; x.fillRect(8, 0, 4, 2); // capacete
+}, 20, 13);
+export const onibus = tile(x => {
+  x.fillStyle = '#141420'; x.fillRect(0, 0, 56, 22);
+  x.fillStyle = '#e8a020'; x.fillRect(1, 1, 54, 20);
+  x.fillStyle = '#c03028'; x.fillRect(1, 14, 54, 4);
+  x.fillStyle = '#bfe8f8';
+  for (let i = 0; i < 6; i++) x.fillRect(3 + i * 9, 3, 7, 7);
+  x.fillStyle = '#141420';
+  x.fillRect(7, 22, 8, 4); x.fillRect(41, 22, 8, 4);
+  x.fillStyle = '#f8f8f8'; x.fillRect(20, 15, 16, 2); // letreiro
+}, 56, 26);
+export const carrosR = carros.map(flipped);
+export const motoR = flipped(moto);
+export const onibusR = flipped(onibus);
+
+// retrato do Cego da Ficha (cutscene)
+export const portCego = sp([
+  '....kkkkkkkkkkkkkkkk....',
+  '...khhhhhhhhhhhhhhhhk...',
+  '..khhhhhhhhhhhhhhhhhhk..',
+  '..khhhhhhhhhhhhhhhhhhk..',
+  '..khhhssssssssssshhhhk..',
+  '..khhsssssssssssssshhk..',
+  '..khsssssssssssssssshk..',
+  '..kssssssssssssssssssk..',
+  '..kkkkkkkkkkkkkkkkkkkk..',
+  '..kskkkkkkksskkkkkkkssk.',
+  '..kskkkkkkksskkkkkkkssk.',
+  '..kssssssssssssssssssk..',
+  '..kssssssssssssssssssk..',
+  '..ksssssssskkssssssssk..',
+  '..kssssssssssssssssssk..',
+  '..kssssssssssssssssssk..',
+  '..ksskkkkkkkkkkkkkssk...',
+  '..kssssssssssssssssk....',
+  '...kssssssssssssssk.....',
+  '....kssssssssssssk......',
+  '.....kkkkkkkkkkkk.......',
+  '....kxxxxxxxxxxxxk......',
+  '...kxxxxxxxxxxxxxxk.....',
+  '..kxxxxxyyyyyyxxxxxk....',
+]);
+
 // avatar do mapa (10x12)
 export const mapMurr = [sp([
   '..kkkkkk..',
@@ -499,13 +639,66 @@ export const TILES = {
   }),
   // tijolo vermelho (muro)
   'M': tile(x => bricks(x, '#b04028', '#8c2e1a', '#d8c0a8', 16, 16)),
-  // ladrilho da praça (laranja/terracota)
+  // calçadão português da praça (pedrinhas branca/cinza/preta em ondas)
   'L': tile(x => {
-    x.fillStyle = '#d87838'; x.fillRect(0, 0, 16, 16);
-    x.fillStyle = '#e89858'; x.fillRect(0, 0, 8, 8); x.fillRect(8, 8, 8, 8);
-    x.fillStyle = '#b85c24'; x.fillRect(0, 0, 16, 1);
-    x.fillStyle = '#c06830'; x.fillRect(7, 0, 1, 16); x.fillRect(0, 7, 16, 1);
-    x.fillStyle = '#f2b078'; x.fillRect(0, 1, 16, 1);
+    x.fillStyle = '#e6e2d6'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#f4f0e6'; x.fillRect(0, 0, 16, 2);
+    // textura de pedrinhas
+    x.fillStyle = '#cfcabc';
+    for (let j = 2; j < 16; j += 3) for (let i = (j % 2) * 2; i < 16; i += 4) x.fillRect(i, j, 1, 1);
+    // onda cinza-escura descendo
+    x.fillStyle = '#8a867a';
+    x.fillRect(0, 4, 4, 2); x.fillRect(3, 5, 4, 2); x.fillRect(6, 6, 4, 2);
+    x.fillRect(9, 7, 4, 2); x.fillRect(12, 8, 4, 2);
+    x.fillStyle = '#3c3a34';
+    x.fillRect(1, 5, 2, 1); x.fillRect(7, 7, 2, 1); x.fillRect(13, 9, 2, 1);
+  }),
+  // variação da onda (subindo) — alternada para formar o desenho contínuo
+  'L2': tile(x => {
+    x.fillStyle = '#e6e2d6'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#f4f0e6'; x.fillRect(0, 0, 16, 2);
+    x.fillStyle = '#cfcabc';
+    for (let j = 2; j < 16; j += 3) for (let i = ((j + 1) % 2) * 2; i < 16; i += 4) x.fillRect(i, j, 1, 1);
+    x.fillStyle = '#8a867a';
+    x.fillRect(0, 8, 4, 2); x.fillRect(3, 7, 4, 2); x.fillRect(6, 6, 4, 2);
+    x.fillRect(9, 5, 4, 2); x.fillRect(12, 4, 4, 2);
+    x.fillStyle = '#3c3a34';
+    x.fillRect(2, 9, 2, 1); x.fillRect(8, 6, 2, 1); x.fillRect(14, 5, 2, 1);
+  }),
+  // miolo do calçadão (sem onda, para as fileiras de baixo)
+  'L3': tile(x => {
+    x.fillStyle = '#dcd8ca'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#c4c0b0';
+    for (let j = 1; j < 16; j += 3) for (let i = (j % 2) * 2; i < 16; i += 4) x.fillRect(i, j, 1, 1);
+  }),
+  // pilha de livros da biblioteca (sólida)
+  'K': tile(x => {
+    const cores = ['#c03028', '#2a52c0', '#2e8a5c', '#c8a428'];
+    for (let j = 0; j < 4; j++) {
+      x.fillStyle = cores[j]; x.fillRect(j % 2, j * 4, 15, 4);
+      x.fillStyle = '#f2e8d0'; x.fillRect(j % 2, j * 4 + 3, 15, 1);
+      x.fillStyle = '#141420'; x.fillRect(j % 2, j * 4, 15, 1);
+    }
+  }),
+  // toldo listrado da banca (decoração)
+  'j': tile(x => {
+    for (let i = 0; i < 16; i += 4) {
+      x.fillStyle = i % 8 ? '#f8f8f8' : '#c03028';
+      x.fillRect(i, 6, 4, 8);
+    }
+    x.fillStyle = '#141420'; x.fillRect(0, 13, 16, 1); x.fillRect(0, 6, 16, 1);
+  }),
+  // asfalto da Avenida Floriano
+  'R': tile(x => {
+    x.fillStyle = '#4a4a52'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#5a5a64'; x.fillRect(0, 0, 16, 2);
+    x.fillStyle = '#3a3a42'; x.fillRect(3, 6, 2, 1); x.fillRect(11, 10, 2, 1); x.fillRect(6, 13, 2, 1);
+  }),
+  // calçada cinza
+  'S': tile(x => {
+    x.fillStyle = '#b0aca0'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#c8c4b8'; x.fillRect(0, 0, 16, 3);
+    x.fillStyle = '#8a867a'; x.fillRect(0, 3, 16, 1); x.fillRect(7, 3, 1, 13);
   }),
   // terra/canteiro (topo com grama)
   'E': tile(x => {

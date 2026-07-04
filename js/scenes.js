@@ -21,15 +21,17 @@ export class Title {
     ctx.fillStyle = '#8ed0f0'; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#c9ecfa'; ctx.fillRect(0, 0, W, 30);
     // sol
-    ctx.fillStyle = '#f8e858'; ctx.fillRect(262, 18, 22, 22);
-    ctx.fillStyle = '#fff8b0'; ctx.fillRect(266, 22, 14, 14);
-    // skyline
-    ctx.fillStyle = '#a8bccc';
-    ctx.fillRect(0, 96, 60, 60); ctx.fillRect(70, 82, 40, 74); ctx.fillRect(120, 100, 48, 56);
-    ctx.fillRect(178, 70, 44, 86); ctx.fillRect(196, 56, 4, 16); // TELPA
-    ctx.fillRect(232, 92, 60, 64);
-    ctx.fillStyle = '#c8d8e4';
-    for (let i = 0; i < 3; i++) for (let j = 0; j < 5; j++) ctx.fillRect(184 + i * 13, 76 + j * 14, 7, 8);
+    ctx.fillStyle = '#f8e858'; ctx.fillRect(W - 58, 18, 22, 22);
+    ctx.fillStyle = '#fff8b0'; ctx.fillRect(W - 54, 22, 14, 14);
+    // skyline (padrão repetido para qualquer largura de tela)
+    for (let x = 0; x < W + 300; x += 300) {
+      ctx.fillStyle = '#a8bccc';
+      ctx.fillRect(x, 96, 60, 60); ctx.fillRect(x + 70, 82, 40, 74); ctx.fillRect(x + 120, 100, 48, 56);
+      ctx.fillRect(x + 178, 70, 44, 86); ctx.fillRect(x + 196, 56, 4, 16); // TELPA
+      ctx.fillRect(x + 232, 92, 60, 64);
+      ctx.fillStyle = '#c8d8e4';
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 5; j++) ctx.fillRect(x + 184 + i * 13, 76 + j * 14, 7, 8);
+    }
     // chão de ladrilho
     for (let i = 0; i < W / 16 + 1; i++) for (let j = 0; j < 2; j++)
       ctx.drawImage(S.TILES['L'], i * 16, 148 + j * 16);
@@ -46,7 +48,7 @@ export class Title {
     ctx.drawImage(pi, Math.round(wx - 34), 104 + Math.sin(this.t * 0.1) * 4);
     if (Math.floor(this.t / 32) % 2 === 0)
       drawTextC(ctx, input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR', W / 2, 96, '#14284a');
-    drawTextC(ctx, 'PRACA DA BANDEIRA - CAMPINA GRANDE - PB', W / 2, 170, '#f8f8f8');
+    drawTextO(ctx, 'PRACA DA BANDEIRA - CAMPINA GRANDE - PB', W / 2 - textWidth('PRACA DA BANDEIRA - CAMPINA GRANDE - PB') / 2, 170, '#14284a', '#f4f0e6');
   }
 }
 
@@ -104,46 +106,78 @@ export class WorldMap {
     }
   }
   draw(ctx) {
+    const ox = (W - 320) >> 1; // centraliza o mapa em telas mais largas
     // fundo: vista aérea estilizada do centro
-    ctx.fillStyle = '#7ab648'; ctx.fillRect(0, 0, W, H); // verde geral
-    // avenida Floriano (diagonal de cima a baixo à direita)
-    ctx.fillStyle = '#68686f';
-    ctx.fillRect(212, 0, 26, H);
+    ctx.fillStyle = '#6aa844'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#7ab648';
+    for (let i = 0; i < W / 8 + 1; i++) for (let j = 0; j < H / 8 + 1; j++)
+      if ((i + j) % 2 === 0) ctx.fillRect(i * 8, j * 8, 8, 8);
+    ctx.save();
+    ctx.translate(ox, 0);
+    // avenida Floriano (vertical, à direita)
+    ctx.fillStyle = '#55555e'; ctx.fillRect(210, 0, 30, H);
+    ctx.fillStyle = '#68686f'; ctx.fillRect(212, 0, 26, H);
     ctx.fillStyle = '#f2d24e';
     for (let y = (this.t * 0.4) % 16 - 16; y < H; y += 16) ctx.fillRect(224, y, 2, 8);
-    // carrinhos passando
+    // tráfego no mapa: carros e um ônibus
     const carY = (this.t * 0.9) % (H + 40) - 20;
-    ctx.fillStyle = '#d81e18'; ctx.fillRect(215, carY, 7, 12);
-    ctx.fillStyle = '#2a52c0'; ctx.fillRect(229, H - carY, 7, 12);
+    ctx.fillStyle = '#d81e18'; ctx.fillRect(214, carY, 8, 13);
+    ctx.fillStyle = '#bfe8f8'; ctx.fillRect(215, carY + 2, 6, 3);
+    ctx.fillStyle = '#2a52c0'; ctx.fillRect(230, H - carY, 8, 13);
+    const busY = (this.t * 0.5 + 90) % (H + 60) - 30;
+    ctx.fillStyle = '#e8a020'; ctx.fillRect(213, busY, 9, 24);
+    ctx.fillStyle = '#c03028'; ctx.fillRect(213, busY + 18, 9, 4);
     // ruas
     ctx.fillStyle = '#8a8a90';
     ctx.fillRect(0, 74, 212, 12); ctx.fillRect(0, 118, 212, 10);
     ctx.fillRect(88, 0, 10, H); ctx.fillRect(160, 74, 10, 106);
-    // a praça central (ladrilho)
-    ctx.fillStyle = '#d87838'; ctx.fillRect(104, 86, 50, 32);
-    ctx.fillStyle = '#e89858';
-    for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++)
-      if ((i + j) % 2 === 0) ctx.fillRect(104 + i * 8, 86 + j * 8, 8, 8);
-    // arvorezinhas da praça
-    ctx.fillStyle = '#3d8c3d';
-    ctx.fillRect(108, 90, 7, 7); ctx.fillRect(140, 92, 7, 7); ctx.fillRect(122, 106, 7, 7);
+    ctx.fillStyle = '#9a9aa0';
+    ctx.fillRect(0, 74, 212, 2); ctx.fillRect(0, 118, 212, 2);
+    // a praça central (calçadão claro com ondas)
+    ctx.fillStyle = '#e6e2d6'; ctx.fillRect(102, 86, 54, 32);
+    ctx.fillStyle = '#8a867a';
+    for (let i = 0; i < 6; i++) { ctx.fillRect(104 + i * 9, 90 + (i % 2) * 2, 6, 2); ctx.fillRect(106 + i * 9, 104 + ((i + 1) % 2) * 2, 6, 2); }
+    // busto do fundador + banca do Orlando
+    ctx.fillStyle = '#6a4a24'; ctx.fillRect(127, 96, 4, 6);
+    ctx.fillStyle = '#c03028'; ctx.fillRect(142, 108, 9, 6);
+    ctx.fillStyle = '#f8f8f8'; ctx.fillRect(142, 108, 9, 2);
+    // árvores da praça e das calçadas
+    for (const [tx, ty] of [[106, 88], [146, 90], [110, 108], [134, 96], [30, 68], [70, 68], [120, 112], [180, 70], [24, 132], [70, 132], [190, 130]]) {
+      ctx.fillStyle = '#2a662e'; ctx.fillRect(tx + 1, ty + 1, 8, 8);
+      ctx.fillStyle = '#3d8c3d'; ctx.fillRect(tx, ty, 8, 8);
+      ctx.fillStyle = '#57ab4a'; ctx.fillRect(tx + 1, ty + 1, 4, 4);
+    }
     // pombos da praça (pontinhos que andam)
     ctx.fillStyle = '#9aa0ac';
-    for (let i = 0; i < 5; i++) {
-      const px = 110 + ((i * 37 + Math.floor(this.t / 20) * (i + 1)) % 40);
-      ctx.fillRect(px, 94 + (i * 11) % 20, 2, 2);
+    for (let i = 0; i < 6; i++) {
+      const px = 108 + ((i * 37 + Math.floor(this.t / 20) * (i + 1)) % 44);
+      ctx.fillRect(px, 92 + (i * 11) % 22, 2, 2);
     }
-    // quarteirões
-    ctx.fillStyle = '#c8b89c';
-    ctx.fillRect(30, 30, 46, 36); ctx.fillRect(110, 24, 40, 42); ctx.fillRect(170, 26, 34, 40);
-    ctx.fillRect(20, 96, 56, 34); ctx.fillRect(20, 138, 68, 34); ctx.fillRect(104, 132, 100, 40);
-    ctx.fillStyle = '#b0a084';
-    ctx.fillRect(30, 30, 46, 4); ctx.fillRect(110, 24, 40, 4); ctx.fillRect(170, 26, 34, 4);
-    ctx.fillRect(20, 96, 56, 4); ctx.fillRect(20, 138, 68, 4); ctx.fillRect(104, 132, 100, 4);
-    // fachada do CAD (bloco com colunas vermelhas)
-    ctx.fillStyle = '#f0e8d8'; ctx.fillRect(40, 42, 36, 24);
+    // quarteirões com telhados coloridos
+    const blocos = [
+      [30, 30, 46, 36, '#c8703c'], [110, 24, 40, 42, '#8a9aa8'], [170, 26, 34, 40, '#3d8c5c'],
+      [20, 96, 56, 34, '#c8a040'], [20, 138, 68, 34, '#b05038'], [104, 132, 100, 40, '#7a8a98'],
+    ];
+    for (const [bx, by, bw, bh, cor] of blocos) {
+      ctx.fillStyle = '#3a3a30'; ctx.fillRect(bx + 2, by + 2, bw, bh); // sombra
+      ctx.fillStyle = cor; ctx.fillRect(bx, by, bw, bh);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(bx, by, bw, 4);
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let l = by + 8; l < by + bh; l += 6) ctx.fillRect(bx, l, bw, 1);
+    }
+    // fachada do CAD: colunas vermelhas e os dois leões
+    ctx.fillStyle = '#f0e8d8'; ctx.fillRect(38, 40, 40, 26);
     ctx.fillStyle = '#c03028';
-    ctx.fillRect(43, 46, 3, 20); ctx.fillRect(51, 46, 3, 20); ctx.fillRect(59, 46, 3, 20); ctx.fillRect(67, 46, 3, 20);
+    for (let c = 0; c < 4; c++) ctx.fillRect(41 + c * 9, 44, 3, 22);
+    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(40, 64, 4, 4); ctx.fillRect(72, 64, 4, 4); // leões
+    // letreiro das Brasileiras (verde-amarelo)
+    ctx.fillStyle = '#f2d24e'; ctx.fillRect(174, 30, 26, 5);
+    ctx.fillStyle = '#2e8a5c'; ctx.fillRect(174, 35, 26, 3);
+    // TELPA no canto da avenida
+    ctx.fillStyle = '#8ca4b8'; ctx.fillRect(244, 20, 30, 44);
+    ctx.fillStyle = '#c8dce8';
+    for (let j = 0; j < 4; j++) for (let i = 0; i < 2; i++) ctx.fillRect(248 + i * 12, 24 + j * 10, 8, 6);
+    ctx.fillStyle = '#55555e'; ctx.fillRect(256, 12, 3, 9);
 
     // caminhos entre nós
     ctx.fillStyle = '#fff8e0';
@@ -180,6 +214,7 @@ export class WorldMap {
     // avatar
     const av = S.mapMurr[Math.floor(this.t / 12) % 2];
     ctx.drawImage(av, Math.round(this.avatar.x - 5), Math.round(this.avatar.y - 14));
+    ctx.restore();
 
     // painel do nó atual
     const node = NODES[this.cur];
@@ -201,7 +236,7 @@ export class WorldMap {
 }
 
 // ==================== CUTSCENE ====================
-const PORTRAITS = { murr: () => S.portMurr, lig: () => S.portLig, pombo: () => S.portPombo };
+const PORTRAITS = { murr: () => S.portMurr, lig: () => S.portLig, pombo: () => S.portPombo, cego: () => S.portCego };
 
 export class Cutscene {
   constructor(G, levelDef) {
@@ -231,6 +266,8 @@ export class Cutscene {
     drawTextC(ctx, this.def.name, W / 2, 16, '#f2d24e', 2);
     const line = this.lines[this.i];
     if (!line) return;
+    const ox = (W - 320) >> 1;
+    ctx.save(); ctx.translate(ox, 0);
     // retrato
     const img = (PORTRAITS[line.who] || PORTRAITS.murr)();
     drawBox(ctx, 24, 58, 60, 60, '#243050');
@@ -253,6 +290,7 @@ export class Cutscene {
     drawText(ctx, lineStr, 101, ly, '#fff');
     if (this.chars >= line.text.length && Math.floor(this.t / 20) % 2 === 0)
       drawText(ctx, '>', 286, 122, '#f2d24e');
+    ctx.restore();
     drawTextC(ctx, (input.isTouch() ? 'TOQUE' : 'Z') + ' PARA AVANCAR', W / 2, 156, '#5a6a8a');
   }
 }

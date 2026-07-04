@@ -1,5 +1,9 @@
 // gfx.js — fábrica de sprites pixel-art e fonte bitmap 3x5
-export const W = 320, H = 180;
+// Altura interna fixa (180); largura se adapta à proporção da tela do
+// aparelho (16:9 até ~21:9) para preencher o celular sem tarjas.
+export let W = 320;
+export const H = 180;
+export function setW(w) { W = w; }
 
 // Cria um canvas a partir de um "mapa de pixels" (array de strings) + paleta.
 export function sprite(rows, pal) {

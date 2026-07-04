@@ -5,7 +5,7 @@ import * as input from './input.js';
 import * as audio from './audio.js';
 
 const TS = 16;
-const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X']);
+const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X', 'K', 'R', 'S']);
 const ONEWAY = new Set(['=', 'b']);
 const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
@@ -32,8 +32,11 @@ export class Level {
     this.state = 'play'; // play | dying | win | gameover
     this.stateT = 0;
     this.fichasFase = 0;
+    this.tickets = 0;
     this.time = 0;
     this.toast = null; this.toastT = 0;
+    // zonas de tráfego (Av. Floriano): {c0, c1, row, dir, speed, every, types}
+    this.traffic = (def.traffic || []).map(z => ({ ...z, t: z.every - 40 }));
   }
 
   tileAt(i, j) {
@@ -54,6 +57,7 @@ export class Level {
     this.ents = [];
     this.parts = [];
     this.poops = [];
+    this.cars = [];
     for (let j = 0; j < this.h; j++) for (let i = 0; i < this.rows[j].length; i++) {
       const ch = this.rows[j][i], x = i * TS, y = j * TS, key = i + ',' + j;
       if (this.collected.has(key)) continue;
@@ -61,6 +65,9 @@ export class Level {
         case 'f': this.ents.push({ t: 'ficha', x: x + 5, y: y + 5, w: 6, h: 6, key, anim: (i * 7) % 24 }); break;
         case 'h': this.ents.push({ t: 'choc', x: x + 3, y: y + 6, w: 10, h: 6, key }); break;
         case 'p': this.ents.push({ t: 'pipoca', x: x + 3, y: y + 4, w: 10, h: 8, key }); break;
+        case 'n': this.ents.push({ t: 'nota', x: x + 2, y: y + 4, w: 12, h: 9, key, anim: 0 }); break;
+        case 'a': this.ents.push({ t: 'maca', x: x + 4, y: y + 4, w: 8, h: 9, key }); break;
+        case 't': this.ents.push({ t: 'ticket', x: x + 3, y: y + 5, w: 10, h: 5, key, anim: 0 }); break;
         case '1': this.ents.push({ t: 'liginha', x, y: y - 12, w: 12, h: 26, vx: -0.5, dir: -1, mode: 'patrol', anim: 0, saw: 0 }); break;
         case 'g': this.ents.push({ t: 'tromba', x: x + 2, y, w: 10, h: 14, vx: -0.45, dir: -1, anim: 0, dead: 0 }); break;
         case 'o': this.ents.push({ t: 'pombo', x: x + 3, y: y + 8, w: 10, h: 8, mode: 'perch', vx: 0, anim: 0, drop: 0, homeY: y + 8 }); break;
@@ -159,7 +166,7 @@ export class Level {
       this.stateT++;
       // Murrinha sai andando
       if (p.x < this.goalX + 40) { p.x += 1.2; p.anim++; }
-      if (this.stateT > 100 && input.pressed('a')) G.onLevelClear(this.def.id, this.fichasFase);
+      if (this.stateT > 100 && input.pressed('a')) G.onLevelClear(this.def.id, this.fichasFase, this.tickets);
       this.updateParts();
       return;
     }
@@ -205,6 +212,9 @@ export class Level {
         case 'ficha': e.anim++; if (this.overlap(p, e)) { this.collect(e); this.fichasFase++; G.fichas++; audio.sfx('coin'); if (G.fichas >= 100) { G.fichas -= 100; G.lives++; audio.sfx('life'); this.say('+1 VIDA!'); } } break;
         case 'choc': if (this.overlap(p, e)) { this.collect(e); G.lives++; audio.sfx('life'); this.say('CHOCOLATE DAS BRASILEIRAS! +1 VIDA'); } break;
         case 'pipoca': if (this.overlap(p, e)) { this.collect(e); p.boost = 480; audio.sfx('powerup'); this.say('PIPOCA DO GALEGO! TURBO!'); } break;
+        case 'nota': e.anim++; if (this.overlap(p, e)) { this.collect(e); this.fichasFase += 10; G.fichas += 10; audio.sfx('powerup'); this.say('UMA NOTA! VALE 10 FICHAS!'); if (G.fichas >= 100) { G.fichas -= 100; G.lives++; audio.sfx('life'); } } break;
+        case 'maca': if (this.overlap(p, e)) { this.collect(e); p.shield = true; audio.sfx('powerup'); this.say('MACA DO LANCHE! AGUENTA 1 SUSTO'); } break;
+        case 'ticket': e.anim++; if (this.overlap(p, e)) { this.collect(e); this.tickets++; audio.sfx('life'); this.say('TICKET ESTUDANTIL! (' + this.tickets + '/3)'); } break;
         case 'check': if (!e.on && this.overlap(p, e)) { e.on = true; this.checkpoint = { x: e.x, y: e.y - 8 }; audio.sfx('checkpoint'); this.say('CHECKPOINT!'); } break;
         case 'tromba': this.upTromba(e, p); break;
         case 'liginha': this.upLiginha(e, p); break;
@@ -226,6 +236,37 @@ export class Level {
       }
     }
     this.poops = this.poops.filter(q => !q.gone);
+
+    // ----- tráfego da avenida -----
+    for (const z of this.traffic) {
+      z.t++;
+      if (z.t >= z.every) {
+        z.t = 0;
+        const types = z.types || ['carro', 'carro', 'carro', 'moto', 'onibus'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const dims = { carro: [32, 16], moto: [20, 13], onibus: [56, 26] }[type];
+        const spd = z.speed * (type === 'moto' ? 1.5 : type === 'onibus' ? 0.8 : 1) * (0.85 + Math.random() * 0.4);
+        // o veículo vive SEMPRE dentro da zona: nasce numa ponta, some na outra
+        // (assim nunca invade canteiro central nem calçada)
+        this.cars.push({
+          type, w: dims[0], h: dims[1],
+          x: z.dir > 0 ? z.c0 * TS + 1 : z.c1 * TS - dims[0] - 1,
+          y: z.row * TS - dims[1],
+          vx: z.dir * spd,
+          skin: Math.floor(Math.random() * 4),
+          z0: z.c0 * TS, z1: z.c1 * TS,
+        });
+      }
+    }
+    for (const c of this.cars) {
+      c.x += c.vx;
+      if (c.x <= c.z0 || c.x + c.w >= c.z1) { c.gone = true; continue; }
+      if (p.inv <= 0 && this.state === 'play' &&
+        this.overlap(p, { x: c.x + 2, y: c.y + 2, w: c.w - 4, h: c.h - 2 })) {
+        this.hurt(false, 'ATROPELADO NA FLORIANO!');
+      }
+    }
+    this.cars = this.cars.filter(c => !c.gone);
     this.updateParts();
   }
 
@@ -294,6 +335,14 @@ export class Level {
   hurt(pit = false, msg = null) {
     const G = this.G;
     if (this.state !== 'play') return;
+    // a maçã do lanche segura um susto (menos queda em buraco)
+    if (this.p.shield && !pit) {
+      this.p.shield = false;
+      this.p.inv = 110;
+      audio.sfx('hurt');
+      this.say('UFA! A MACA DO LANCHE SEGUROU!');
+      return;
+    }
     G.lives--;
     this.state = 'dying'; this.stateT = 0;
     this.deathMsg = msg;
@@ -331,8 +380,9 @@ export class Level {
     const j0 = Math.floor(camY / TS), j1 = Math.min(this.h - 1, Math.ceil((camY + H) / TS));
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       let t = this.tileAt(i, j);
-      // miolo de blocos empilhados não repete o topo (grama/friso)
+      // miolo de blocos empilhados não repete o topo (grama/friso/onda)
       if ((t === 'E' || t === '#') && this.tileAt(i, j - 1) === t) t += '2';
+      else if (t === 'L') t = this.tileAt(i, j - 1) === 'L' ? 'L3' : (i % 2 ? 'L2' : 'L');
       const img = S.TILES[t];
       if (img) ctx.drawImage(img, i * TS, j * TS);
     }
@@ -345,6 +395,14 @@ export class Level {
 
     // cagadas
     for (const q of this.poops) ctx.drawImage(S.poop, Math.round(q.x - 2), Math.round(q.y - 2));
+
+    // tráfego
+    for (const c of this.cars) {
+      const img = c.type === 'moto' ? (c.vx < 0 ? S.moto : S.motoR)
+        : c.type === 'onibus' ? (c.vx < 0 ? S.onibus : S.onibusR)
+        : (c.vx < 0 ? S.carros : S.carrosR)[c.skin];
+      ctx.drawImage(img, Math.round(c.x), Math.round(c.y));
+    }
 
     // partículas
     for (const q of this.parts) {
@@ -391,6 +449,9 @@ export class Level {
       }
       case 'choc': ctx.drawImage(S.chocolate, Math.round(e.x), Math.round(e.y)); break;
       case 'pipoca': ctx.drawImage(S.pipocaBag, Math.round(e.x), Math.round(e.y)); break;
+      case 'nota': ctx.drawImage(S.nota, Math.round(e.x), Math.round(e.y + Math.sin(e.anim * 0.07) * 1.5)); break;
+      case 'maca': ctx.drawImage(S.maca, Math.round(e.x), Math.round(e.y)); break;
+      case 'ticket': ctx.drawImage(S.ticket, Math.round(e.x), Math.round(e.y + Math.sin(e.anim * 0.1) * 2)); break;
       case 'check': ctx.drawImage(e.on ? S.checkSignOn : S.checkSign, Math.round(e.x), Math.round(e.y)); break;
       case 'tromba':
         if (e.dead) ctx.drawImage(S.troSquash, Math.round(e.x - 1), Math.round(e.y));
@@ -424,8 +485,13 @@ export class Level {
     // vidas
     ctx.drawImage(S.murrFace, 4, 2);
     drawText(ctx, 'X' + this.G.lives, 15, 4, '#fff');
+    // maçã do lanche ativa
+    if (this.p.shield) ctx.drawImage(S.maca, 30, 2);
     // nome da fase
     drawTextC(ctx, this.def.name, W / 2, 4, '#f2d24e');
+    // tickets da fase
+    ctx.drawImage(S.ticket, W - 78, 4);
+    drawText(ctx, this.tickets + '/3', W - 66, 4, this.tickets >= 3 ? '#8f8' : '#fff');
     // fichas
     ctx.drawImage(S.ficha[0], W - 42, 3);
     drawText(ctx, 'X' + String(this.G.fichas).padStart(2, '0'), W - 33, 4, '#fff');
@@ -450,12 +516,14 @@ export class Level {
   }
 
   drawWin(ctx) {
-    drawBox(ctx, W / 2 - 90, 48, 180, 70);
+    drawBox(ctx, W / 2 - 90, 48, 180, 74);
     drawTextC(ctx, 'FASE COMPLETA!', W / 2, 58, '#f2d24e', 1);
     drawTextC(ctx, this.def.clearMsg || 'MURRINHA ESCAPOU!', W / 2, 74, '#fff');
-    ctx.drawImage(S.ficha[0], W / 2 - 24, 86);
-    drawText(ctx, 'X ' + this.fichasFase, W / 2 - 14, 87, '#fff');
+    ctx.drawImage(S.ficha[0], W / 2 - 44, 86);
+    drawText(ctx, 'X ' + this.fichasFase, W / 2 - 34, 87, '#fff');
+    ctx.drawImage(S.ticket, W / 2 + 8, 87);
+    drawText(ctx, this.tickets + '/3', W / 2 + 22, 87, this.tickets >= 3 ? '#8f8' : '#fff');
     if (this.stateT > 100 && Math.floor(this.stateT / 30) % 2 === 0)
-      drawTextC(ctx, input.isTouch() ? 'TOQUE PARA CONTINUAR' : 'APERTE Z', W / 2, 106, '#8f8');
+      drawTextC(ctx, input.isTouch() ? 'TOQUE PARA CONTINUAR' : 'APERTE Z', W / 2, 108, '#8f8');
   }
 }

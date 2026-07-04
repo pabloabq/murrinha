@@ -52,7 +52,9 @@ Os pais **jamais** podem saber.
 | Item | Efeito |
 |---|---|
 | **Ficha telefônica** 🪙 | Moeda do jogo. 100 fichas = +1 vida |
+| **Nota de dinheiro** 💵 | Vale 10 fichas de uma vez |
 | **Chocolate (Brasileiras)** 🍫 | +1 vida (escondido nas fases) |
+| **Maçã do lanche** 🍎 | Segura 1 susto no lugar do Murrinha (o "cogumelo" do jogo) |
 | **Pipoca do Galego** 🍿 | Velocidade turbo por 8 segundos |
 | **Ticket estudantil** 🎫 | 3 por fase, escondidos (estilo moedas-dragão). Colecionável de 100% |
 
@@ -241,9 +243,10 @@ beijo do Cacimba, apito da Liginha, buzina, sino de porta de loja.
 
 | Etapa | Conteúdo | Status |
 |---|---|---|
-| **1 (agora)** | Motor + PWA + título + mapa-múndi + Fases 1 e 2 + áudio | ✅ em construção |
-| 2 | Fases 3 (Brasileiras) e 4 (Playtime) | planejado |
-| 3 | Fases 5 (Calçadão) e 6 (Floriano/TELPA) | planejado |
-| 4 | Fase 7 (FISK/Galego/perseguição Ratinho) | planejado |
-| 5 | Fases 8 e 9 (ônibus) + final + créditos | planejado |
-| 6 | Polimento: tickets 100%, minigames do Playtime, speedrun timer | planejado |
+| **1** | Motor + PWA + título + mapa-múndi + Fases 1 e 2 + áudio | ✅ pronto |
+| **2** | Travessia da Floriano (tráfego) + itens novos + reforma visual | ✅ pronto |
+| 3 | Fases Brasileiras (stealth) e Playtime (Cacimba) | planejado |
+| 4 | Fase Calçadão (Carrapeta/Gordo/Tavinho) | planejado |
+| 5 | Fase FISK/Galego + perseguição do Ratinho | planejado |
+| 6 | Fases do ônibus (fila + lotado) + final + créditos | planejado |
+| 7 | Polimento: tickets 100%, minigames do Playtime, speedrun timer | planejado |

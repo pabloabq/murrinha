@@ -42,7 +42,7 @@ const cad2 = [ // corredor: Liginha 1
   '....................',
   '....................',
   '....................',
-  '..........fff......',
+  '..........aff......',
   '........=====......',
   '....................',
   '...................f',
@@ -52,10 +52,10 @@ const cad2 = [ // corredor: Liginha 1
   '####################',
   '####################',
 ];
-const cad3 = [ // biblioteca: prateleiras
+const cad3 = [ // biblioteca: prateleiras e pilhas de livros
   '....................',
   '....................',
-  '....h...............',
+  '....h.t.............',
   '...====....fff......',
   '..........=====.....',
   '.ff................f',
@@ -63,8 +63,8 @@ const cad3 = [ // biblioteca: prateleiras
   '..........ff........',
   '.......====.........',
   '.fff................',
-  '.===........X.......',
-  '............X.......',
+  '.===........K.......',
+  '............K.......',
   '####################',
   '####################',
 ];
@@ -90,7 +90,7 @@ const cad5 = [ // pátio: muretas e o bueiro sem tampa
   '....................',
   '....................',
   '....................',
-  '....................',
+  '..........t.........',
   '....................',
   '......ff......ff....',
   '..C..........MMM...f',
@@ -119,7 +119,7 @@ const cad6 = [ // corredor final: Liginha 2 (mais brava)
 const cad7 = [ // saguão com pé-direito alto
   '....................',
   '....................',
-  '....ff..............',
+  '...tff..............',
   '...====.............',
   '..........ff........',
   '.........====.......',
@@ -191,7 +191,7 @@ const pr1 = [ // chegada na praça
   '....o...............',
   '..AAAAA.............',
   '..AAAAA......fff....',
-  '....i...............',
+  '....i.......n.......',
   '....i......bbb......',
   '..P.i...............',
   '....i...............',
@@ -216,19 +216,19 @@ const pr2 = [ // canteiros e pombos
   'LLLLLLLLLLLLLLLLLLLL',
   'LLLLLLLLLLLLLLLLLLLL',
 ];
-const pr3 = [ // banca do Orlando
-  '....................',
-  '....................',
-  '....................',
-  '....fff.............',
-  '..........h........',
-  '........=======.....',
-  '........XXXXXXX.....',
-  '..f.....XXXXXXX.....',
-  '..b.....XXXXXXX..g..',
-  '........XXXXXXX.....',
-  '....g...XXXXXXX...f.',
-  '........XXXXXXX...f.',
+const pr3 = [ // banca do Orlando + árvore
+  '...............AAAA.',
+  '..............AAAAAA',
+  '...............AAAA.',
+  '....fff..........i..',
+  '..........h.t....i..',
+  '.................i..',
+  '........=======..i..',
+  '........XXXXXXX..i..',
+  '..f.....XXXXXXX..i..',
+  '..b.....XXXXXXX..i..',
+  '....g...XXXXXXX..i..',
+  '........XXXXXXX..i..',
   'LLLLLLLLLLLLLLLLLLLL',
   'LLLLLLLLLLLLLLLLLLLL',
 ];
@@ -239,7 +239,7 @@ const pr4 = [ // busto do fundador + checkpoint
   '.AAAAA...o......o...',
   '.AAAAA..............',
   '...i................',
-  '...i.....fff........',
+  '...i.....faf........',
   '...i....bbbbb.......',
   '...i................',
   '...C................',
@@ -248,26 +248,26 @@ const pr4 = [ // busto do fundador + checkpoint
   'LLLLLLLLLLLLLLLLLLLL',
   'LLLLLLLLLLLLLLLLLLLL',
 ];
-const pr5 = [ // lago de pombos (chuva de cocô)
+const pr5 = [ // alameda dos pombos (chuva de cocô)
   '....................',
   '..o.....o.....o.....',
   '....................',
-  '....................',
-  '....................',
-  '.....ff.......ff....',
-  '....bbbb.....bbbb...',
-  '....................',
-  '....................',
-  '....................',
-  '......g.........g...',
-  '....................',
+  '.AAA............AAA.',
+  'AAAAA.....t....AAAAA',
+  '..i..ff.......ff.i..',
+  '..i.bbbb.....bbbb.i.',
+  '..i...............i.',
+  '..i...............i.',
+  '..i...............i.',
+  '..i...g.......g...i.',
+  '..i...............i.',
   'LLLLLLLLLLLLLLLLLLLL',
   'LLLLLLLLLLLLLLLLLLLL',
 ];
 const pr6 = [ // canteiro grande: sobe e desce
   '....................',
   '....................',
-  '....................',
+  '........t...........',
   '.......fff..........',
   '....................',
   '......EEEEE.........',
@@ -328,6 +328,15 @@ export function bgPraca(ctx, camX, camY, t) {
   // faixa de prédios baixos
   ctx.fillStyle = '#c8b89c'; ctx.fillRect(0, 130, W, 20);
   ctx.fillStyle = '#a89878'; ctx.fillRect(0, 130, W, 3);
+  // linha de árvores da praça (frente aos prédios)
+  const tp = camX * 0.7;
+  ctx.fillStyle = '#2f7434';
+  for (let x = -((tp) % 64) - 64; x < W + 64; x += 64) {
+    ctx.fillRect(x + 8, 126, 22, 14); ctx.fillRect(x + 12, 120, 14, 8);
+    ctx.fillRect(x + 44, 132, 14, 10);
+  }
+  ctx.fillStyle = '#245c28';
+  for (let x = -((tp) % 64) - 64; x < W + 64; x += 64) ctx.fillRect(x + 8, 136, 22, 4);
 }
 
 function decoPraca(ctx, lvl) {
@@ -348,6 +357,166 @@ function decoPraca(ctx, lvl) {
   ctx.fillStyle = '#f8f8f8'; ctx.fillRect(gx - 4, 126, 24, 12);
   ctx.fillStyle = '#2a52c0';
   ctx.fillRect(gx - 1, 129, 8, 6); ctx.fillRect(gx + 9, 129, 10, 2); ctx.fillRect(gx + 9, 133, 10, 2);
+}
+
+// ================= FASE 3 — TRAVESSIA DA FLORIANO =================
+const fl1 = [ // calçada de partida: Cego da Ficha
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '..P.......ff........',
+  '....................',
+  'SSSSSSSSSSSSSSSSSSSS',
+  'SSSSSSSSSSSSSSSSSSSS',
+];
+const fl2 = [ // pista 1 (mão: direita → esquerda)
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '.....f....n....f....',
+  '....................',
+  '....................',
+  '....................',
+  'RRRRRRRRRRRRRRRRRRRR',
+  'RRRRRRRRRRRRRRRRRRRR',
+];
+const fl3 = [ // pista 1 continua + canteiro central
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '..........AAAA......',
+  '.........AAAAAA.....',
+  '....f......ii..t....',
+  '...........ii.......',
+  '.....f.....ii.......',
+  '..........Cii.......',
+  '....................',
+  '.........EEEEEE.....',
+  'RRRRRRRRRREEEEEERRRR',
+  'RRRRRRRRRREEEEEERRRR',
+];
+const fl4 = [ // pista 2 (mão: esquerda → direita, mais rápida)
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '...f....n.....f.....',
+  '....................',
+  '....................',
+  '....................',
+  'RRRRRRRRRRRRRRRRRRRR',
+  'RRRRRRRRRRRRRRRRRRRR',
+];
+const fl5 = [ // canteiro 2 + pista 3 (motos!)
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '...a................',
+  '....................',
+  '..........f...f.....',
+  '...t................',
+  '....................',
+  '..EEEE..............',
+  'RREEEERRRRRRRRRRRRRR',
+  'RREEEERRRRRRRRRRRRRR',
+];
+const fl6 = [ // reta final + faixa de pedestre
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....f.....f.........',
+  '....................',
+  '....................',
+  '....................',
+  'RRRRRRRRRRRRRRRRSSSS',
+  'RRRRRRRRRRRRRRRRSSSS',
+];
+const fl7 = [ // calçada da TELPA: orelhões e o telefonema
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '....................',
+  '......ff............',
+  '..............G.....',
+  '....................',
+  'SSSSSSSSSSSSSSSSSSSS',
+  'SSSSSSSSSSSSSSSSSSSS',
+];
+
+export function bgFloriano(ctx, camX, camY, t) {
+  // céu de meio-dia
+  ctx.fillStyle = '#9ad4f0'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#c9ecfa'; ctx.fillRect(0, 0, W, 28);
+  // sol forte
+  ctx.fillStyle = '#f8e858'; ctx.fillRect(W - 50, 12, 20, 20);
+  const par = camX * 0.4;
+  // o prédio da TELPA domina o fundo
+  for (let x = -((par) % 420) - 420; x < W + 420; x += 420) {
+    ctx.fillStyle = '#8ca4b8';
+    ctx.fillRect(x + 200, 30, 70, 116);
+    ctx.fillRect(x + 228, 12, 5, 20); // antena
+    ctx.fillStyle = '#ff3020'; ctx.fillRect(x + 228, 10, 5, 3); // luz da antena
+    ctx.fillStyle = '#c8dce8';
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 4; i++)
+      ctx.fillRect(x + 206 + i * 16, 36 + j * 13, 10, 8);
+    ctx.fillStyle = '#f8f8f8'; ctx.fillRect(x + 204, 32, 62, 3);
+    // prédios vizinhos
+    ctx.fillStyle = '#aab8c4';
+    ctx.fillRect(x + 40, 70, 56, 76); ctx.fillRect(x + 120, 88, 48, 58);
+    ctx.fillRect(x + 300, 78, 60, 68);
+    ctx.fillStyle = '#8296a4';
+    ctx.fillRect(x + 40, 70, 56, 4); ctx.fillRect(x + 120, 88, 48, 4); ctx.fillRect(x + 300, 78, 60, 4);
+  }
+  // fileira de lojas
+  ctx.fillStyle = '#c8b89c'; ctx.fillRect(0, 146, W, 14);
+  ctx.fillStyle = '#a89878'; ctx.fillRect(0, 146, W, 3);
+}
+
+function decoFloriano(ctx, lvl) {
+  const gx = lvl.goalX;
+  // dois orelhões na calçada da TELPA
+  ctx.drawImage(S.orelhao, gx - 6, 174);
+  ctx.drawImage(S.orelhao, gx + 22, 174);
+  // Cego da Ficha na calçada de partida
+  ctx.drawImage(S.cego, 88, 171);
+  // faixa amarela central das pistas + faixa de pedestre
+  ctx.fillStyle = '#e8c020';
+  for (let i = 22; i < 136; i += 4) {
+    const t0 = lvl.tileAt(i, 12), t1 = lvl.tileAt(i + 1, 12);
+    if (t0 === 'R' && t1 === 'R') ctx.fillRect(i * 16, 198, 24, 2);
+  }
+  ctx.fillStyle = '#e8e4da';
+  for (let k = 0; k < 5; k++) ctx.fillRect((110 + k) * 16 + 4, 193, 8, 10);
 }
 
 // ================= REGISTRO DAS FASES =================
@@ -375,6 +544,22 @@ export const LEVELS = {
       { who: 'murr', name: 'MURRINHA', text: '...sem levar uma cagada na cabeca. E olho nos trombadinhas!' },
     ],
   },
+  flor: {
+    id: 'flor', name: 'TRAVESSIA DA FLORIANO', music: 'floriano',
+    map: join(fl1, fl2, fl3, fl4, fl5, fl6, fl7),
+    bg: bgFloriano, deco: decoFloriano,
+    clearMsg: 'ALO, MAE? TO NA ESCOLA!',
+    traffic: [
+      { c0: 20, c1: 48, row: 12, dir: -1, speed: 2.4, every: 100 },
+      { c0: 59, c1: 81, row: 12, dir: 1, speed: 2.8, every: 90 },
+      { c0: 86, c1: 115, row: 12, dir: -1, speed: 3.1, every: 72, types: ['moto', 'moto', 'carro', 'carro', 'onibus'] },
+    ],
+    cutscene: [
+      { who: 'murr', name: 'MURRINHA', text: 'Hora do alibi: ligar pra mainha do orelhao da TELPA. "To na escola!"' },
+      { who: 'cego', name: 'CEGO DA FICHA', text: 'Fichas fresquinhas, menino. Eu nao VEJO os carros... mas OUCO cada um deles.' },
+      { who: 'murr', name: 'MURRINHA', text: 'Atravessar a Floriano na hora do rush. O que pode dar errado?' },
+    ],
+  },
 };
 
 // ================= NÓS DO MAPA-MÚNDI =================
@@ -384,7 +569,7 @@ export const NODES = [
   { id: 'bras',   label: 'AS BRASILEIRAS', x: 196, y: 64,  playable: false },
   { id: 'play',   label: 'PLAYTIME',       x: 52,  y: 118, playable: false },
   { id: 'calc',   label: 'CALCADAO',       x: 128, y: 136, playable: false },
-  { id: 'flor',   label: 'AV. FLORIANO',   x: 226, y: 96,  playable: false },
+  { id: 'flor',   label: 'AV. FLORIANO / TELPA', x: 226, y: 96, playable: true },
   { id: 'fisk',   label: 'FISK / GALEGO',  x: 180, y: 140, playable: false },
   { id: 'fila',   label: 'FILA DO ONIBUS', x: 262, y: 128, playable: false },
   { id: 'bus',    label: 'ONIBUS LOTADO',  x: 292, y: 96,  playable: false },

@@ -97,6 +97,13 @@ const SONGS = {
       { wave: 'square', vol: 0.1, seq: 'x . x . X . x . x . x . X . x . x . x . X . x . x . x . X . x x' },
     ]
   },
+  floriano: { // trânsito na hora do rush
+    bpm: 158, loop: true, ch: [
+      { wave: 'square', vol: 0.4, seq: 'D4 . D4 . F4 . D4 . A4 - . F4 D4 . C4 . D4 . D4 . F4 . G4 . A4 - . C5 A4 . G4 F4' },
+      { wave: 'triangle', vol: 0.85, seq: 'D3 . D2 . D3 . D2 . B2 . B1 . B2 . B1 . C3 . C2 . C3 . C2 . A2 . A1 . C3 . E3 .' },
+      { wave: 'square', vol: 0.1, seq: 'x . x x . x x . x . x x . x x . x . x x . x x . x . x x . X X X' },
+    ]
+  },
   clear: {
     bpm: 150, loop: false, ch: [
       { wave: 'square', vol: 0.5, seq: 'C4 . E4 . G4 . C5 . E5 - - - D5 . E5 - - - - -' },

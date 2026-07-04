@@ -7,20 +7,28 @@ import { Title, WorldMap, Cutscene } from './scenes.js';
 import { Level } from './level.js';
 import { LEVELS } from './levels.js';
 
-const canvas = document.getElementById('game');
-canvas.width = W; canvas.height = H;
-const ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
+import { setW } from './gfx.js';
 
-// ---------- escala/letterbox ----------
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// ---------- escala adaptativa (preenche telas 16:9 a ~21:9) ----------
 function resize() {
-  const vw = innerWidth, vh = innerHeight;
-  let scale = Math.min(vw / W, vh / H);
+  const vw = innerWidth || 320, vh = innerHeight || 180;
+  const aspect = Math.max(16 / 9, Math.min(vw / vh, 21 / 9));
+  const w = Math.round(H * aspect / 2) * 2; // par, entre 320 e 420
+  if (w !== canvas.width || canvas.height !== H) {
+    setW(w);
+    canvas.width = w; canvas.height = H;
+    ctx.imageSmoothingEnabled = false;
+  }
+  let scale = Math.min(vw / canvas.width, vh / H);
   if (scale > 1.5) scale = Math.floor(scale * 2) / 2; // meio-inteiro para nitidez
-  canvas.style.width = W * scale + 'px';
+  canvas.style.width = canvas.width * scale + 'px';
   canvas.style.height = H * scale + 'px';
 }
 addEventListener('resize', resize);
+addEventListener('orientationchange', () => setTimeout(resize, 250));
 resize();
 
 // ---------- estado global ----------
@@ -45,8 +53,8 @@ const G = {
     G.scene = new Level(LEVELS[id], G);
     audio.playSong(LEVELS[id].music);
   },
-  onLevelClear(id, fichasFase) {
-    save.markCleared(id, fichasFase);
+  onLevelClear(id, fichasFase, tickets) {
+    save.markCleared(id, fichasFase, tickets);
     audio.stopSong();
     G.toMap();
   },
