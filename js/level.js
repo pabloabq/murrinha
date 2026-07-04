@@ -296,9 +296,9 @@ export class Level {
       }
       if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
       if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
-    } else { // chase
+    } else { // chase (mais devagar que a corrida do Murrinha — dá pra pular por cima)
       if (e.saw > 0) e.saw--;
-      const spd = 1.45;
+      const spd = 1.15;
       e.dir = Math.sign(dx) || e.dir;
       e.vx = e.dir * spd;
       if (this.onGround(e) && this.edgeAhead(e)) { e.vx = 0; } // não pula do prédio
@@ -307,7 +307,9 @@ export class Level {
     }
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
-    if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e)) this.hurt(false, 'PEGO PELA LIGINHA!');
+    // só pega se o Murrinha NÃO estiver claramente por cima dela (dá pra pular por cima!)
+    if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 10)
+      this.hurt(false, 'PEGO PELA LIGINHA!');
   }
 
   upPombo(e, p) {

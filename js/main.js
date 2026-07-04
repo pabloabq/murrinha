@@ -125,4 +125,11 @@ if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
   addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
+  // quando uma versão nova assumir, recarrega sozinho (uma vez)
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
 }
