@@ -374,8 +374,8 @@ export function bgPraca(ctx, camX, camY, t) {
 
 function decoPraca(ctx, lvl) {
   for (const e of lvl.ents) {
-    // busto do fundador perto do checkpoint
-    if (e.t === 'check') ctx.drawImage(S.busto, e.x - 26, e.y - 4);
+    // busto do fundador perto do checkpoint (só no fundo em código; a imagem já tem um)
+    if (e.t === 'check' && !lvl.def.bgImg) ctx.drawImage(S.busto, e.x - 26, e.y - 4);
     // fio de telefone sob os pombos empoleirados
     if (e.t === 'pombo' && e.mode === 'perch') {
       ctx.fillStyle = '#3a3a44';
@@ -1345,7 +1345,7 @@ export const LEVELS = {
   praca: {
     id: 'praca', name: 'PRACA DOS POMBOS', music: 'praca',
     map: join(pr1, pr2, pr3, pr4, pr5, pr6, pr7),
-    bg: bgPraca, deco: decoPraca,
+    bg: bgPraca, bgImg: 'art/praca.png', deco: decoPraca,
     clearMsg: 'ATRAVESSOU SEQUINHO!',
     objetivo: 'Atravesse a Praca dos Pombos ate a parada de onibus do outro lado.',
     desafios: [
@@ -1384,7 +1384,7 @@ export const LEVELS = {
   bras: {
     id: 'bras', name: 'AS BRASILEIRAS', music: 'praca',
     map: join(br1, br2, br3, br4, br5, br6, br7),
-    bg: bgBras, deco: decoBras,
+    bg: bgBras, bgImg: 'art/bras.png', deco: decoBras,
     clearMsg: 'CHOCOLATE NO BOLSO!',
     objetivo: 'Suba a loja pela escada rolante e pegue o CHOCOLATE la no fim.',
     desafios: [
@@ -1401,7 +1401,7 @@ export const LEVELS = {
   play: {
     id: 'play', name: 'PLAYTIME', music: 'floriano',
     map: join(pl1, pl2, pl3, pl4, pl5, pl6),
-    bg: bgPlay, deco: decoPlay,
+    bg: bgPlay, bgImg: 'art/play.png', deco: decoPlay,
     clearMsg: 'ZEROU E VAZOU!',
     objetivo: 'Atravesse o salao de fliperamas ate a SAIDA verde.',
     desafios: [

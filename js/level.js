@@ -8,6 +8,8 @@ import * as audio from './audio.js';
 const TS = 16;
 const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X', 'K', 'R', 'S', 'T', 'y', 'u']);
 const ONEWAY = new Set(['=', 'b', 'r', 'm']);
+// tiles puramente decorativos (árvore, coluna) — escondidos quando há cenário de IA
+const DECO_TILES = new Set(['A', 'i', 'c']);
 const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
 
@@ -650,8 +652,10 @@ export class Level {
     // tiles (somente os visíveis)
     const i0 = Math.floor(camX / TS), i1 = Math.min(this.w - 1, Math.ceil((camX + W) / TS));
     const j0 = Math.floor(camY / TS), j1 = Math.min(this.h - 1, Math.ceil((camY + H) / TS));
+    const hideDeco = !!this.def.bgImg; // com cenário de IA, as árvores/colunas vêm da imagem
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       let t = this.tileAt(i, j);
+      if (hideDeco && DECO_TILES.has(t)) continue;
       // miolo de blocos empilhados não repete o topo (grama/friso/onda)
       if ((t === 'E' || t === '#') && this.tileAt(i, j - 1) === t) t += '2';
       else if (t === 'L') t = this.tileAt(i, j - 1) === 'L' ? 'L3' : (i % 2 ? 'L2' : 'L');
