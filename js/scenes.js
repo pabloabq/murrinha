@@ -75,7 +75,10 @@ export class Title {
 
     if (Math.floor(this.t / 32) % 2 === 0)
       drawTextO(ctx, input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR',
-        W / 2 - textWidth(input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR') / 2, 112, '#f8f8f8', '#14284a');
+        W / 2 - textWidth(input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR') / 2, 106, '#f8f8f8', '#14284a');
+    // dica de controles (o segredo do pulo longo: CORRER!)
+    const ctrl = input.isTouch() ? 'D-PAD ANDAR - A PULAR - B CORRER (PULO LONGO)' : 'SETAS ANDAR - Z PULAR - X CORRER (PULO LONGO)';
+    drawTextC(ctx, ctrl, W / 2, 148, '#bcd0e4');
     // faixa escura do rodapé para legibilidade
     ctx.fillStyle = 'rgba(16,16,28,0.7)'; ctx.fillRect(0, 166, W, 14);
     drawTextC(ctx, 'PRACA DA BANDEIRA - CAMPINA GRANDE - PB', W / 2, 170, '#f2d24e');

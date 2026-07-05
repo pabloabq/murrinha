@@ -150,21 +150,45 @@ const cad8 = [ // fachada: marquise + leões + saída
 ];
 
 export function bgCAD(ctx, camX, camY, t) {
-  // parede da escola
-  ctx.fillStyle = '#e6d9b8'; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#cfc09a'; ctx.fillRect(0, 120 - camY * 0.5, W, H);
-  ctx.fillStyle = '#8a6c3c'; ctx.fillRect(0, 118 - camY * 0.5, W, 3);
-  // janelas com céu (parallax)
+  const cy = camY * 0.5;
+  // parede da escola: painel bege claro em cima, rodapé (lambril) mais escuro
+  ctx.fillStyle = '#ece0c4'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#c8b488'; ctx.fillRect(0, 112 - cy, W, H);        // lambril
+  ctx.fillStyle = '#a68a54'; ctx.fillRect(0, 110 - cy, W, 3);        // friso do lambril
+  ctx.fillStyle = '#8a6c3c'; ctx.fillRect(0, 106 - cy, W, 2);
+  // luminárias fluorescentes no teto
+  for (let x = -((camX * 0.5) % 96); x < W; x += 96) {
+    ctx.fillStyle = '#f8f4d8'; ctx.fillRect(x + 20, 6, 40, 4);
+    ctx.globalAlpha = 0.12; ctx.fillStyle = '#ffffff'; ctx.fillRect(x + 16, 4, 48, 12); ctx.globalAlpha = 1;
+  }
   const par = camX * 0.5;
-  for (let x = -((par) % 112) - 112; x < W + 112; x += 112) {
-    ctx.fillStyle = '#6a4c22'; ctx.fillRect(x, 28 - camY * 0.5, 44, 34);
-    ctx.fillStyle = '#9ad4f0'; ctx.fillRect(x + 2, 30 - camY * 0.5, 40, 30);
-    ctx.fillStyle = '#c9ecfa'; ctx.fillRect(x + 2, 30 - camY * 0.5, 40, 8);
-    ctx.fillStyle = '#6a4c22'; ctx.fillRect(x + 20, 30 - camY * 0.5, 2, 30);
-    // quadro de avisos entre janelas
-    ctx.fillStyle = '#7c5a2a'; ctx.fillRect(x + 66, 40 - camY * 0.5, 26, 20);
-    ctx.fillStyle = '#f2e8d0'; ctx.fillRect(x + 68, 42 - camY * 0.5, 10, 7);
-    ctx.fillStyle = '#e8b0b0'; ctx.fillRect(x + 80, 44 - camY * 0.5, 9, 10);
+  for (let x = -((par) % 128) - 128; x < W + 128; x += 128) {
+    // janelão com esquadria e céu
+    ctx.fillStyle = '#7a5828'; ctx.fillRect(x + 2, 24 - cy, 50, 40);
+    ctx.fillStyle = '#9ad4f0'; ctx.fillRect(x + 5, 27 - cy, 44, 34);
+    ctx.fillStyle = '#c9ecfa'; ctx.fillRect(x + 5, 27 - cy, 44, 9);
+    ctx.fillStyle = '#7a5828'; ctx.fillRect(x + 26, 27 - cy, 2, 34); ctx.fillRect(x + 5, 43 - cy, 44, 2);
+    // coluna vermelha brutalista do CAD entre as janelas
+    ctx.fillStyle = '#b02820'; ctx.fillRect(x + 60, 14 - cy, 10, 94);
+    ctx.fillStyle = '#d84838'; ctx.fillRect(x + 60, 14 - cy, 3, 94);
+    ctx.fillStyle = '#801812'; ctx.fillRect(x + 67, 14 - cy, 3, 94);
+    // lousa verde com giz
+    ctx.fillStyle = '#2a2a2a'; ctx.fillRect(x + 82, 30 - cy, 40, 24);
+    ctx.fillStyle = '#2e6a44'; ctx.fillRect(x + 84, 32 - cy, 36, 20);
+    ctx.fillStyle = 'rgba(240,240,220,0.6)';
+    ctx.fillRect(x + 88, 37 - cy, 20, 1); ctx.fillRect(x + 88, 41 - cy, 26, 1); ctx.fillRect(x + 88, 45 - cy, 14, 1);
+    // quadro de avisos / mural
+    ctx.fillStyle = '#8a6a3a'; ctx.fillRect(x + 82, 62 - cy, 30, 20);
+    ctx.fillStyle = '#f2e8d0'; ctx.fillRect(x + 85, 65 - cy, 10, 8);
+    ctx.fillStyle = '#a8c8e8'; ctx.fillRect(x + 98, 66 - cy, 11, 12);
+  }
+  // fileira de armários (lockers) no lambril
+  for (let x = -((camX * 0.5) % 26); x < W; x += 26) {
+    ctx.fillStyle = '#b8402e'; ctx.fillRect(x + 2, 116 - cy, 22, 40);
+    ctx.fillStyle = '#d05a44'; ctx.fillRect(x + 2, 116 - cy, 22, 3);
+    ctx.fillStyle = '#7a2418'; ctx.fillRect(x + 23, 116 - cy, 2, 40);
+    ctx.fillStyle = '#3a1a12'; ctx.fillRect(x + 20, 132 - cy, 2, 3);   // fechadura
+    ctx.fillStyle = '#e8e0c8'; ctx.fillRect(x + 5, 120 - cy, 8, 4);    // ventilação
   }
 }
 
@@ -308,6 +332,15 @@ export function bgPraca(ctx, camX, camY, t) {
   for (let x = -((cl) % 160) - 160; x < W + 160; x += 160) {
     ctx.fillRect(x + 20, 24, 30, 8); ctx.fillRect(x + 26, 20, 18, 6);
     ctx.fillRect(x + 90, 44, 24, 7); ctx.fillRect(x + 95, 41, 13, 5);
+  }
+  // revoada de pombos no céu (é a PRAÇA DOS POMBOS!)
+  ctx.fillStyle = '#6a6a76';
+  for (let k = 0; k < 7; k++) {
+    const bx = ((k * 53 - t * 0.6) % (W + 40) + W + 40) % (W + 40) - 20;
+    const by = 30 + (k * 17) % 40 + Math.sin((t * 0.08) + k) * 3;
+    const flap = Math.floor(t / 6 + k) % 2;
+    ctx.fillRect(bx - 2, by + (flap ? 0 : 1), 2, 1); ctx.fillRect(bx + 1, by + (flap ? 0 : 1), 2, 1);
+    ctx.fillRect(bx, by, 1, 1);
   }
   // skyline do centro (parallax 0.5) — inclui o prédio da TELPA
   const par = camX * 0.5;
@@ -533,23 +566,32 @@ const br7 = [ // vitrine dos chocolates: o prêmio (objetivo)
 ];
 
 export function bgBras(ctx, camX, camY, t) {
-  ctx.fillStyle = '#f0ead8'; ctx.fillRect(0, 0, W, H);        // interior claro
-  ctx.fillStyle = '#e0d8c0'; ctx.fillRect(0, 120, W, H);
-  // prateleiras de fundo (parallax)
+  // piso comercial claro + teto com luminárias
+  ctx.fillStyle = '#f2ecdc'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#e4dcc4'; ctx.fillRect(0, 122, W, H);
+  ctx.fillStyle = '#d8cfb2'; ctx.fillRect(0, 120, W, 2);
+  for (let x = -((camX * 0.4) % 80); x < W; x += 80) { ctx.fillStyle = '#fbf6e2'; ctx.fillRect(x + 18, 4, 44, 3); }
+  // prateleiras/gôndolas de fundo (parallax) com produtos e etiquetas
   const par = camX * 0.5;
-  for (let x = -((par) % 96) - 96; x < W + 96; x += 96) {
-    ctx.fillStyle = '#c8b088'; ctx.fillRect(x + 6, 40, 84, 78);
-    ctx.fillStyle = '#a88a58';
-    for (let j = 0; j < 4; j++) ctx.fillRect(x + 6, 48 + j * 18, 84, 3);
-    // produtos coloridos
-    for (let j = 0; j < 4; j++) for (let i = 0; i < 8; i++) {
-      ctx.fillStyle = ['#c85050','#5070c8','#50a060','#c8a040','#8050a0'][(i + j) % 5];
-      ctx.fillRect(x + 10 + i * 10, 52 + j * 18, 6, 10);
+  for (let x = -((par) % 104) - 104; x < W + 104; x += 104) {
+    ctx.fillStyle = '#b89a68'; ctx.fillRect(x + 6, 44, 92, 76);
+    ctx.fillStyle = '#9a7c48';
+    for (let j = 0; j < 4; j++) ctx.fillRect(x + 6, 52 + j * 18, 92, 3);
+    for (let j = 0; j < 4; j++) for (let i = 0; i < 9; i++) {
+      const c = ['#d05858','#5878d0','#58a868','#d0a848','#9058a8','#d07840'][(i * 2 + j) % 6];
+      ctx.fillStyle = c; ctx.fillRect(x + 10 + i * 10, 55 + j * 18, 7, 11);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fillRect(x + 10 + i * 10, 55 + j * 18, 7, 2);
     }
+    // etiquetas de promoção amarelas penduradas
+    ctx.fillStyle = '#f2d24e'; ctx.fillRect(x + 30, 40, 12, 8); ctx.fillRect(x + 66, 40, 12, 8);
+    ctx.fillStyle = '#c02020'; ctx.fillRect(x + 32, 43, 8, 2);
   }
-  // faixa verde-amarela das Brasileiras no topo
-  ctx.fillStyle = '#2e8a5c'; ctx.fillRect(0, 14, W, 8);
-  ctx.fillStyle = '#f2d24e'; ctx.fillRect(0, 22, W, 6);
+  // letreiro "BRASILEIRAS" verde-amarelo no alto (marca da loja)
+  ctx.fillStyle = '#1c6a44'; ctx.fillRect(0, 12, W, 18);
+  ctx.fillStyle = '#2e8a5c'; ctx.fillRect(0, 12, W, 3);
+  ctx.fillStyle = '#f2d24e'; ctx.fillRect(0, 28, W, 3);
+  drawTextC(ctx, 'BRASILEIRAS', (W / 2 + ((camX * 0.15) % W)) % W, 16, '#f2d24e');
+  drawTextC(ctx, 'BRASILEIRAS', ((W / 2 + ((camX * 0.15) % W)) % W) - W, 16, '#f2d24e');
 }
 function decoBras(ctx, lvl) {
   // escada rolante: degraus metálicos animados sob os '=' em diagonal
@@ -950,29 +992,42 @@ const fk6 = [ // disparada até o ponto de ônibus (objetivo)
 ];
 
 export function bgFisk(ctx, camX, camY, t) {
-  ctx.fillStyle = '#9ad4f0'; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#c9ecfa'; ctx.fillRect(0, 0, W, 26);
+  // manhã de céu claro
+  ctx.fillStyle = '#8fd0ee'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#bfe6f6'; ctx.fillRect(0, 0, W, 30);
+  const cl = camX * 0.2;
+  ctx.fillStyle = '#ffffff';
+  for (let x = -((cl) % 150) - 150; x < W + 150; x += 150) { ctx.fillRect(x + 30, 22, 26, 7); ctx.fillRect(x + 100, 14, 20, 6); }
+  // quarteirão: prédio branco da FISK + convento das DAMAS, alternando
   const par = camX * 0.5;
-  for (let x = -((par) % 200) - 200; x < W + 200; x += 200) {
-    // prédio branco da FISK com letreiro vermelho
-    ctx.fillStyle = '#f4f4ec'; ctx.fillRect(x + 20, 46, 90, 96);
-    ctx.fillStyle = '#d81e18'; ctx.fillRect(x + 30, 54, 70, 12);
-    ctx.fillStyle = '#f4f4ec';
-    // "FISK"
-    // janelas
-    ctx.fillStyle = '#9ad4f0';
-    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) ctx.fillRect(x + 32 + i * 24, 74 + j * 20, 16, 12);
-    ctx.fillStyle = '#c8c4b8'; ctx.fillRect(x + 20, 46, 90, 3);
-    // convento das DAMAS ao lado
-    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(x + 120, 60, 64, 82);
-    ctx.fillStyle = '#b89860'; ctx.fillRect(x + 148, 44, 8, 18);
+  for (let x = -((par) % 220) - 220; x < W + 220; x += 220) {
+    // --- FISK: prédio branco, letreiro vermelho ---
+    ctx.fillStyle = '#f6f6ee'; ctx.fillRect(x + 14, 40, 96, 100);
+    ctx.fillStyle = '#d0ccc0'; ctx.fillRect(x + 14, 40, 96, 3);
+    ctx.fillStyle = '#d81e18'; ctx.fillRect(x + 24, 48, 76, 14);        // faixa do letreiro
+    drawTextC(ctx, 'FISK', x + 62, 51, '#f8f8f8');
+    ctx.fillStyle = '#7aa8c8';
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 4; i++) {           // janelas azuis
+      ctx.fillStyle = '#8ec4e4'; ctx.fillRect(x + 24 + i * 20, 72 + j * 20, 14, 13);
+      ctx.fillStyle = '#c8e6f6'; ctx.fillRect(x + 24 + i * 20, 72 + j * 20, 14, 4);
+    }
+    ctx.fillStyle = '#c8442e'; ctx.fillRect(x + 46, 120, 30, 20);       // portão vermelho
+    // --- convento das DAMAS: bege, telhado, campanário e cruz ---
+    ctx.fillStyle = '#ece0c4'; ctx.fillRect(x + 122, 56, 74, 84);
+    ctx.fillStyle = '#b8905a'; ctx.fillRect(x + 118, 52, 82, 6);        // beiral
+    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(x + 150, 30, 18, 26);       // campanário
+    ctx.fillStyle = '#a07040'; ctx.fillRect(x + 150, 24, 18, 6);        // telhado do campanário
+    ctx.fillStyle = '#7a5a30'; ctx.fillRect(x + 158, 14, 2, 10); ctx.fillRect(x + 155, 17, 8, 2); // cruz
+    ctx.fillStyle = '#8aa0b8';                                          // vitrais em arco
+    ctx.fillRect(x + 130, 70, 12, 22); ctx.fillRect(x + 150, 70, 12, 22); ctx.fillRect(x + 170, 70, 12, 22);
+    ctx.fillStyle = '#e0d0e8'; ctx.fillRect(x + 132, 72, 8, 6); ctx.fillRect(x + 152, 72, 8, 6); ctx.fillRect(x + 172, 72, 8, 6);
+    ctx.fillStyle = '#d8ccb0'; ctx.fillRect(x + 148, 120, 22, 20);      // escadaria/porta
   }
-  ctx.fillStyle = '#b0aca0'; ctx.fillRect(0, 140, W, 12);
+  // arborização e meio-fio
+  ctx.fillStyle = '#c8c4b8'; ctx.fillRect(0, 140, W, 12);
+  ctx.fillStyle = '#a8a498'; ctx.fillRect(0, 140, W, 2);
 }
-function decoFisk(ctx, lvl) {
-  for (const e of lvl.ents) if (e.t === 'check') { /* Galego já desenhado como entidade */ }
-  // letreiro FISK
-}
+function decoFisk(ctx, lvl) { /* Galego e Bené desenhados como entidades */ }
 
 // ================= FASE 8 — FILA DO ÔNIBUS =================
 const fi1 = [ // fim de tarde: chegando na parada
@@ -1073,25 +1128,46 @@ const fi6 = [ // a porta traseira do ônibus (objetivo)
 ];
 
 export function bgFila(ctx, camX, camY, t) {
-  // fim de tarde: céu laranja
-  ctx.fillStyle = '#f0a850'; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#f8c878'; ctx.fillRect(0, 0, W, 40);
-  ctx.fillStyle = '#f8e0a0'; ctx.fillRect(0, 0, W, 18);
-  ctx.fillStyle = '#f8e858'; ctx.fillRect(W - 70, 20, 26, 26); // sol baixo
-  const par = camX * 0.5;
-  ctx.fillStyle = '#a06840';
-  for (let x = -((par) % 240) - 240; x < W + 240; x += 240) {
-    ctx.fillRect(x, 84, 50, 58); ctx.fillRect(x + 60, 96, 40, 46);
-    ctx.fillRect(x + 130, 60, 44, 82); ctx.fillRect(x + 190, 88, 56, 54);
+  // pôr do sol: céu em gradiente laranja/rosa
+  const bands = ['#3a3a6a', '#6a4a7a', '#a85a6a', '#e08858', '#f4b45c', '#f8d878'];
+  for (let i = 0; i < bands.length; i++) { ctx.fillStyle = bands[i]; ctx.fillRect(0, i * 8, W, 9); }
+  ctx.fillStyle = '#f8e090'; ctx.fillRect(0, 48, W, H);
+  // sol grande baixo no horizonte
+  ctx.fillStyle = '#f8e060'; ctx.fillRect(W - 84, 34, 34, 34);
+  ctx.fillStyle = '#fff0a0'; ctx.fillRect(W - 80, 38, 26, 26);
+  ctx.globalAlpha = 0.25; ctx.fillStyle = '#fff0a0'; ctx.fillRect(W - 92, 26, 50, 50); ctx.globalAlpha = 1;
+  // skyline do centro em silhueta contra o sol (parallax)
+  const par = camX * 0.4;
+  ctx.fillStyle = '#5a3a4a';
+  for (let x = -((par) % 260) - 260; x < W + 260; x += 260) {
+    ctx.fillRect(x, 80, 40, 62); ctx.fillRect(x + 46, 66, 30, 76);       // TELPA alta
+    ctx.fillRect(x + 60, 54, 6, 12);
+    ctx.fillRect(x + 88, 92, 46, 50); ctx.fillRect(x + 150, 76, 34, 66);
+    ctx.fillRect(x + 200, 96, 50, 46);
+    // janelinhas acesas
+    ctx.fillStyle = '#f8d060';
+    for (let k = 0; k < 6; k++) ctx.fillRect(x + 50 + (k % 3) * 8, 74 + Math.floor(k / 3) * 12, 3, 4);
+    ctx.fillStyle = '#5a3a4a';
   }
-  // o ônibus estacionado ao fundo direito
-  ctx.fillStyle = '#c8b89c'; ctx.fillRect(0, 130, W, 20);
+  // orelhões e postes iluminados na calçada de trás
+  ctx.fillStyle = '#7a5060'; ctx.fillRect(0, 128, W, 16);
+  for (let x = -((camX * 0.7) % 120); x < W; x += 120) {
+    ctx.fillStyle = '#3a2a34'; ctx.fillRect(x + 30, 96, 3, 34);         // poste
+    ctx.fillStyle = '#f8e090'; ctx.fillRect(x + 26, 92, 11, 5);         // luz acesa
+    ctx.globalAlpha = 0.3; ctx.fillRect(x + 22, 90, 19, 12); ctx.globalAlpha = 1;
+  }
 }
 function decoFila(ctx, lvl) {
   const gx = lvl.goalX;
-  // traseira do ônibus no objetivo
-  ctx.drawImage(S.onibus, gx - 20, 150);
-  ctx.fillStyle = '#141420'; ctx.fillRect(gx - 4, 168, 14, 24); // porta traseira aberta
+  // o ônibus (frente virada pro ponto) com faróis acesos
+  ctx.drawImage(S.onibus, gx - 24, 148);
+  ctx.fillStyle = '#141420'; ctx.fillRect(gx - 6, 168, 16, 24);         // porta traseira aberta
+  ctx.fillStyle = '#f8e060'; ctx.fillRect(gx + 30, 164, 4, 4);          // farol
+  // placa do ponto de ônibus
+  ctx.fillStyle = '#3a3a44'; ctx.fillRect(8, 96, 3, 48);
+  ctx.fillStyle = '#2a52c0'; ctx.fillRect(2, 92, 16, 12);
+  ctx.fillStyle = '#f8f8f8'; ctx.fillRect(4, 94, 12, 8);
+  ctx.fillStyle = '#2a52c0'; ctx.fillRect(6, 96, 3, 4);
 }
 
 // ================= FASE 9 — O ÔNIBUS LOTADO =================
