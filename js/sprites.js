@@ -1088,10 +1088,12 @@ export const TILES = {
   }),
   // piso neon do Playtime (grade escura brilhante)
   'y': tile(x => {
-    x.fillStyle = '#141428'; x.fillRect(0, 0, 16, 16);
-    x.fillStyle = '#20d0f0'; x.fillRect(0, 0, 16, 1); x.fillRect(0, 0, 1, 16);
-    x.fillStyle = '#0e3a5a'; x.fillRect(0, 8, 16, 1); x.fillRect(8, 0, 1, 16);
-    x.fillStyle = '#f02080'; x.fillRect(0, 0, 2, 2);
+    // carpete escuro de fliperama (combina com o cenário do arcade)
+    x.fillStyle = '#2a1830'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#3a2440'; x.fillRect(0, 0, 16, 3);
+    x.fillStyle = '#241028';
+    x.fillRect(2, 6, 3, 3); x.fillRect(10, 10, 3, 3); x.fillRect(6, 13, 2, 2);
+    x.fillStyle = '#4a2c50'; x.fillRect(4, 4, 1, 1); x.fillRect(12, 8, 1, 1);
   }),
   // chão do ônibus (piso emborrachado)
   'u': tile(x => {
