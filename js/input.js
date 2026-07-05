@@ -20,6 +20,13 @@ export function pressed(k) { return state[k] && !prev[k]; }
 export function anyPressed() { return ['a', 'b', 'pause'].some(k => pressed(k)); }
 export function endFrame() { Object.assign(prev, state); }
 export function isTouch() { return touched; }
+// zera tudo — evita "tecla presa" carregando de uma cena p/ outra
+export function reset() {
+  for (const k in state) state[k] = false;
+  for (const k in prev) prev[k] = false;
+  if (_padTouches) _padTouches.clear();
+}
+let _padTouches = null;
 
 export function init() {
   addEventListener('keydown', e => {
@@ -45,6 +52,10 @@ export function init() {
 
   // D-pad: um único elemento; posição do dedo decide esquerda/direita/cima/baixo
   const padTouches = new Map();
+  _padTouches = padTouches;
+  // se a janela perde o foco (alt-tab, gesto do sistema), zera tudo
+  addEventListener('blur', () => { reset(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
   const updatePad = () => {
     state.left = state.right = false;
     let down = false, up = false;

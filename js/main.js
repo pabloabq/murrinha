@@ -38,17 +38,20 @@ const G = {
   scene: null,
   lastNode: 'cad',
 
-  toTitle() { G.scene = new Title(G); audio.stopSong(); },
+  toTitle() { input.reset(); G.scene = new Title(G); audio.stopSong(); },
   toMap() {
+    input.reset();
     G.scene = new WorldMap(G, G.lastNode);
     audio.playSong('map');
   },
   startLevel(id) {
+    input.reset();
     G.lastNode = id;
     audio.stopSong();
     G.scene = new Cutscene(G, LEVELS[id]);
   },
   launchLevel(id) {
+    input.reset();               // evita tecla presa fazendo o Murrinha andar sozinho
     if (G.lives <= 0) G.lives = 3;
     G.scene = new Level(LEVELS[id], G);
     audio.playSong(LEVELS[id].music);

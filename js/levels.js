@@ -616,7 +616,7 @@ function decoBras(ctx, lvl) {
 }
 
 // ================= FASE 5 — PLAYTIME =================
-const pl1 = [ // entrada do fliperama
+const pl1 = [ // entrada do fliperama: bola de pinball rolando!
   '....................',
   '....................',
   '....................',
@@ -627,12 +627,12 @@ const pl1 = [ // entrada do fliperama
   '........=====.......',
   '....................',
   '..P.................',
-  '....................',
+  '................B...',
   '....................',
   'yyyyyyyyyyyyyyyyyyyy',
   'yyyyyyyyyyyyyyyyyyyy',
 ];
-const pl2 = [ // Cacimba dança atrás de você (pule por cima)
+const pl2 = [ // Cacimba lança beijos + moleque bagunçando
   '....................',
   '....................',
   '....................',
@@ -642,13 +642,13 @@ const pl2 = [ // Cacimba dança atrás de você (pule por cima)
   '..f..............f..',
   '.....===....===.....',
   '....................',
-  '..........Q.........',
+  '..........Q....g....',
   '....................',
   '....................',
   'yyyyyyyyyyyyyyyyyyyy',
   'yyyyyyyyyyyyyyyyyyyy',
 ];
-const pl3 = [ // escadaria de fliperamas + checkpoint
+const pl3 = [ // escadaria de fliperamas + checkpoint + pinball
   '....................',
   '....................',
   '..............fff...',
@@ -659,12 +659,12 @@ const pl3 = [ // escadaria de fliperamas + checkpoint
   '....................',
   '..C.................',
   '....................',
-  '....................',
+  '.............B......',
   '....................',
   'yyyyyyyyyyyyyyyyyyyy',
   'yyyyyyyyyyyyyyyyyyyy',
 ];
-const pl4 = [ // Cacimba 2 + saltos entre fliperamas
+const pl4 = [ // Cacimba + moleque correndo (Tavinho-style) entre fliperamas
   '....................',
   '....................',
   '....................',
@@ -674,13 +674,13 @@ const pl4 = [ // Cacimba 2 + saltos entre fliperamas
   '..f.......f........f',
   '.......======.......',
   '....................',
-  '...................t',
+  '.....Q.........g...t',
   '....................',
-  '....................',
+  '..............B.....',
   'yyyyyyyyyyyyyyyyyyyy',
   'yyyyyyyyyyyyyyyyyyyy',
 ];
-const pl5 = [ // salão dos fliperamas + Cacimba 2
+const pl5 = [ // salão dos fliperamas: Cacimba + pinball + moleque
   '....................',
   '....................',
   '....f...f...f.......',
@@ -688,7 +688,7 @@ const pl5 = [ // salão dos fliperamas + Cacimba 2
   '....................',
   '..f.................',
   '.........===........',
-  '....................',
+  '.....B.........g....',
   '............Q.......',
   '....................',
   '....................',

@@ -15,6 +15,20 @@ function foot(ctx, e, img, dx = 0) {
   ctx.drawImage(img, Math.round(e.x + dx), Math.round(e.y + e.h - img.height));
 }
 
+// nome do personagem (discreto) acima da cabeça, pra saber de quem é
+const ENT_NAMES = {
+  liginha: 'VANITA', bigwalk: 'GORDO', crosser: 'TAVINHO', whistler: 'CARRAPETA',
+  galego: 'GALEGO', cobrador: 'COBRADOR', damas: 'DAMAS',
+  'chaser:fiscal': 'FISCAL', 'chaser:cacimba': 'CACIMBA', 'chaser:ratinho': 'RATINHO',
+};
+function nameTag(ctx, e) {
+  const nm = ENT_NAMES[e.skin ? e.t + ':' + e.skin : e.t];
+  if (!nm) return;
+  const w = textWidth(nm), tx = Math.round(e.x + e.w / 2 - w / 2), ty = Math.round(e.y - 9);
+  ctx.fillStyle = 'rgba(10,10,22,0.55)'; ctx.fillRect(tx - 2, ty - 1, w + 4, 7);
+  drawText(ctx, nm, tx, ty, '#f4e29a');
+}
+
 export class Level {
   constructor(def, G) {
     this.def = def;
@@ -61,6 +75,7 @@ export class Level {
       x: sp.x, y: sp.y, w: 10, h: 22, vx: 0, vy: 0,
       dir: 1, ground: false, anim: 0, inv: hard ? 0 : 90,
       boost: 0, jumpHeld: false, stun: 0, shield: false,
+      charm: 0, stink: 0,     // apaixonado (Cacimba) / fedido (Gordo) => mais lento
     };
     this.ents = [];
     this.parts = [];
@@ -68,6 +83,8 @@ export class Level {
     this.cars = [];
     this.waves = [];
     this.grains = [];
+    this.kisses = [];   // beijos do Cacimba
+    this.clouds = [];   // nuvens de peido do Gordo
     this.shake = 0;
     this.combo = 0;
     // y tal que um NPC de altura h fique com os PÉS no primeiro chão abaixo da linha j
@@ -111,6 +128,8 @@ export class Level {
         // --- passageiro do ônibus (obstáculo que balança) ---
         case 'z': this.ents.push({ t: 'passenger', x: x + 1, y: feetY(i, j, 24), w: 12, h: 24, skin: (i * 7) % 5, anim: 0, homeX: x + 1 }); break;
         case 'Z': this.ents.push({ t: 'cobrador', x, y: feetY(i, j, 24), w: 14, h: 24, anim: 0 }); break;
+        // --- bola de fliperama: rola pelo chão, empurra o Murrinha (pule!) ---
+        case 'B': this.ents.push({ t: 'roller', x, y: feetY(i, j, 10), w: 10, h: 10, vx: -1.4, dir: -1, anim: 0 }); break;
       }
     }
   }
@@ -207,7 +226,8 @@ export class Level {
     if (p.stun > 0) p.stun--;
     const stunned = p.stun > 0;
     const dir = stunned ? 0 : (input.held('right') ? 1 : 0) - (input.held('left') ? 1 : 0);
-    const max = (input.held('b') ? RUN : WALK) * (p.boost > 0 ? 1.55 : 1);
+    const slow = (p.charm > 0 || p.stink > 0) ? 0.5 : 1;   // apaixonado/fedido => lerdo
+    const max = (input.held('b') ? RUN : WALK) * (p.boost > 0 ? 1.55 : 1) * slow;
     if (dir !== 0) {
       p.dir = dir;
       p.vx += ACC * dir * (Math.sign(p.vx) !== dir ? 2.2 : 1); // skid mais rápido
@@ -230,6 +250,8 @@ export class Level {
     p.x = Math.max(0, Math.min(p.x, this.pw - p.w));
     if (p.inv > 0) p.inv--;
     if (p.boost > 0) p.boost--;
+    if (p.charm > 0) p.charm--;
+    if (p.stink > 0) p.stink--;
 
     // caiu no buraco
     if (p.y > this.ph + 8) this.hurt(true, 'ESCORREGOU E CAIU!');
@@ -261,6 +283,7 @@ export class Level {
         case 'galego': this.upGalego(e, p); break;
         case 'passenger': this.upPassenger(e, p); break;
         case 'cobrador': e.anim++; break; // decorativo (fica atrás da catraca)
+        case 'roller': this.upRoller(e, p); break;
         case 'pombo': this.upPombo(e, p); break;
         case 'damas': e.anim++; break;
       }
@@ -290,6 +313,29 @@ export class Level {
       }
     }
     if (this.grains) this.grains = this.grains.filter(g => !g.gone);
+
+    // beijos do Cacimba — apaixonam e deixam o Murrinha lerdo (não matam)
+    for (const k of this.kisses) {
+      k.x += k.vx; k.y += k.vy; k.vy += 0.006; k.life--;
+      if (k.life <= 0 || k.x < -8 || k.x > this.pw + 8 || k.y > this.ph) { k.gone = true; continue; }
+      if (p.inv <= 0 && this.state === 'play' && this.overlap(p, { x: k.x - 3, y: k.y - 3, w: 7, h: 7 })) {
+        k.gone = true;
+        if (p.charm <= 0) this.say('APAIXONOU! MURRINHA FICOU LERDO...');
+        p.charm = 210; audio.sfx('hurt'); this.burst(k.x, k.y, '#f25e8a', 5);
+      }
+    }
+    this.kisses = this.kisses.filter(k => !k.gone);
+
+    // nuvens de peido do Gordo — deixam fedido e lerdo (não matam)
+    for (const c of this.clouds) {
+      c.life--; c.r = Math.min(10, c.r + 0.14);
+      if (c.life <= 0) { c.gone = true; continue; }
+      if (p.inv <= 0 && this.state === 'play' && this.overlap(p, { x: c.x - c.r, y: c.y - c.r, w: c.r * 2, h: c.r * 2 })) {
+        if (p.stink <= 0) this.say('ECA! O PEIDO DO GORDO! QUE FEDOR...');
+        p.stink = 100;
+      }
+    }
+    this.clouds = this.clouds.filter(c => !c.gone);
 
     // cagadas de pombo
     for (const q of this.poops) {
@@ -419,19 +465,48 @@ export class Level {
     }
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
+    // CACIMBA lança beijos teleguiados: apaixona e deixa lerdo (não mata)
+    if (e.skin === 'cacimba') {
+      e.kiss = (e.kiss || 90) - 1;
+      if (e.kiss <= 0 && Math.abs(dx) < 150 && this.state === 'play') {
+        e.kiss = 120;
+        const a = Math.atan2((p.y + 8) - (e.y + 6), dx);
+        this.kisses.push({ x: e.x + 6, y: e.y + 6, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, life: 150 });
+        audio.sfx('coin');
+      }
+    }
     if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 15) {
       const msg = { fiscal: 'O FISCAL TE PEGOU!', cacimba: 'CACIMBA TE ENCANTOU!', ratinho: 'RATINHO ROUBOU SEU TENIS!' }[e.skin] || 'PEGO!';
       this.hurt(false, msg);
     }
   }
 
-  // obstáculo largo que anda (Gordo) — jump-over, não pisável
+  // bola de fliperama que rola: quica nas paredes/beiras e empurra o Murrinha (não mata)
+  upRoller(e, p) {
+    e.anim += Math.abs(e.vx);
+    if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
+    if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
+    e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
+    this.moveY(e, e.vy);
+    if (p.stun <= 0 && p.inv <= 0 && this.state === 'play' && this.overlap(p, e)) {
+      p.stun = 20; p.inv = 40; p.vx = e.dir * 2.4; p.vy = -2.2;
+      this.shake = 5; audio.sfx('kick'); this.say('A BOLA DE FLIPERAMA TE ATROPELOU!');
+    }
+  }
+
+  // obstáculo largo que anda (Gordo) — jump-over; solta PEIDO que deixa lerdo
   upBigwalk(e, p) {
     e.anim++;
     if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
     if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
+    e.fart = (e.fart || 100) - 1;
+    if (e.fart <= 0 && this.state === 'play') {
+      e.fart = 130;
+      this.clouds.push({ x: e.x + (e.dir < 0 ? e.w : -6), y: e.y + e.h - 8, life: 110, r: 3 });
+      audio.sfx('splat');
+    }
     if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 8)
       this.hurt(false, 'TROMBOU NO GORDO!');
   }
@@ -589,6 +664,19 @@ export class Level {
     // grãos de pipoca
     for (const gr of (this.grains || [])) ctx.drawImage(S.pipocaGrao, Math.round(gr.x - 2), Math.round(gr.y - 2));
 
+    // beijos do Cacimba (corações)
+    for (const k of this.kisses) ctx.drawImage(S.beijo, Math.round(k.x - 2), Math.round(k.y - 2 + Math.sin(k.life * 0.3)));
+
+    // nuvens de peido do Gordo (verde fedido)
+    for (const c of this.clouds) {
+      const a = Math.min(0.6, c.life / 110 * 0.6);
+      ctx.globalAlpha = a; ctx.fillStyle = '#8ab048';
+      const r = Math.round(c.r);
+      ctx.fillRect(Math.round(c.x - r), Math.round(c.y - r), r * 2, r * 2);
+      ctx.fillStyle = '#a8c860'; ctx.fillRect(Math.round(c.x - r + 2), Math.round(c.y - r + 2), r, r);
+      ctx.globalAlpha = 1;
+    }
+
     // tráfego
     for (const c of this.cars) {
       const img = c.type === 'moto' ? (c.vx < 0 ? S.moto : S.motoR)
@@ -633,10 +721,26 @@ export class Level {
       ctx.fillStyle = '#f2d24e';
       ctx.fillRect(Math.round(p.x - p.dir * 8), Math.round(p.y + 14), 3, 3);
     }
+    // apaixonado: corações subindo
+    if (p.charm > 0) {
+      for (let k = 0; k < 2; k++) {
+        const hy = p.y - 4 - ((this.time * 0.6 + k * 20) % 22);
+        ctx.drawImage(S.beijo, Math.round(p.x + 2 + Math.sin((this.time + k * 30) * 0.15) * 5), Math.round(hy));
+      }
+    }
+    // fedido: linhas de fedor onduladas
+    if (p.stink > 0) {
+      ctx.fillStyle = '#8ab048';
+      for (let k = 0; k < 3; k++) {
+        const sx = Math.round(p.x + k * 4 - 1 + Math.sin((this.time + k * 8) * 0.3) * 2);
+        ctx.fillRect(sx, Math.round(p.y - 6 - (this.time + k * 7) % 10), 1, 3);
+      }
+    }
   }
 
   drawEnt(ctx, e) {
     const f = Math.floor(e.anim / 8) % 2;
+    if (e.t !== 'pombo') nameTag(ctx, e);
     switch (e.t) {
       case 'ficha': {
         const fr = Math.floor(e.anim / 5) % 4;
@@ -684,6 +788,12 @@ export class Level {
         break;
       case 'passenger': foot(ctx, e, S.passageiros[e.skin], -2); break;
       case 'cobrador': foot(ctx, e, S.cobrador, -1); break;
+      case 'roller': {
+        const a = (e.anim * 0.12) % (Math.PI / 2); // rotação simulada
+        ctx.save(); ctx.translate(Math.round(e.x + 5), Math.round(e.y + 5)); ctx.rotate(e.dir * a);
+        ctx.drawImage(S.bola, -5, -5); ctx.restore();
+        break;
+      }
     }
   }
 

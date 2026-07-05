@@ -167,6 +167,27 @@ export const pomboFly2 = sp([
 ]);
 export const pomboFly1L = flipped(pomboFly1), pomboFly2L = flipped(pomboFly2);
 
+// bola de fliperama/pinball que rola pelo chão (10x10, metal brilhante)
+export const bola = sprite([
+  '..kkkk..',
+  '.kwwwgk.',
+  'kwwwgggk',
+  'kwwgggxk',
+  'kwgggxxk',
+  'kgggxxxk',
+  '.kgxxxk.',
+  '..kkkk..',
+], { k: '#141420', w: '#f8f8f8', g: '#a8a8b4', x: '#5a5a66' });
+
+// beijo do Cacimba (coração rosa 5x5)
+export const beijo = sp([
+  '.e.e.',
+  'eeeee',
+  'eeeee',
+  '.eee.',
+  '..e..',
+]);
+
 // cagada de pombo (4x4)
 export const poop = sp(['.ww.', 'wWww', '.ww.', '..w.']);
 export const splat = sp(['w.w.w', '.wWw.', 'wWWWw', '.wWw.', 'w.w.w']);
