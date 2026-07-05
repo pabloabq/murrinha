@@ -25,7 +25,7 @@
 ### Premissa
 Murrinha, aluno do CAD (Colégio Alfredo Dantas), decide que hoje **não vai
 assistir aula**. Ele precisa gazear o dia inteiro no centro de Campina Grande —
-escapando de Liginha (a diretora), dos pombos da praça, de Ratinho, do Cacimba,
+escapando de Vanita (a diretora), dos pombos da praça, de Ratinho, do Cacimba,
 do palhaço Carrapeta e de todos os perigos do centro — até chegar a hora certa
 de pegar o ônibus lotado e voltar pra casa como se nada tivesse acontecido.
 Os pais **jamais** podem saber.
@@ -38,7 +38,7 @@ Os pais **jamais** podem saber.
 - **Andar / Correr** — botão B segura para correr (velocidade ~1.6×)
 - **Pulo variável** — segurar A pula mais alto; física com aceleração/atrito
 - **Pisão** — pular na cabeça de certos inimigos os derrota (trombadinhas)
-- Inimigos "de autoridade" (Liginha, Bené, fiscal) **não podem ser pisados** —
+- Inimigos "de autoridade" (Vanita, Bené, fiscal) **não podem ser pisados** —
   encostar neles = pego = perde vida
 
 ### Vidas e game over
@@ -86,7 +86,7 @@ tênis branco, caderno debaixo do braço.
 ### Antagonistas / obstáculos
 | Personagem | Comportamento no jogo |
 |---|---|
-| **Liginha** (diretora do CAD) | Algoz principal. Patrulha corredores; se vê Murrinha, acelera na direção dele. Intocável — encostou, pegou. |
+| **Vanita** (diretora do CAD) | Algoz principal. Patrulha corredores; se vê Murrinha, acelera na direção dele. Intocável — encostou, pegou. |
 | **Bené** (expetor das DAMAS) | Bigode + cabo de vassoura. Patrulha a frente das DAMAS varrendo o chão com o cabo (área de perigo baixa — exige pulo no tempo certo). |
 | **Ratinho** (batedor de carteiras) | Persegue Murrinha em trechos de perseguição — corre atrás querendo o tênis. Mais rápido que andar, mais lento que correr. |
 | **Trombadinhas** | Inimigos comuns (o "goomba" do jogo). Andam em grupo, podem ser pisados. Encostar = perdem-se fichas espalhadas pelo chão (estilo Sonic) na fase do ônibus. |
@@ -136,13 +136,13 @@ reconhecíveis de cada local.
 ### FASE 1 — "Fuga do CAD" 🦁
 **Local:** interior do CAD → fachada brutalista com colunas vermelhas e leões.
 **Cutscene:** Murrinha na porta da sala. *"Prova de matemática? Hoje não.
-HOJE NÃO."* Liginha aparece no fim do corredor.
+HOJE NÃO."* Vanita aparece no fim do corredor.
 **Gameplay:** atravessar corredores da escola: pular carteiras empilhadas,
-baldes de zelador, desviar de Liginha patrulhando (2 encontros — ela acelera
+baldes de zelador, desviar de Vanita patrulhando (2 encontros — ela acelera
 quando te vê). Trecho no pátio com muro. Final: sair pela porta principal
 por baixo da marquise **entre os dois leões de pedra** — os leões são o
 "portal" de fim de fase.
-**Chefe? Não** — Liginha reaparece nas fases finais.
+**Chefe? Não** — Vanita reaparece nas fases finais.
 
 ### FASE 2 — "Praça dos Pombos" 🐦
 **Local:** Praça da Bandeira: ladrilho, bancos de alvenaria, árvores,
@@ -194,7 +194,7 @@ dianteira por um corredor LOTADO. Passageiros balançam com as freadas
 (o "terreno" se move), cobrador vira catraca-obstáculo, Ratinho fez a
 mesma linha (!). Descer no ponto certo — passou do ponto = volta trecho.
 **Cutscene final:** Murrinha desce, chega em casa, a mãe pergunta:
-*"E a escola, meu filho?"* — *"Foi ótima, mãe."* Corta pra Liginha na
+*"E a escola, meu filho?"* — *"Foi ótima, mãe."* Corta pra Vanita na
 diretoria olhando a lista de faltas... **FIM** (com os créditos em
 estilo SNES e estatísticas: fichas, tickets, vidas perdidas).
 
@@ -227,7 +227,7 @@ estilo SNES e estatísticas: fichas, tickets, vidas perdidas).
 | Game over | "Suspenso" — trombone triste 8-bit |
 
 SFX: pulo, ficha (plim!), pisão, splat de cagada, assovio do Carrapeta,
-beijo do Cacimba, apito da Liginha, buzina, sino de porta de loja.
+beijo do Cacimba, apito da Vanita, buzina, sino de porta de loja.
 
 ## 8. Técnica
 

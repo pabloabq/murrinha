@@ -1,7 +1,7 @@
 # MURRINHA — O Gazeador 🦁🐦
 
 Um jogo de plataforma 16-bits (estilo Super Mario World) sobre **gazear aula**
-no centro de Campina Grande — PB. Praça da Bandeira, CAD, pombos, Liginha,
+no centro de Campina Grande — PB. Praça da Bandeira, CAD, pombos, Vanita,
 trombadinhas e o ônibus lotado de volta pra casa.
 
 **Jogue no browser, instale como app (PWA) e jogue em tela cheia no celular.**
@@ -18,7 +18,7 @@ trombadinhas e o ônibus lotado de volta pra casa.
 - Colete **fichas telefônicas** (100 = vida extra) e **notas** (valem 10)
 - **Chocolate das Brasileiras** = +1 vida · **Pipoca do Galego** = turbo · **Maçã** = segura 1 susto
 - 3 **tickets estudantis** escondidos por fase (colecionável de 100%)
-- Pise nos trombadinhas; da **Liginha/Fiscal/Cacimba/Ratinho**, pule por cima
+- Pise nos trombadinhas; da **Vanita/Fiscal/Cacimba/Ratinho**, pule por cima
 - Não pare embaixo de pombo. Pule o **assovio do Carrapeta**. Sério.
 
 ## As 9 fases

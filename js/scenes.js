@@ -270,7 +270,7 @@ const ENDING_LINES = [
   { who: 'murr', name: 'MURRINHA', text: 'Desci no ponto de sempre. Cheguei em casa na hora certa. Perfeito.' },
   { who: 'mae', name: 'MAE', text: 'E a escola hoje, meu filho? Como foi a aula?' },
   { who: 'murr', name: 'MURRINHA', text: 'Foi otima, mae. Aprendi um monte de coisa. (piscadela)' },
-  { who: 'lig', name: 'LIGINHA', text: 'Na diretoria... "Murrinha, faltou de novo. Da proxima, eu PEGO."' },
+  { who: 'lig', name: 'VANITA', text: 'Na diretoria... "Murrinha, faltou de novo. Da proxima, eu PEGO."' },
   { who: 'murr', name: 'MURRINHA', text: 'Mas isso e uma historia pra outro dia de gazeacao. FIM!' },
 ];
 export class Ending {

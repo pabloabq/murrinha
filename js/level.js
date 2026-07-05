@@ -82,9 +82,9 @@ export class Level {
         }
         case 'd': this.ents.push({ t: 'damas', x, y: y - 8, w: 16, h: 24, anim: (i * 13) % 60 }); break;
         // --- perseguidores (pule por cima!) ---
-        case 'F': this.ents.push({ t: 'chaser', skin: 'fiscal', x, y: y - 8, w: 12, h: 24, vx: -0.6, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.1, range: 100 }); break;
-        case 'Q': this.ents.push({ t: 'chaser', skin: 'cacimba', x, y: y - 8, w: 12, h: 24, vx: 0.7, dir: 1, mode: 'patrol', anim: 0, saw: 0, spd: 1.2, range: 90, beijo: 90 }); break;
-        case 'Y': this.ents.push({ t: 'chaser', skin: 'ratinho', x, y: y - 8, w: 12, h: 24, vx: -0.8, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.35, range: 120 }); break;
+        case 'F': this.ents.push({ t: 'chaser', skin: 'fiscal', x, y: y - 8, w: 12, h: 24, vx: -0.6, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.0, range: 96 }); break;
+        case 'Q': this.ents.push({ t: 'chaser', skin: 'cacimba', x, y: y - 8, w: 12, h: 24, vx: 0.7, dir: 1, mode: 'patrol', anim: 0, saw: 0, spd: 1.05, range: 88, beijo: 90 }); break;
+        case 'Y': this.ents.push({ t: 'chaser', skin: 'ratinho', x, y: y - 8, w: 12, h: 24, vx: -0.8, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.2, range: 110 }); break;
         // --- obstáculos que andam (jump-over, não pisáveis) ---
         case 'O': this.ents.push({ t: 'bigwalk', skin: 'gordo', x, y: y - 4, w: 20, h: 20, vx: -0.3, dir: -1, anim: 0 }); break;
         case 'V': this.ents.push({ t: 'crosser', skin: 'tavinho', x, y: y - 8, w: 13, h: 24, vx: 2.2, dir: 1, anim: 0, x0: x - 70, x1: x + 70 }); break;
@@ -329,7 +329,8 @@ export class Level {
     if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
     this.moveY(e, e.vy);
     if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e)) {
-      if (p.vy > 0.5 && p.y + p.h < e.y + e.h * 0.7) {
+      // pisão generoso: se o pé do Murrinha está acima do meio do trombadinha (e não subindo forte), pisa
+      if (p.vy > -1.5 && p.y + p.h < e.y + e.h * 0.6) {
         e.dead = 1; p.vy = -3.6; audio.sfx('stomp');
         this.burst(e.x + 5, e.y + 4, '#c05010', 4);
       } else this.hurt();
@@ -358,7 +359,7 @@ export class Level {
     this.moveY(e, e.vy);
     // só pega se o Murrinha NÃO estiver claramente por cima dela (dá pra pular por cima!)
     if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 10)
-      this.hurt(false, 'PEGO PELA LIGINHA!');
+      this.hurt(false, 'PEGO PELA VANITA!');
   }
 
   // perseguidor genérico (fiscal, cacimba, ratinho) — igual Liginha, com skin/vel
@@ -378,7 +379,7 @@ export class Level {
     }
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
-    if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 10) {
+    if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 15) {
       const msg = { fiscal: 'O FISCAL TE PEGOU!', cacimba: 'CACIMBA TE ENCANTOU!', ratinho: 'RATINHO ROUBOU SEU TENIS!' }[e.skin] || 'PEGO!';
       this.hurt(false, msg);
     }
