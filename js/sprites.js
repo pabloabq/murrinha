@@ -1070,6 +1070,14 @@ export const TILES = {
     x.fillStyle = '#3a3630';
     for (let i = 2; i < 16; i += 4) for (let j = 4; j < 16; j += 4) x.fillRect(i, j, 2, 2);
   }),
+  // canteiro central da avenida (median) — one-way, refúgio entre as faixas
+  'm': tile(x => {
+    x.fillStyle = '#b8b4a8'; x.fillRect(0, 0, 16, 8);
+    x.fillStyle = '#d8d4c8'; x.fillRect(0, 0, 16, 2);
+    x.fillStyle = '#8a867a'; x.fillRect(0, 7, 16, 1);
+    x.fillStyle = '#e8c020'; x.fillRect(2, 3, 5, 2); x.fillRect(9, 3, 5, 2); // faixa amarela
+    x.fillStyle = '#4a4a52'; x.fillRect(0, 8, 16, 8);   // sombra do vão embaixo
+  }),
   // arara de roupa / prateleira (one-way, cobre e serve de plataforma)
   'r': tile(x => {
     x.fillStyle = '#8a8a96'; x.fillRect(0, 0, 16, 2);

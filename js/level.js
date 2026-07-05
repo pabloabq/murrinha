@@ -6,7 +6,7 @@ import * as audio from './audio.js';
 
 const TS = 16;
 const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X', 'K', 'R', 'S', 'T', 'y', 'u']);
-const ONEWAY = new Set(['=', 'b', 'r']);
+const ONEWAY = new Set(['=', 'b', 'r', 'm']);
 const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
 
@@ -35,8 +35,11 @@ export class Level {
     this.tickets = 0;
     this.time = 0;
     this.toast = null; this.toastT = 0;
-    // zonas de tráfego (Av. Floriano): {c0, c1, row, dir, speed, every, types}
+    // zonas de tráfego horizontais legadas: {c0, c1, row, dir, speed, every, types}
     this.traffic = (def.traffic || []).map(z => ({ ...z, t: z.every - 40 }));
+    // FAIXAS da avenida (Frogger vertical): carros atravessam a largura toda
+    // e nascem/somem FORA da tela, nas bordas do mapa. {topRow, dir, speed, every, types, phase}
+    this.lanes = (def.laneTraffic || []).map((z, i) => ({ ...z, t: z.phase != null ? z.phase : (z.every - 30 - i * 24) }));
   }
 
   tileAt(i, j) {
@@ -218,8 +221,10 @@ export class Level {
     // caiu no buraco
     if (p.y > this.ph + 8) this.hurt(true);
 
-    // chegou ao objetivo
-    if (p.x + p.w / 2 >= this.goalX && this.state === 'play') {
+    // chegou ao objetivo (por X, ou por Y no caso das travessias verticais)
+    const reachedX = !this.def.goalY && p.x + p.w / 2 >= this.goalX;
+    const reachedY = this.def.goalY && p.y <= this.def.goalY && p.ground;
+    if ((reachedX || reachedY) && this.state === 'play') {
       this.state = 'win'; this.stateT = 0;
       audio.stopSong(); audio.playSong('clear');
     }
@@ -307,9 +312,30 @@ export class Level {
         });
       }
     }
+    // FAIXAS da avenida: carros atravessam a largura toda, nascem/somem FORA da tela
+    for (const lane of this.lanes) {
+      lane.t++;
+      if (lane.t >= lane.every) {
+        lane.t = 0;
+        const types = lane.types || ['carro', 'carro', 'carro', 'moto', 'onibus'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const dims = { carro: [32, 16], moto: [20, 13], onibus: [56, 26] }[type];
+        const spd = lane.speed * (type === 'moto' ? 1.4 : type === 'onibus' ? 0.85 : 1) * (0.9 + Math.random() * 0.25);
+        this.cars.push({
+          type, w: dims[0], h: dims[1],
+          x: lane.dir > 0 ? -dims[0] - 6 : this.pw + 6,
+          y: (lane.topRow + 2) * TS - dims[1],   // "rodas" no piso da faixa
+          vx: lane.dir * spd,
+          skin: Math.floor(Math.random() * 4),
+          lane: true,
+        });
+      }
+    }
     for (const c of this.cars) {
       c.x += c.vx;
-      if (c.x <= c.z0 || c.x + c.w >= c.z1) { c.gone = true; continue; }
+      // legado (zonas) despawna nas bordas da zona; faixas despawnam fora do mapa
+      if (c.lane) { if (c.x < -c.w - 10 || c.x > this.pw + 10) { c.gone = true; continue; } }
+      else if (c.x <= c.z0 || c.x + c.w >= c.z1) { c.gone = true; continue; }
       if (p.inv <= 0 && this.state === 'play' &&
         this.overlap(p, { x: c.x + 2, y: c.y + 2, w: c.w - 4, h: c.h - 2 })) {
         this.hurt(false, 'ATROPELADO NA FLORIANO!');
