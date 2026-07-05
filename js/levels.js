@@ -891,6 +891,7 @@ export function bgCalc(ctx, camX, camY, t) {
   ctx.beginPath(); ctx.moveTo(0, 128); ctx.lineTo(W, 128); ctx.stroke();
 }
 function decoCalc(ctx, lvl) {
+  if (lvl.def.bgImg) return; // a imagem já é a rua completa do calçadão
   for (const e of lvl.ents) if (e.t === 'check') ctx.drawImage(S.busto, e.x - 26, e.y - 4);
 }
 
@@ -1159,6 +1160,7 @@ export function bgFila(ctx, camX, camY, t) {
   }
 }
 function decoFila(ctx, lvl) {
+  if (lvl.def.bgImg) return; // a imagem já tem o ônibus, a placa e o pôr do sol
   const gx = lvl.goalX;
   // o ônibus (frente virada pro ponto) com faróis acesos
   ctx.drawImage(S.onibus, gx - 24, 148);
@@ -1311,6 +1313,7 @@ export function bgBus(ctx, camX, camY, t) {
   }
 }
 function decoBus(ctx, lvl) {
+  if (lvl.def.bgImg) return; // a imagem já tem barras, alças, bancos e catraca
   // barras de apoio verticais fixas (nos montantes)
   for (let i = 6; i < lvl.w; i += 6) {
     ctx.fillStyle = '#c0c4cc'; ctx.fillRect(i * 16, 44, 3, 148);
@@ -1419,7 +1422,7 @@ export const LEVELS = {
   calc: {
     id: 'calc', name: 'CALCADAO', music: 'praca',
     map: join(ca1, ca2, ca3, ca4, ca5, ca6),
-    bg: bgCalc, deco: decoCalc,
+    bg: bgCalc, bgImg: 'art/calc.png', deco: decoCalc,
     clearMsg: 'PASSOU RETO!',
     objetivo: 'Percorra o calcadao ate a saida, desviando dos personagens.',
     desafios: [
@@ -1436,7 +1439,7 @@ export const LEVELS = {
   fisk: {
     id: 'fisk', name: 'FISK E O GALEGO', music: 'praca',
     map: join(fk1, fk2, fk3, fk4, fk5, fk6),
-    bg: bgFisk, deco: decoFisk,
+    bg: bgFisk, bgImg: 'art/fisk.png', deco: decoFisk,
     clearMsg: 'CORREU DO RATINHO!',
     objetivo: 'Pegue a pipoca do Galego e corra do Ratinho ate o ponto de onibus.',
     desafios: [
@@ -1453,7 +1456,7 @@ export const LEVELS = {
   fila: {
     id: 'fila', name: 'FILA DO ONIBUS', music: 'cad',
     map: join(fi1, fi2, fi3, fi4, fi5, fi6),
-    bg: bgFila, deco: decoFila,
+    bg: bgFila, bgImg: 'art/fila.png', deco: decoFila,
     clearMsg: 'ENTROU NO ONIBUS!',
     objetivo: 'Chegue na porta de tras do onibus protegendo sua carteira.',
     desafios: [
@@ -1467,7 +1470,7 @@ export const LEVELS = {
   bus: {
     id: 'bus', name: 'O ONIBUS LOTADO', music: 'floriano',
     map: join(bu1, bu2, bu3, bu4, bu5, bu6),
-    bg: bgBus, deco: decoBus,
+    bg: bgBus, bgImg: 'art/bus.png', deco: decoBus,
     clearMsg: 'DESCEU NO PONTO CERTO!',
     ending: true,
     objetivo: 'Fure o onibus lotado da porta de tras ate a frente e desca no ponto certo.',

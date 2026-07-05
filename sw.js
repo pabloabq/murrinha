@@ -1,5 +1,5 @@
 // sw.js — service worker: stale-while-revalidate (funciona offline, atualiza sozinho)
-const VERSION = 'murrinha-v16';
+const VERSION = 'murrinha-v17';
 const ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const ASSETS = [
   './js/input.js', './js/save.js', './js/scenes.js', './js/level.js', './js/levels.js',
   './js/assets.js',
   './art/title.png', './art/cad.png', './art/praca.png', './art/bras.png', './art/play.png',
+  './art/calc.png', './art/fisk.png', './art/fila.png', './art/bus.png',
   './icons/icon-192.png', './icons/icon-512.png',
 ];
 
