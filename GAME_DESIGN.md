@@ -245,8 +245,11 @@ beijo do Cacimba, apito da Liginha, buzina, sino de porta de loja.
 |---|---|---|
 | **1** | Motor + PWA + título + mapa-múndi + Fases 1 e 2 + áudio | ✅ pronto |
 | **2** | Travessia da Floriano (tráfego) + itens novos + reforma visual | ✅ pronto |
-| 3 | Fases Brasileiras (stealth) e Playtime (Cacimba) | planejado |
-| 4 | Fase Calçadão (Carrapeta/Gordo/Tavinho) | planejado |
-| 5 | Fase FISK/Galego + perseguição do Ratinho | planejado |
-| 6 | Fases do ônibus (fila + lotado) + final + créditos | planejado |
+| **3** | Brasileiras (escada rolante/fiscal) e Playtime (Cacimba) | ✅ pronto |
+| **4** | Calçadão (Carrapeta/Gordo/Tavinho) | ✅ pronto |
+| **5** | FISK/Galego (chuva de pipoca) + Ratinho | ✅ pronto |
+| **6** | Ônibus (fila + lotado) + final + créditos | ✅ pronto |
 | 7 | Polimento: tickets 100%, minigames do Playtime, speedrun timer | planejado |
+
+**Todas as 9 fases jogáveis e validadas contra softlock por bot automatizado.**
+Ondas do Carrapeta e o Tavinho são não-letais (paralisam, como no filme).

@@ -5,8 +5,8 @@ import * as input from './input.js';
 import * as audio from './audio.js';
 
 const TS = 16;
-const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X', 'K', 'R', 'S']);
-const ONEWAY = new Set(['=', 'b']);
+const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X', 'K', 'R', 'S', 'T', 'y', 'u']);
+const ONEWAY = new Set(['=', 'b', 'r']);
 const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
 
@@ -52,12 +52,14 @@ export class Level {
     this.p = {
       x: sp.x, y: sp.y, w: 10, h: 22, vx: 0, vy: 0,
       dir: 1, ground: false, anim: 0, inv: hard ? 0 : 90,
-      boost: 0, jumpHeld: false,
+      boost: 0, jumpHeld: false, stun: 0, shield: false,
     };
     this.ents = [];
     this.parts = [];
     this.poops = [];
     this.cars = [];
+    this.waves = [];
+    this.grains = [];
     for (let j = 0; j < this.h; j++) for (let i = 0; i < this.rows[j].length; i++) {
       const ch = this.rows[j][i], x = i * TS, y = j * TS, key = i + ',' + j;
       if (this.collected.has(key)) continue;
@@ -79,6 +81,20 @@ export class Level {
           break;
         }
         case 'd': this.ents.push({ t: 'damas', x, y: y - 8, w: 16, h: 24, anim: (i * 13) % 60 }); break;
+        // --- perseguidores (pule por cima!) ---
+        case 'F': this.ents.push({ t: 'chaser', skin: 'fiscal', x, y: y - 8, w: 12, h: 24, vx: -0.6, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.1, range: 100 }); break;
+        case 'Q': this.ents.push({ t: 'chaser', skin: 'cacimba', x, y: y - 8, w: 12, h: 24, vx: 0.7, dir: 1, mode: 'patrol', anim: 0, saw: 0, spd: 1.2, range: 90, beijo: 90 }); break;
+        case 'Y': this.ents.push({ t: 'chaser', skin: 'ratinho', x, y: y - 8, w: 12, h: 24, vx: -0.8, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.35, range: 120 }); break;
+        // --- obstáculos que andam (jump-over, não pisáveis) ---
+        case 'O': this.ents.push({ t: 'bigwalk', skin: 'gordo', x, y: y - 4, w: 20, h: 20, vx: -0.3, dir: -1, anim: 0 }); break;
+        case 'V': this.ents.push({ t: 'crosser', skin: 'tavinho', x, y: y - 8, w: 13, h: 24, vx: 2.2, dir: 1, anim: 0, x0: x - 70, x1: x + 70 }); break;
+        // --- Carrapeta: emite ondas de assovio ---
+        case 'W': this.ents.push({ t: 'whistler', x, y: y - 8, w: 13, h: 24, dir: -1, anim: 0, fire: 60 }); break;
+        // --- Galego: chuva de pipoca (bônus) ---
+        case 'q': this.ents.push({ t: 'galego', x, y: y - 8, w: 14, h: 24, anim: 0, pop: 40 }); break;
+        // --- passageiro do ônibus (obstáculo que balança) ---
+        case 'z': this.ents.push({ t: 'passenger', x: x + 1, y: y - 8, w: 12, h: 24, skin: (i * 7) % 5, anim: 0, homeX: x + 1 }); break;
+        case 'Z': this.ents.push({ t: 'cobrador', x, y: y - 8, w: 14, h: 24, anim: 0 }); break;
       }
     }
   }
@@ -172,7 +188,9 @@ export class Level {
     }
 
     // ----- player -----
-    const dir = (input.held('right') ? 1 : 0) - (input.held('left') ? 1 : 0);
+    if (p.stun > 0) p.stun--;
+    const stunned = p.stun > 0;
+    const dir = stunned ? 0 : (input.held('right') ? 1 : 0) - (input.held('left') ? 1 : 0);
     const max = (input.held('b') ? RUN : WALK) * (p.boost > 0 ? 1.55 : 1);
     if (dir !== 0) {
       p.dir = dir;
@@ -183,7 +201,7 @@ export class Level {
       if (Math.abs(p.vx) < FRIC) p.vx = 0; else p.vx -= FRIC * Math.sign(p.vx);
     }
     p.ground = this.onGround(p);
-    if (input.pressed('a') && p.ground) {
+    if (!stunned && input.pressed('a') && p.ground) {
       p.vy = -(4.7 + Math.abs(p.vx) * 0.30);
       p.jumpHeld = true;
       audio.sfx('jump');
@@ -218,11 +236,42 @@ export class Level {
         case 'check': if (!e.on && this.overlap(p, e)) { e.on = true; this.checkpoint = { x: e.x, y: e.y - 8 }; audio.sfx('checkpoint'); this.say('CHECKPOINT!'); } break;
         case 'tromba': this.upTromba(e, p); break;
         case 'liginha': this.upLiginha(e, p); break;
+        case 'chaser': this.upChaser(e, p); break;
+        case 'bigwalk': this.upBigwalk(e, p); break;
+        case 'crosser': this.upCrosser(e, p); break;
+        case 'whistler': this.upWhistler(e, p); break;
+        case 'galego': this.upGalego(e, p); break;
+        case 'passenger': this.upPassenger(e, p); break;
+        case 'cobrador': e.anim++; break; // decorativo (fica atrás da catraca)
         case 'pombo': this.upPombo(e, p); break;
         case 'damas': e.anim++; break;
       }
     }
     this.ents = this.ents.filter(e => !e.gone);
+
+    // ondas de assovio (Carrapeta) — anel baixo que corre pelo chão; PULE por cima
+    for (const wv of (this.waves || [])) {
+      wv.x += wv.vx; wv.r = 5 + Math.sin(wv.life * 0.3); wv.life--;
+      if (wv.life <= 0 || wv.x < -20 || wv.x > this.pw + 20) { wv.gone = true; continue; }
+      // NÃO mata: paralisa e empurra (como no filme). Pule por cima pra não parar.
+      if (p.stun <= 0 && p.inv <= 0 && this.state === 'play' && Math.abs((p.x + p.w / 2) - wv.x) < 8 && p.y + p.h > wv.y + 4) {
+        p.stun = 26; p.inv = 44; p.vx = -Math.sign(wv.vx) * 1.6; p.vy = -1.5;
+        audio.sfx('hurt'); this.say('FIU-FIU! PAROU PRA OUVIR O CARRAPETA');
+      }
+    }
+    if (this.waves) this.waves = this.waves.filter(w => !w.gone);
+
+    // grãos de pipoca (Galego) — colete para fichas
+    for (const gr of (this.grains || [])) {
+      gr.vy += 0.12; gr.x += gr.vx; gr.y += gr.vy;
+      const gj = Math.floor((gr.y + 4) / TS), gi = Math.floor(gr.x / TS);
+      if (SOLID.has(this.tileAt(gi, gj)) || ONEWAY.has(this.tileAt(gi, gj)) || gr.y > this.ph) { gr.gone = true; continue; }
+      if (this.overlap(p, { x: gr.x - 2, y: gr.y - 2, w: 6, h: 6 })) {
+        gr.gone = true; this.fichasFase++; G.fichas++; audio.sfx('coin');
+        if (G.fichas >= 100) { G.fichas -= 100; G.lives++; audio.sfx('life'); }
+      }
+    }
+    if (this.grains) this.grains = this.grains.filter(g => !g.gone);
 
     // cagadas de pombo
     for (const q of this.poops) {
@@ -312,6 +361,87 @@ export class Level {
       this.hurt(false, 'PEGO PELA LIGINHA!');
   }
 
+  // perseguidor genérico (fiscal, cacimba, ratinho) — igual Liginha, com skin/vel
+  upChaser(e, p) {
+    e.anim++;
+    const dx = (p.x + p.w / 2) - (e.x + e.w / 2), dy = Math.abs(p.y - e.y);
+    if (e.mode === 'patrol') {
+      if (dy < 44 && Math.abs(dx) < (e.range || 100) && Math.sign(dx) === e.dir) { e.mode = 'chase'; e.saw = 40; audio.sfx('apito'); }
+      if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
+      if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
+    } else {
+      if (e.saw > 0) e.saw--;
+      e.dir = Math.sign(dx) || e.dir;
+      e.vx = e.dir * (e.spd || 1.15);
+      if (this.onGround(e) && this.edgeAhead(e)) e.vx = 0; else this.moveX(e, e.vx);
+      if (Math.abs(dx) > 190 || dy > 60) { e.mode = 'patrol'; e.vx = e.dir * 0.5; }
+    }
+    e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
+    this.moveY(e, e.vy);
+    if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 10) {
+      const msg = { fiscal: 'O FISCAL TE PEGOU!', cacimba: 'CACIMBA TE ENCANTOU!', ratinho: 'RATINHO ROUBOU SEU TENIS!' }[e.skin] || 'PEGO!';
+      this.hurt(false, msg);
+    }
+  }
+
+  // obstáculo largo que anda (Gordo) — jump-over, não pisável
+  upBigwalk(e, p) {
+    e.anim++;
+    if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
+    if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
+    e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
+    this.moveY(e, e.vy);
+    if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 8)
+      this.hurt(false, 'TROMBOU NO GORDO!');
+  }
+
+  // Tavinho: cruza a tela em alta velocidade. NÃO mata: prende na conversa (para o tempo)
+  upCrosser(e, p) {
+    e.anim++;
+    e.x += e.vx;
+    if (e.x < e.x0) { e.x = e.x0; e.vx *= -1; e.dir = 1; }
+    if (e.x > e.x1) { e.x = e.x1; e.vx *= -1; e.dir = -1; }
+    if (p.stun <= 0 && p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 10) {
+      p.stun = 40; p.inv = 60; p.vx = -Math.sign(e.vx) * 1.2;
+      audio.sfx('hurt'); this.say('TAVINHO TE PRENDEU NA CONVERSA! BLA BLA BLA...');
+    }
+  }
+
+  // Carrapeta: solta ondas de assovio que correm pelo chão (pule por cima)
+  upWhistler(e, p) {
+    e.anim++;
+    e.dir = Math.sign((p.x) - e.x) || -1;
+    // só assovia quando o Murrinha está por perto (não spamma de longe) e com folga
+    if (--e.fire <= 0) {
+      if (Math.abs((p.x + p.w / 2) - (e.x + e.w / 2)) < 150) {
+        e.fire = 175;
+        if (!this.waves) this.waves = [];
+        this.waves.push({ x: e.x + e.w / 2, y: e.y + e.h - 6, r: 3, vx: e.dir * 1.05, life: 240 });
+        audio.sfx('apito');
+      } else e.fire = 20;
+    }
+  }
+
+  // Galego: fica na barraca soltando pipoca que arca e cai (colete!)
+  upGalego(e, p) {
+    e.anim++;
+    if (--e.pop <= 0) {
+      e.pop = 45 + Math.floor(Math.random() * 30);
+      if (!this.grains) this.grains = [];
+      this.grains.push({ x: e.x + 6, y: e.y + 2, vx: (Math.random() - 0.3) * 1.8, vy: -2.6 - Math.random() });
+    }
+  }
+
+  // passageiro do ônibus: balança com as freadas; empurra o Murrinha (não mata)
+  upPassenger(e, p) {
+    e.anim++;
+    e.x = e.homeX + Math.sin((e.anim + e.skin * 20) * 0.06) * 3;
+    if (this.state === 'play' && this.overlap(p, e)) {
+      // empurra pra trás em vez de matar (o ônibus é lotado, não letal)
+      p.x -= Math.sign((p.x + p.w / 2) - (e.x + e.w / 2)) * 1.2 || -1.2;
+    }
+  }
+
   upPombo(e, p) {
     e.anim++;
     if (e.mode === 'perch') {
@@ -324,9 +454,11 @@ export class Level {
       e.x += e.vx * 1.05;
       e.y = e.homeY + Math.sin(e.anim * 0.15) * 3;
       e.drop--;
-      if (e.drop <= 0 && Math.abs((p.x + p.w / 2) - (e.x + 5)) < 30) {
-        this.poops.push({ x: e.x + 5, y: e.y + 8, vy: 0.4 });
-        e.drop = 55;
+      // solta a cagada um pouco À FRENTE do Murrinha (dá pra parar e deixar cair)
+      const rel = (p.x + p.w / 2) - (e.x + 5);
+      if (e.drop <= 0 && rel > -6 && rel < 40) {
+        this.poops.push({ x: e.x + 5, y: e.y + 8, vy: 0.3 });
+        e.drop = 80;
       }
       if (e.x < -40 || e.x > this.pw + 40) e.gone = true;
     }
@@ -397,6 +529,14 @@ export class Level {
 
     // cagadas
     for (const q of this.poops) ctx.drawImage(S.poop, Math.round(q.x - 2), Math.round(q.y - 2));
+
+    // ondas de assovio
+    for (const wv of (this.waves || [])) {
+      ctx.strokeStyle = '#a8e0f8'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(Math.round(wv.x), Math.round(wv.y), Math.round(wv.r), 0, Math.PI * 2); ctx.stroke();
+    }
+    // grãos de pipoca
+    for (const gr of (this.grains || [])) ctx.drawImage(S.pipocaGrao, Math.round(gr.x - 2), Math.round(gr.y - 2));
 
     // tráfego
     for (const c of this.cars) {
@@ -478,6 +618,28 @@ export class Level {
         ctx.drawImage(S.damas, Math.round(e.x), Math.round(e.y));
         break;
       }
+      case 'chaser': {
+        const set = { fiscal: S.fiscal, cacimba: S.cacimba, ratinho: S.ratinho }[e.skin];
+        const idx = (e.dir < 0 ? 0 : 2) + f;
+        ctx.drawImage(set[idx], Math.round(e.x - 2), Math.round(e.y));
+        if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6)
+          drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
+        break;
+      }
+      case 'bigwalk': ctx.drawImage(S.gordo[e.dir < 0 ? 0 : 1], Math.round(e.x - 2), Math.round(e.y)); break;
+      case 'crosser':
+        ctx.drawImage(S.tavinho[(e.dir < 0 ? 0 : 2) + f], Math.round(e.x - 2), Math.round(e.y));
+        drawText(ctx, 'BLA BLA', Math.round(e.x - 8), Math.round(e.y - 10), '#fff');
+        break;
+      case 'whistler':
+        ctx.drawImage(S.carrapeta[(e.dir < 0 ? 0 : 2) + f], Math.round(e.x - 2), Math.round(e.y));
+        break;
+      case 'galego':
+        ctx.drawImage(S.galego, Math.round(e.x), Math.round(e.y));
+        ctx.drawImage(S.panela, Math.round(e.x + 12), Math.round(e.y + 14));
+        break;
+      case 'passenger': ctx.drawImage(S.passageiros[e.skin], Math.round(e.x - 2), Math.round(e.y)); break;
+      case 'cobrador': ctx.drawImage(S.cobrador, Math.round(e.x - 1), Math.round(e.y)); break;
     }
   }
 

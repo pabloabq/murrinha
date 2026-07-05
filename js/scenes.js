@@ -265,8 +265,78 @@ export class WorldMap {
   }
 }
 
+// ==================== FINAL + CRÉDITOS ====================
+const ENDING_LINES = [
+  { who: 'murr', name: 'MURRINHA', text: 'Desci no ponto de sempre. Cheguei em casa na hora certa. Perfeito.' },
+  { who: 'mae', name: 'MAE', text: 'E a escola hoje, meu filho? Como foi a aula?' },
+  { who: 'murr', name: 'MURRINHA', text: 'Foi otima, mae. Aprendi um monte de coisa. (piscadela)' },
+  { who: 'lig', name: 'LIGINHA', text: 'Na diretoria... "Murrinha, faltou de novo. Da proxima, eu PEGO."' },
+  { who: 'murr', name: 'MURRINHA', text: 'Mas isso e uma historia pra outro dia de gazeacao. FIM!' },
+];
+export class Ending {
+  constructor(G) { this.G = G; this.phase = 'talk'; this.i = 0; this.chars = 0; this.t = 0; }
+  update() {
+    this.t++; this.chars += 0.6;
+    if (this.phase === 'talk') {
+      if (input.pressed('a') || input.pressed('b')) {
+        const line = ENDING_LINES[this.i];
+        if (line && this.chars < line.text.length) this.chars = 999;
+        else { this.i++; this.chars = 0; audio.sfx('select'); if (this.i >= ENDING_LINES.length) { this.phase = 'credits'; this.t = 0; audio.playSong('clear'); } }
+      }
+    } else {
+      if (this.t > 60 && input.pressed('a')) { audio.stopSong(); this.G.toTitle(); }
+    }
+  }
+  draw(ctx) {
+    if (this.phase === 'talk') {
+      ctx.fillStyle = '#101020'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#181830';
+      for (let j = 0; j < H; j += 8) ctx.fillRect(0, j, W, 4);
+      const line = ENDING_LINES[this.i];
+      if (!line) return;
+      const ox = (W - 320) >> 1;
+      ctx.save(); ctx.translate(ox, 0);
+      const port = { murr: S.portMurr, lig: S.portLig, mae: S.portMae }[line.who] || S.portMurr;
+      drawBox(ctx, 24, 48, 60, 60, '#243050');
+      ctx.drawImage(port, 30, 54, 48, 48);
+      drawBox(ctx, 94, 48, 204, 84);
+      drawText(ctx, line.name + ':', 101, 55, '#f2d24e');
+      const shown = normText(line.text).slice(0, Math.floor(this.chars));
+      let ly = 70, lineStr = '';
+      for (const w2 of shown.split(' ')) {
+        const test = lineStr ? lineStr + ' ' + w2 : w2;
+        if (textWidth(test) > 188) { drawText(ctx, lineStr, 101, ly, '#fff'); ly += 9; lineStr = w2; }
+        else lineStr = test;
+      }
+      drawText(ctx, lineStr, 101, ly, '#fff');
+      ctx.restore();
+      drawTextC(ctx, (input.isTouch() ? 'TOQUE' : 'Z') + ' PARA CONTINUAR', W / 2, 150, '#5a6a8a');
+      return;
+    }
+    // --- créditos ---
+    ctx.fillStyle = '#0a0a18'; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 30; i++) { ctx.fillStyle = '#20204a'; ctx.fillRect((i * 53) % W, (i * 37 + this.t * 0.3) % H, 1, 1); }
+    const sv = save.get();
+    const done = Object.keys(sv.cleared).length, tick = Object.values(sv.tickets || {}).reduce((a, b) => a + b, 0);
+    drawTextC(ctx, 'FIM DE UM DIA', W / 2, 22, '#f2d24e', 2);
+    drawTextC(ctx, 'DE GAZEACAO', W / 2, 40, '#f2d24e', 2);
+    const cx = W / 2;
+    drawTextC(ctx, 'MURRINHA - O GAZEADOR', cx, 66, '#fff');
+    drawTextC(ctx, 'CAMPINA GRANDE - PARAIBA', cx, 78, '#9aa0ac');
+    drawTextC(ctx, 'FASES VENCIDAS: ' + done + '/9', cx, 98, '#8f8');
+    drawTextC(ctx, 'FICHAS NA COLECAO: ' + sv.fichasTotal, cx, 110, '#f2d24e');
+    drawTextC(ctx, 'TICKETS ESTUDANTIS: ' + tick + '/27', cx, 122, '#8ec8e8');
+    drawTextC(ctx, 'OBRIGADO POR JOGAR, GAZEADOR!', cx, 146, '#fff');
+    if (this.t > 60 && Math.floor(this.t / 30) % 2 === 0)
+      drawTextC(ctx, (input.isTouch() ? 'TOQUE' : 'Z') + ' PARA VOLTAR AO TITULO', cx, 166, '#5a6a8a');
+  }
+}
+
 // ==================== CUTSCENE ====================
-const PORTRAITS = { murr: () => S.portMurr, lig: () => S.portLig, pombo: () => S.portPombo, cego: () => S.portCego };
+const PORTRAITS = {
+  murr: () => S.portMurr, lig: () => S.portLig, pombo: () => S.portPombo, cego: () => S.portCego,
+  fiscal: () => S.portFiscal, cacimba: () => S.portCacimba, carrapeta: () => S.portCarrapeta, galego: () => S.portGalego,
+};
 
 export class Cutscene {
   constructor(G, levelDef) {

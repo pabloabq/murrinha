@@ -522,6 +522,260 @@ export const portPombo = sp([
   '........................',
 ]);
 
+// ==================== NPCs DAS NOVAS FASES (16x24) ====================
+// helper de personagem humanoide de 2 frames (anda) com paleta própria
+function walker2(rows, pal, legRowA, legRowB) {
+  const base = rows;
+  const a = sprite([...base, ...legRowA], pal);
+  const b = sprite([...base, ...legRowB], pal);
+  return [a, b, flipped(a), flipped(b)];
+}
+const LEGS_A = ['...kMMk..kMMk...', '...kssk..kssk...', '..kttttkkttttk..', '..kggggkkggggk..'];
+const LEGS_B = ['....kMMkkMMk....', '....kssk.kssk...', '...kttttkttttk..', '...kggggkggggk..'];
+
+// Fiscal das Brasileiras (uniforme azul, boné, crachá)
+const FISCAL_PAL = { ...PAL, M: '#26407a', N: '#1a2c56' };
+export const fiscal = walker2([
+  '....kkkkkkkk....',
+  '...kNNNNNNNNk...',   // boné
+  '...kNNNNNNNNk...',
+  '..kkssssssssk...',
+  '..kssksssskssk..',
+  '..kssssssssssk..',
+  '..kssskkkksssk..',
+  '...kssssssssk...',
+  '....kkkkkkkk....',
+  '...kMMMMMMMMk...',
+  '..kMMMwMMMMMMk..',   // crachá branco
+  '..kMMMMMMMMMMk..',
+  '..kMMMMMMMMMMk..',
+  '...kMMMMMMMMk...',
+], FISCAL_PAL, LEGS_A, LEGS_B);
+
+// Cacimba (camiseta rosa, short curto, braços pra cima dançando)
+const CAC_PAL = { ...PAL, M: '#e05ea0', N: '#b03c7c', L: '#f2c184' };
+export const cacimba = walker2([
+  'k..kkkkkkkk..k..',
+  'Lk.khhhhhhhhk.kL',   // braços erguidos (L=pele)
+  'Lk.khhhhhhhhk.kL',
+  '.k.kssssssssk.k.',
+  '...kssksssksk...',
+  '...kssssssssk...',
+  '...kssekkessk...',   // sorriso
+  '....kssssssk....',
+  '....kkkkkkkk....',
+  '...kMMMMMMMMk...',
+  '..kMMMMMMMMMMk..',
+  '..kMMMMMMMMMMk..',
+  '...kkkkkkkkkk...',   // short curto
+  '...kLLk..kLLk...',
+], CAC_PAL, ['...kLLk..kLLk...', '..kttttkkttttk..', '..kggggkkggggk..', '................'],
+   ['....kLLkkLLk....', '...kttttkttttk..', '...kggggkggggk..', '................']);
+
+// Carrapeta (palhaço: peruca, nariz vermelho, roupa colorida)
+const CLOWN_PAL = { ...PAL, u: '#f28020', U: '#c85e10', e: '#e02020', v: '#20a040', m: '#f2d24e' };
+export const carrapeta = walker2([
+  '..u..kkkk..u....',
+  '.uuu.kwwww.uuu..',   // peruca laranja lateral
+  'uuuukwwwwwwkuuu.',
+  '...kwssssswwk...',   // rosto branco (w)
+  '...kwsksskswk...',
+  '...kwsssssswk...',
+  '...kwseeeeswk...',   // boca vermelha
+  '...kwwseeswwk...',
+  '....kkeekk k....',   // nariz
+  '...kvmvmvmvk....',   // roupa colorida
+  '..kmvmvmvmvmk...',
+  '..kvmvmvmvmvk...',
+  '..kmvmvmvmvmk...',
+  '...kvvmmvvk.....',
+], CLOWN_PAL, ['...keek..keek...', '..kuuukkuuuk....', '..kUUUkkUUUk....', '................'],
+   ['....keekkeek....', '...kuuukuuuk....', '...kUUUkUUUk....', '................']);
+
+// onda de assovio do Carrapeta (fiu-fiu) — anel que expande
+export const assovio = sprite([
+  '..wwww..',
+  '.w....w.',
+  'w......w',
+  'w......w',
+  'w......w',
+  'w......w',
+  '.w....w.',
+  '..wwww..',
+], { w: '#a8e0f8' });
+
+// Tavinho Miranda (boné virado, ombreiras retas, camisa)
+const TAV_PAL = { ...PAL, M: '#8040a0', N: '#5c2c78', m: '#f2d24e' };
+export const tavinho = walker2([
+  '...kkkkkkkkm....',   // aba do boné pro lado
+  '..kNNNNNNNNk....',
+  '..kNNNNNNNNk....',
+  '..kssssssssk....',
+  '..kssksssskssk..',
+  '..kssssssssssk..',
+  '..kssskkkksssk..',
+  '...kssssssssk...',
+  'kkkkkkkkkkkkkkk.',   // ombreiras retas e largas
+  'kMMMMMMMMMMMMMk.',
+  'kMMMMMMMMMMMMMk.',
+  '.kMMMMMMMMMMk...',
+  '.kMMMMMMMMMMk...',
+  '.kMMMMMMMMMMk...',
+], TAV_PAL, LEGS_A, LEGS_B);
+
+// Gordo do Calçadão (bem gordo, plataforma móvel) — 24x22
+export const gordo = (() => {
+  const P = { ...PAL, M: '#4a8a4a', N: '#356835' };
+  const a = sprite([
+    '......kkkkkkkk......',
+    '.....khhhhhhhhk.....',
+    '....kssssssssssk....',
+    '....ksskssssksk.....',
+    '....kssssssssssk....',
+    '....ksssseesssk.....',
+    '.....kssssssssk.....',
+    '......kkkkkkkk......',
+    '...kMMMMMMMMMMMMk...',
+    '..kMMMMMMMMMMMMMMk..',
+    '.kMMMMMMMMMMMMMMMMk.',
+    '.kMMMMMMMMMMMMMMMMk.',
+    '.kMMMMMMMMMMMMMMMMk.',
+    '.kMMMMMMMMMMMMMMMMk.',
+    '..kMMMMMMMMMMMMMMk..',
+    '...kMMMMMMMMMMMMk...',
+    '....kkk......kkk....',
+    '....kssk....kssk....',
+    '...ktttk....ktttk...',
+    '...kgggk....kgggk...',
+  ], P);
+  return [a, flipped(a)];
+})();
+
+// Galego da Pipoca (loiro encaracolado, camisa de botão) — aliado
+const GAL_PAL = { ...PAL, y: '#f2d24e', Y: '#c8a428', m: '#d84040' };
+export const galego = sprite([
+  '...yykkkkkkyy...',
+  '..yyyhhhhhhyyy..',   // cabelo loiro encaracolado
+  '..yykhhhhhhkyy..',
+  '...kssssssssk...',
+  '..kssksssskssk..',
+  '..kssssssssssk..',
+  '..ksssmmmmsssk..',   // bigode? não, sorriso
+  '...kssssssssk...',
+  '....kkkkkkkk....',
+  '...kwwmwwmwwk...',   // camisa de botão com listras
+  '..kwwmwwmwwwwk..',
+  '..kwwwwwwwwwwk..',
+  '..kwwmwwmwwwwk..',
+  '...kwwwwwwwwk...',
+  '...kbbbbbbbbk...',
+  '...kbbk..kbbk...',
+  '...kssk..kssk...',
+  '..kttttkkttttk..',
+], GAL_PAL);
+
+// panela de pipoca (Galego) — pipocas pulam dela
+export const panela = sprite([
+  '.wwwwwwwwww.',
+  'wwzwzwzwzww.',   // pipocas
+  'kkkkkkkkkkkk',
+  'kxxxxxxxxxxk',
+  'kxxxxxxxxxxk',
+  'kxxxxxxxxxxk',
+  '.kxxxxxxxxk.',
+  '..kkkkkkkk..',
+], { w: '#f8f8f8', z: '#f2e8d0', k: '#141420', x: '#a0a0a8' });
+export const pipocaGrao = sprite(['.ww.', 'wwww', 'wwww', '.ww.'], { w: '#f8f0d8' });
+
+// Ratinho (batedor de carteiras, roupas velhas, bravo)
+const RAT_PAL = { ...PAL, M: '#6a5a3a', N: '#4a3e28', h: '#2a2a2a' };
+export const ratinho = walker2([
+  '....kkkkkkkk....',
+  '...khhhhhhhhk...',
+  '..khhhhhhhhhhk..',
+  '..khhsssssshhk..',
+  '..kssksssskssk..',   // olhar bravo
+  '..kssssssssssk..',
+  '..ksskkkkkkssk..',   // careta
+  '...kssssssssk...',
+  '....kkkkkkkk....',
+  '...kMMkNNkMMk...',   // camisa rasgada
+  '..kMMNMMMMNMMk..',
+  '..kMMMMMMMMMMk..',
+  '..kNMMMMMMMMNk..',
+  '...kMMMMMMMMk...',
+], RAT_PAL, LEGS_A, LEGS_B);
+
+// cobrador do ônibus (atrás da catraca)
+const COB_PAL = { ...PAL, M: '#3a6a9a', N: '#264a70' };
+export const cobrador = sprite([
+  '....kkkkkkkk....',
+  '...khhhhhhhhk...',
+  '..khhhhhhhhhhk..',
+  '..khhsssssshhk..',
+  '..kssksssskssk..',
+  '..kssssssssssk..',
+  '..kssskkkksssk..',
+  '...kssssssssk...',
+  '....kkkkkkkk....',
+  '...kMMMMMMMMk...',
+  '..kMMMMMMMMMMk..',
+  '..kMMMwwMMMMMk..',
+  '..kMMMMMMMMMMk..',
+  '...kMMMMMMMMk...',
+], COB_PAL);
+
+// passageiro genérico do ônibus (segurando na barra) — cores variadas
+function passageiro(cor, cor2) {
+  const P = { ...PAL, M: cor, N: cor2, h: '#3a2a1a' };
+  return sprite([
+    '..k.kkkkkk.k....',
+    '..kkhhhhhhkk....',   // braço erguido segurando barra
+    '...khhhhhhk.....',
+    '...kssssssk.....',
+    '...ksskssksk....',
+    '...kssssssk.....',
+    '...ksskkssk.....',
+    '....kkkkkk......',
+    '...kMMMMMMk.....',
+    '..kMMMMMMMMk....',
+    '..kMMMMMMMMk....',
+    '..kMMMMMMMMk....',
+    '...kMMMMMMk.....',
+    '...kNNkkNNk.....',
+    '...kNNk.kNNk....',
+    '...kssk.kssk....',
+  ], P);
+}
+export const passageiros = [
+  passageiro('#c85050', '#9a3838'),
+  passageiro('#5070c8', '#38509a'),
+  passageiro('#50a060', '#387844'),
+  passageiro('#c8a040', '#9a7828'),
+  passageiro('#8050a0', '#5c3878'),
+];
+
+// fliperama do Playtime (gabinete de arcade)
+export const fliperama = (() => {
+  const P = { k: '#141420', M: '#2a2a4a', N: '#1a1a34', s: '#20d0f0', e: '#f02080', y: '#f2d24e', w: '#f8f8f8' };
+  return sprite([
+    '.kkkkkkkkkkk.',
+    'kMsssssssssMk',   // tela neon
+    'kMseeeeeeesMk',
+    'kMseyyyyyesMk',
+    'kMseyewyeysMk',
+    'kMseyyyyyesMk',
+    'kMsssssssssMk',
+    'kMMMMMMMMMMMk',
+    'kMwwMwwMwwMMk',   // botões
+    'kMMMMMMMMMMMk',
+    'kNNNNNNNNNNNk',
+    'kNNNNNNNNNNNk',
+    'kNNNNNNNNNNNk',
+    '.kkkkkkkkkkk.',
+  ], P);
+})();
+
 // ==================== VEÍCULOS DA FLORIANO ====================
 function carro(cor) {
   return tile(x => {
@@ -588,6 +842,101 @@ export const portCego = sp([
   '...kxxxxxxxxxxxxxxk.....',
   '..kxxxxxyyyyyyxxxxxk....',
 ]);
+
+// retratos das cutscenes (24x24)
+export const portFiscal = sprite([
+  '.....kkkkkkkkkkkk...',
+  '....kNNNNNNNNNNNNk..',   // boné
+  '...kNNNNNNNNNNNNNNk.',
+  '..kkssssssssssssskk',
+  '..kssssssssssssssk.',
+  '..ksskkssssssksskk.',
+  '..kssssssssssssssk.',
+  '..ksssssssssssssk..',
+  '..ksssskkkkksssssk.',
+  '..kssssssssssssssk.',
+  '...kkkkkkkkkkkkkk..',
+  '..kMMMMMMMMMMMMMMk.',
+  '.kMMMMMwwwMMMMMMMMk',
+  '.kMMMMMMMMMMMMMMMMk',
+  '.kMMMMMMMMMMMMMMMMk',
+  '.kMMMMMMMMMMMMMMMMk',
+], { ...PAL, M: '#26407a', N: '#1a2c56' });
+export const portCacimba = sprite([
+  '....kkkkkkkkkkkk...',
+  '...khhhhhhhhhhhhk..',
+  '..khhhhhhhhhhhhhhk.',
+  '..khhssssssssshhhk.',
+  '..kssksssssksssssk.',
+  '..kssssssssssssssk.',
+  '..kssseeeeeeesssk..',   // sorrisão
+  '..ksssseeeeessssk..',
+  '...kssssssssssssk..',
+  '....kkkkkkkkkkkk...',
+  '...kMMMMMMMMMMMMk..',
+  '..kMMMMMMMMMMMMMMk.',
+  '..kMMMMMMMMMMMMMMk.',
+  '..kMMMMMMMMMMMMMMk.',
+  '...kMMMMMMMMMMMMk..',
+  '....kkkkkkkkkkkk...',
+], { ...PAL, M: '#e05ea0', e: '#f28ab0' });
+export const portCarrapeta = sprite([
+  '.uu.kkkkkkkkkk.uu..',
+  'uuuukwwwwwwwwkuuuu.',
+  'uuukwwwwwwwwwwkuuu.',
+  '..kwwssssssssswwk..',
+  '..kwsksssssksswwk..',
+  '..kwwssssssssswwk..',
+  '..kwwsskkkksswwwk..',
+  '...kwwseeeeswwwk...',
+  '....kkeeeekk k.....',   // nariz vermelho
+  '...kvmvmvmvmvmvk...',
+  '..kmvmvmvmvmvmvmk..',
+  '..kvmvmvmvmvmvmvk..',
+  '..kmvmvmvmvmvmvmk..',
+  '..kvmvmvmvmvmvmvk..',
+  '...kkkkkkkkkkkkk...',
+  '..................',
+], { ...PAL, u: '#f28020', e: '#e02020', v: '#20a040', m: '#f2d24e' });
+export const portGalego = sprite([
+  '..yyykkkkkkkkyyy...',
+  '.yyyyhhhhhhhhyyyy..',
+  'yyyykhhhhhhhhkyyyy.',
+  '.yykhhhhhhhhhhkyy..',
+  '..kssssssssssssk...',
+  '..kssksssssksssk...',
+  '..kssssssssssssk...',
+  '..ksssmmmmmmsssk...',   // sorriso
+  '..ksssssssssssk....',
+  '...kkkkkkkkkkkk....',
+  '..kwwmwwmwwmwwwk...',
+  '.kwwmwwmwwmwwwwwk..',
+  '.kwwwwwwwwwwwwwwk..',
+  '.kwwmwwmwwmwwwwwk..',
+  '..kwwwwwwwwwwwwk...',
+  '...kkkkkkkkkkkk....',
+], { ...PAL, y: '#f2d24e', m: '#d84040' });
+
+export const portMae = sprite([
+  '.....kkkkkkkkkk....',
+  '....khhhhhhhhhhhk..',
+  '...khhhhhhhhhhhhhk.',
+  '..khhhhssssssshhhk.',
+  '..khhssssssssshhk..',
+  '..khssssssssssshk..',
+  '..kssssssssssssk...',
+  '..ksskssssskssk....',   // olhos
+  '..kssssssssssk.....',
+  '..ksssseeesssk.....',   // sorriso
+  '..kssssssssssk.....',
+  '...kkkkkkkkkkk.....',
+  '..kvvvvvvvvvvvk....',   // blusa
+  '.kvvvvvvvvvvvvvk...',
+  '.kvvvvwwwwwvvvvk...',
+  '.kvvvvvvvvvvvvvk...',
+  '.kvvvvvvvvvvvvvk...',
+  '..kvvvvvvvvvvvk....',
+], { ...PAL, h: '#6a4a2a', e: '#d86a6a', v: '#b0506a', w: '#f0d0d8' });
 
 // avatar do mapa (10x12)
 export const mapMurr = [sp([
@@ -699,6 +1048,34 @@ export const TILES = {
     x.fillStyle = '#b0aca0'; x.fillRect(0, 0, 16, 16);
     x.fillStyle = '#c8c4b8'; x.fillRect(0, 0, 16, 3);
     x.fillStyle = '#8a867a'; x.fillRect(0, 3, 16, 1); x.fillRect(7, 3, 1, 13);
+  }),
+  // piso de loja (Brasileiras): xadrez claro
+  'T': tile(x => {
+    x.fillStyle = '#e8e4dc'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#d0ccc0'; x.fillRect(0, 0, 8, 8); x.fillRect(8, 8, 8, 8);
+    x.fillStyle = '#f4f0e8'; x.fillRect(0, 0, 16, 2);
+    x.fillStyle = '#a8a498'; x.fillRect(0, 15, 16, 1);
+  }),
+  // piso neon do Playtime (grade escura brilhante)
+  'y': tile(x => {
+    x.fillStyle = '#141428'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#20d0f0'; x.fillRect(0, 0, 16, 1); x.fillRect(0, 0, 1, 16);
+    x.fillStyle = '#0e3a5a'; x.fillRect(0, 8, 16, 1); x.fillRect(8, 0, 1, 16);
+    x.fillStyle = '#f02080'; x.fillRect(0, 0, 2, 2);
+  }),
+  // chão do ônibus (piso emborrachado)
+  'u': tile(x => {
+    x.fillStyle = '#4a4640'; x.fillRect(0, 0, 16, 16);
+    x.fillStyle = '#5a564e'; x.fillRect(0, 0, 16, 2);
+    x.fillStyle = '#3a3630';
+    for (let i = 2; i < 16; i += 4) for (let j = 4; j < 16; j += 4) x.fillRect(i, j, 2, 2);
+  }),
+  // arara de roupa / prateleira (one-way, cobre e serve de plataforma)
+  'r': tile(x => {
+    x.fillStyle = '#8a8a96'; x.fillRect(0, 0, 16, 2);
+    x.fillStyle = '#c8c4bc'; x.fillRect(0, 0, 16, 1);
+    for (let i = 1; i < 16; i += 4) { x.fillStyle = ['#c85050','#5070c8','#50a060','#c8a040'][(i>>2)%4]; x.fillRect(i, 2, 3, 12); }
+    x.fillStyle = '#6a6a72'; x.fillRect(1, 2, 1, 12); x.fillRect(14, 2, 1, 12);
   }),
   // terra/canteiro (topo com grama)
   'E': tile(x => {

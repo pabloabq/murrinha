@@ -3,7 +3,7 @@ import { W, H, drawTextC } from './gfx.js';
 import * as input from './input.js';
 import * as audio from './audio.js';
 import * as save from './save.js';
-import { Title, WorldMap, Cutscene } from './scenes.js';
+import { Title, WorldMap, Cutscene, Ending } from './scenes.js';
 import { Level } from './level.js';
 import { LEVELS } from './levels.js';
 
@@ -56,7 +56,8 @@ const G = {
   onLevelClear(id, fichasFase, tickets) {
     save.markCleared(id, fichasFase, tickets);
     audio.stopSong();
-    G.toMap();
+    if (LEVELS[id].ending) { G.scene = new Ending(G); }
+    else G.toMap();
   },
 };
 
