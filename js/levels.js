@@ -1330,6 +1330,11 @@ export const LEVELS = {
     map: join(cad1, cad2, cad3, cad4, cad5, cad6, cad7, cad8),
     bg: bgCAD, deco: decoCAD,
     clearMsg: 'ESCAPOU DA VANITA!',
+    objetivo: 'Fuja da escola e chegue na porta da entrada (entre os leoes) sem ser pego.',
+    desafios: [
+      { spr: 'vanita', nm: 'VANITA', tip: 'A diretora! Encostou, pegou. Corra e passe longe.' },
+      { spr: 'ficha', nm: 'FICHAS', tip: 'Colete 100 = 1 vida extra.' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Prova de matematica hoje? Hoje nao... HOJE NAO.' },
       { who: 'murr', name: 'MURRINHA', text: 'Vou gazear. So preciso sair da escola sem a Vanita me ver.' },
@@ -1342,6 +1347,11 @@ export const LEVELS = {
     map: join(pr1, pr2, pr3, pr4, pr5, pr6, pr7),
     bg: bgPraca, deco: decoPraca,
     clearMsg: 'ATRAVESSOU SEQUINHO!',
+    objetivo: 'Atravesse a Praca dos Pombos ate a parada de onibus do outro lado.',
+    desafios: [
+      { spr: 'pombo', nm: 'POMBOS', tip: 'Voam e soltam cagada. Nao pare embaixo deles!' },
+      { spr: 'tromba', nm: 'TROMBADINHAS', tip: 'Pule na cabeca pra derrotar.' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Livre! Agora e so atravessar a Praca dos Pombos...' },
       { who: 'pombo', name: 'POMBO', text: 'PRU. PRU-PRU. (mirando com precisao cirurgica)' },
@@ -1354,6 +1364,11 @@ export const LEVELS = {
     bg: bgFloriano, deco: decoFloriano,
     goalY: 55,                     // vence ao pisar na calçada da TELPA (lá em cima)
     clearMsg: 'ALO, MAE? TO NA ESCOLA!',
+    objetivo: 'SUBA atravessando as 4 faixas da avenida ate a calcada da TELPA la em cima.',
+    desafios: [
+      { spr: 'carro', nm: 'CARROS E MOTOS', tip: 'Atropelam! So passe quando a faixa estiver limpa.' },
+      { spr: 'escada', nm: 'CANTEIROS', tip: 'Descanse neles com seguranca entre as faixas.' },
+    ],
     laneTraffic: [
       { topRow: 5,  dir: 1,  speed: 1.6, every: 135, types: ['carro', 'carro', 'moto'] },
       { topRow: 8,  dir: -1, speed: 1.9, every: 120, types: ['carro', 'moto', 'carro'] },
@@ -1371,6 +1386,12 @@ export const LEVELS = {
     map: join(br1, br2, br3, br4, br5, br6, br7),
     bg: bgBras, deco: decoBras,
     clearMsg: 'CHOCOLATE NO BOLSO!',
+    objetivo: 'Suba a loja pela escada rolante e pegue o CHOCOLATE la no fim.',
+    desafios: [
+      { spr: 'fiscal', nm: 'FISCAL', tip: 'Nao deixe ele te encostar. Pule por cima.' },
+      { spr: 'escada', nm: 'ESCADA ROLANTE', tip: 'Suba nela pro segundo andar.' },
+      { spr: 'choc', nm: 'CHOCOLATE', tip: 'O premio! Da +1 vida.' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'A loja das Brasileiras. A unica escada rolante da cidade!' },
       { who: 'murr', name: 'MURRINHA', text: 'Missao: pegar um chocolate sem o fiscal ver. Pela escola!' },
@@ -1382,6 +1403,12 @@ export const LEVELS = {
     map: join(pl1, pl2, pl3, pl4, pl5, pl6),
     bg: bgPlay, deco: decoPlay,
     clearMsg: 'ZEROU E VAZOU!',
+    objetivo: 'Atravesse o salao de fliperamas ate a SAIDA verde.',
+    desafios: [
+      { spr: 'cacimba', nm: 'CACIMBA', tip: 'Lanca beijos que te apaixonam e deixam lerdo. Toque dele = encanto!' },
+      { spr: 'bola', nm: 'BOLA DE PINBALL', tip: 'Rola pelo chao e te empurra. Pule por cima.' },
+      { spr: 'tromba', nm: 'MOLEQUES', tip: 'Pise neles.' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'O Playtime! Fliperama ate a boca. Bora zerar uns joguinho.' },
       { who: 'cacimba', name: 'CACIMBA', text: 'Ei menino... deixa eu dancar so um pouquinho colado em voce...' },
@@ -1393,6 +1420,12 @@ export const LEVELS = {
     map: join(ca1, ca2, ca3, ca4, ca5, ca6),
     bg: bgCalc, deco: decoCalc,
     clearMsg: 'PASSOU RETO!',
+    objetivo: 'Percorra o calcadao ate a saida, desviando dos personagens.',
+    desafios: [
+      { spr: 'carrapeta', nm: 'CARRAPETA', tip: 'O palhaco solta ondas de assovio que paralisam. Pule por cima!' },
+      { spr: 'gordo', nm: 'GORDO', tip: 'Solta PEIDO que deixa lerdo. Nao encoste nele.' },
+      { spr: 'tavinho', nm: 'TAVINHO', tip: 'Cruza correndo e prende voce na conversa (perde tempo).' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'O Calcadao: barraqueiro, o Gordo andando devagar, e o palhaco Carrapeta.' },
       { who: 'carrapeta', name: 'CARRAPETA', text: 'FIU-FIU! (a onda de assovio vem vindo)' },
@@ -1404,6 +1437,12 @@ export const LEVELS = {
     map: join(fk1, fk2, fk3, fk4, fk5, fk6),
     bg: bgFisk, deco: decoFisk,
     clearMsg: 'CORREU DO RATINHO!',
+    objetivo: 'Pegue a pipoca do Galego e corra do Ratinho ate o ponto de onibus.',
+    desafios: [
+      { spr: 'galego', nm: 'GALEGO', tip: 'Pegue os graos que pulam da panela: cada um vale uma ficha!' },
+      { spr: 'ratinho', nm: 'RATINHO', tip: 'Quer roubar seu tenis. Nao deixe ele te alcancar!' },
+      { spr: 'tromba', nm: 'ALUNOS DAS DAMAS', tip: 'Multidao na saida. Pise neles.' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Regiao da FISK. Pega a pipoca do Galego pulando da panela!' },
       { who: 'galego', name: 'GALEGO', text: 'Pipoca quentinha, menino! Cada grao vale uma ficha!' },
@@ -1415,6 +1454,10 @@ export const LEVELS = {
     map: join(fi1, fi2, fi3, fi4, fi5, fi6),
     bg: bgFila, deco: decoFila,
     clearMsg: 'ENTROU NO ONIBUS!',
+    objetivo: 'Chegue na porta de tras do onibus protegendo sua carteira.',
+    desafios: [
+      { spr: 'tromba', nm: 'TROMBADINHAS', tip: 'Enxame querendo bater sua carteira. Pule na cabeca deles!' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Fim de tarde. Hora de pegar o onibus como se tivesse saido da aula.' },
       { who: 'murr', name: 'MURRINHA', text: 'A fila ta cheia de trombadinha querendo bater minha carteira. Pula neles!' },
@@ -1426,6 +1469,12 @@ export const LEVELS = {
     bg: bgBus, deco: decoBus,
     clearMsg: 'DESCEU NO PONTO CERTO!',
     ending: true,
+    objetivo: 'Fure o onibus lotado da porta de tras ate a frente e desca no ponto certo.',
+    desafios: [
+      { spr: 'tromba', nm: 'PASSAGEIROS', tip: 'Empurram voce. Fure a multidao pra frente.' },
+      { spr: 'catraca', nm: 'CATRACA', tip: 'Pule por cima dela.' },
+      { spr: 'ratinho', nm: 'RATINHO', tip: 'Ele tambem pegou esse onibus! Cuidado.' },
+    ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Entrei pela porta de tras. Agora atravessar o onibus LOTADO ate a frente.' },
       { who: 'murr', name: 'MURRINHA', text: 'Fura a multidao, passa da catraca e desce no ponto certo. Ninguem vai saber!' },

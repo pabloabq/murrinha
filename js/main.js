@@ -3,7 +3,7 @@ import { W, H, drawTextC } from './gfx.js';
 import * as input from './input.js';
 import * as audio from './audio.js';
 import * as save from './save.js';
-import { Title, WorldMap, Cutscene, Ending } from './scenes.js';
+import { Title, WorldMap, Cutscene, Briefing, Ending } from './scenes.js';
 import { Level } from './level.js';
 import { LEVELS } from './levels.js';
 
@@ -49,6 +49,10 @@ const G = {
     G.lastNode = id;
     audio.stopSong();
     G.scene = new Cutscene(G, LEVELS[id]);
+  },
+  toBriefing(id) {
+    input.reset();
+    G.scene = new Briefing(G, LEVELS[id]);
   },
   launchLevel(id) {
     input.reset();               // evita tecla presa fazendo o Murrinha andar sozinho

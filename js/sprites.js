@@ -167,6 +167,15 @@ export const pomboFly2 = sp([
 ]);
 export const pomboFly1L = flipped(pomboFly1), pomboFly2L = flipped(pomboFly2);
 
+// coração de vida do HUD (7x6, vermelho)
+export const coracao = sprite([
+  'kk.kk',
+  'krrrk',
+  'kRrrk',
+  '.krk.',
+  '..k..',
+], { k: '#141420', r: '#e83048', R: '#f86078' });
+
 // bola de fliperama/pinball que rola pelo chão (10x10, metal brilhante)
 export const bola = sprite([
   '..kkkk..',

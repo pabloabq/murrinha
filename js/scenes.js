@@ -15,12 +15,16 @@ export class Title {
   }
   update() {
     this.t++;
+    audio.unlock();
+    if (input.pressed('b')) { this.help = !this.help; audio.sfx('select'); return; }
     if (input.pressed('a') || input.pressed('pause')) {
-      audio.unlock(); audio.sfx('enter');
+      if (this.help) { this.help = false; audio.sfx('select'); return; }
+      audio.sfx('enter');
       this.G.toMap();
     }
   }
   draw(ctx) {
+    if (this.help) { this.drawHelp(ctx); return; }
     // céu de fim de manhã
     ctx.fillStyle = '#8ed0f0'; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#c9ecfa'; ctx.fillRect(0, 0, W, 30);
@@ -78,10 +82,39 @@ export class Title {
         W / 2 - textWidth(input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR') / 2, 106, '#f8f8f8', '#14284a');
     // dica de controles (o segredo do pulo longo: CORRER!)
     const ctrl = input.isTouch() ? 'D-PAD ANDAR - A PULAR - B CORRER (PULO LONGO)' : 'SETAS ANDAR - Z PULAR - X CORRER (PULO LONGO)';
-    drawTextC(ctx, ctrl, W / 2, 148, '#bcd0e4');
+    drawTextC(ctx, ctrl, W / 2, 146, '#bcd0e4');
+    drawTextC(ctx, input.isTouch() ? 'BOTAO B = COMO JOGAR' : 'APERTE X = COMO JOGAR', W / 2, 156, '#f2d24e');
     // faixa escura do rodapé para legibilidade
     ctx.fillStyle = 'rgba(16,16,28,0.7)'; ctx.fillRect(0, 166, W, 14);
     drawTextC(ctx, 'PRACA DA BANDEIRA - CAMPINA GRANDE - PB', W / 2, 170, '#f2d24e');
+  }
+
+  drawHelp(ctx) {
+    ctx.fillStyle = '#0e1428'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#141c34';
+    for (let j = 0; j < H; j += 6) ctx.fillRect(0, j, W, 3);
+    const ox = (W - 320) >> 1; ctx.save(); ctx.translate(ox, 0);
+    drawTextC(ctx, 'COMO JOGAR', 160, 8, '#f2d24e', 2);
+    ctx.fillStyle = '#2a3a5a'; ctx.fillRect(20, 22, 280, 1);
+    drawText(ctx, 'QUEM E VOCE', 16, 28, '#8ec8f0');
+    wrap(ctx, 'Voce e o MURRINHA, aluno do CAD. Hoje vai GAZEAR AULA (matar aula) pelo centro de Campina Grande.', 16, 38, 288, '#ffffff');
+    drawText(ctx, 'OBJETIVO', 16, 64, '#8ec8f0');
+    wrap(ctx, 'Vencer cada lugar sem ser pego, ate pegar o onibus de volta pra casa. Ninguem pode saber que voce gazeou!', 16, 74, 288, '#ffffff');
+    drawText(ctx, 'CONTROLES', 16, 100, '#8ec8f0');
+    const c = input.isTouch()
+      ? 'D-PAD = andar   BOTAO A = pular (segure=alto)   BOTAO B = correr (pulo longo)'
+      : 'SETAS/A D = andar   Z/ESPACO = pular (segure=alto)   X/SHIFT = correr (pulo longo)';
+    wrap(ctx, c, 16, 110, 288, '#c8d4e4');
+    drawText(ctx, 'COLETE', 16, 130, '#8ec8f0');
+    ctx.drawImage(S.ficha[0], 16, 138); drawText(ctx, '100=VIDA', 24, 140, '#fff');
+    ctx.drawImage(S.chocolate, 74, 139); drawText(ctx, '+VIDA', 86, 140, '#fff');
+    ctx.drawImage(S.pipocaBag, 128, 137); drawText(ctx, 'TURBO', 140, 140, '#fff');
+    ctx.drawImage(S.maca, 180, 138); drawText(ctx, 'ESCUDO', 190, 140, '#fff');
+    ctx.drawImage(S.ticket, 240, 139); drawText(ctx, '3/FASE', 252, 140, '#fff');
+    ctx.restore();
+    ctx.fillStyle = 'rgba(16,20,40,0.85)'; ctx.fillRect(0, 166, W, 14);
+    if (Math.floor(this.t / 24) % 2 === 0)
+      drawTextC(ctx, input.isTouch() ? 'TOQUE PARA VOLTAR' : 'APERTE Z PARA VOLTAR', W / 2, 170, '#8ef08e');
   }
 }
 
@@ -356,10 +389,10 @@ export class Cutscene {
         this.i++;
         this.chars = 0;
         audio.sfx('select');
-        if (this.i >= this.lines.length) this.G.launchLevel(this.def.id);
+        if (this.i >= this.lines.length) this.G.toBriefing(this.def.id);
       }
     }
-    if (this.lines.length === 0) this.G.launchLevel(this.def.id);
+    if (this.lines.length === 0) this.G.toBriefing(this.def.id);
   }
   draw(ctx) {
     ctx.fillStyle = '#101020'; ctx.fillRect(0, 0, W, H);
@@ -396,4 +429,93 @@ export class Cutscene {
     ctx.restore();
     drawTextC(ctx, (input.isTouch() ? 'TOQUE' : 'Z') + ' PARA AVANCAR', W / 2, 156, '#5a6a8a');
   }
+}
+
+// ==================== BRIEFING (objetivo + desafios + controles) ====================
+// ícones dos desafios: mini-sprites já existentes no jogo
+const BRIEF_ICONS = {
+  vanita: () => S.ligWalk1, fiscal: () => S.fiscal[0], cacimba: () => S.cacimba[0],
+  ratinho: () => S.ratinho[0], gordo: () => S.gordo[0], tavinho: () => S.tavinho[0],
+  carrapeta: () => S.carrapeta[0], galego: () => S.galego, tromba: () => S.troWalk1,
+  pombo: () => S.pomboSit, bola: () => S.bola, carro: () => S.carros[0],
+  choc: () => S.chocolate, pipoca: () => S.pipocaBag, ficha: () => S.ficha[0],
+  ticket: () => S.ticket, maca: () => S.maca, nota: () => S.nota, orelhao: () => S.orelhao,
+  escada: () => S.checkSignOn, catraca: () => S.cobrador, damas: () => S.damas,
+};
+
+export class Briefing {
+  constructor(G, def) { this.G = G; this.def = def; this.t = 0; }
+  update() {
+    this.t++;
+    if (this.t > 6 && (input.pressed('a') || input.pressed('b') || input.pressed('pause'))) {
+      audio.sfx('enter'); this.G.launchLevel(this.def.id);
+    }
+  }
+  draw(ctx) {
+    const touch = input.isTouch();
+    // fundo
+    ctx.fillStyle = '#0e1428'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#141c34';
+    for (let j = 0; j < H; j += 6) ctx.fillRect(0, j, W, 3);
+    const ox = (W - 320) >> 1;
+    ctx.save(); ctx.translate(ox, 0);
+
+    // título da fase
+    drawTextC(ctx, this.def.name, 160, 8, '#f2d24e', 2);
+    ctx.fillStyle = '#2a3a5a'; ctx.fillRect(20, 22, 280, 1);
+
+    // ---- OBJETIVO ----
+    drawText(ctx, 'OBJETIVO', 16, 28, '#8ec8f0');
+    wrap(ctx, this.def.objetivo || 'Chegue ao fim da fase inteiro!', 16, 38, 150, '#ffffff');
+
+    // ---- CONTROLES ----
+    drawText(ctx, 'CONTROLES', 16, 74, '#8ec8f0');
+    const ctrls = touch ? [
+      ['D-PAD', 'andar'], ['BOTAO A', 'pular (segure=alto)'],
+      ['BOTAO B', 'correr = pulo longo'], ['CANTO', 'pausar'],
+    ] : [
+      ['SETAS / A D', 'andar'], ['Z ou ESPACO', 'pular (segure=alto)'],
+      ['X ou SHIFT', 'correr = pulo longo'], ['ENTER', 'pausar'],
+    ];
+    let cy = 84;
+    for (const [k, v] of ctrls) {
+      drawText(ctx, k, 16, cy, '#f2d24e');
+      drawText(ctx, v, 90, cy, '#c8d4e4');
+      cy += 9;
+    }
+
+    // ---- CUIDADO COM / DESAFIOS ---- (coluna direita)
+    drawText(ctx, 'CUIDADO COM', 176, 28, '#f28a8a');
+    let dy = 38;
+    for (const d of (this.def.desafios || [])) {
+      const icon = BRIEF_ICONS[d.spr] && BRIEF_ICONS[d.spr]();
+      if (icon) {
+        // desenha o ícone em caixa 18x18, alinhado embaixo
+        ctx.fillStyle = '#1c2848'; ctx.fillRect(176, dy, 18, 18);
+        const s = Math.min(16, icon.width, icon.height) / Math.max(icon.width, icon.height) * 16;
+        ctx.drawImage(icon, 0, 0, icon.width, icon.height, 177, dy + 17 - Math.min(17, icon.height), Math.min(17, icon.width), Math.min(17, icon.height));
+      }
+      drawText(ctx, d.nm, 198, dy, '#f4e29a');
+      wrap(ctx, d.tip, 198, dy + 8, 120, '#c8d4e4');
+      dy += 22;
+    }
+    ctx.restore();
+
+    // rodapé: começar
+    ctx.fillStyle = 'rgba(16,20,40,0.85)'; ctx.fillRect(0, 166, W, 14);
+    if (Math.floor(this.t / 24) % 2 === 0)
+      drawTextC(ctx, touch ? 'TOQUE PARA GAZEAR!' : 'APERTE Z PARA GAZEAR!', W / 2, 170, '#8ef08e');
+  }
+}
+
+// quebra de texto simples (retorna próximo y)
+function wrap(ctx, text, x, y, maxW, color) {
+  let ly = y, line = '';
+  for (const w2 of normText(text).split(' ')) {
+    const test = line ? line + ' ' + w2 : w2;
+    if (textWidth(test) > maxW) { drawText(ctx, line, x, ly, color); ly += 8; line = w2; }
+    else line = test;
+  }
+  drawText(ctx, line, x, ly, color);
+  return ly + 8;
 }

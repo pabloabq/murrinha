@@ -800,11 +800,17 @@ export class Level {
   drawHUD(ctx) {
     ctx.fillStyle = 'rgba(10,10,20,0.55)';
     ctx.fillRect(0, 0, W, 13);
-    // vidas
+    // vidas: rostinho + corações (até 5; acima disso vira xN)
     ctx.drawImage(S.murrFace, 4, 2);
-    drawText(ctx, 'X' + this.G.lives, 15, 4, '#fff');
-    // maçã do lanche ativa
-    if (this.p.shield) ctx.drawImage(S.maca, 30, 2);
+    const lives = this.G.lives;
+    if (lives <= 5) {
+      for (let k = 0; k < lives; k++) ctx.drawImage(S.coracao, 15 + k * 8, 3);
+    } else {
+      ctx.drawImage(S.coracao, 15, 3);
+      drawText(ctx, 'X' + lives, 24, 4, '#fff');
+    }
+    // maçã do lanche ativa (escudo)
+    if (this.p.shield) ctx.drawImage(S.maca, 58, 2);
     // nome da fase
     drawTextC(ctx, this.def.name, W / 2, 4, '#f2d24e');
     // tickets da fase
