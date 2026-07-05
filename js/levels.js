@@ -1328,7 +1328,7 @@ export const LEVELS = {
   cad: {
     id: 'cad', name: 'FUGA DO CAD', music: 'cad',
     map: join(cad1, cad2, cad3, cad4, cad5, cad6, cad7, cad8),
-    bg: bgCAD, deco: decoCAD,
+    bg: bgCAD, bgImg: 'art/cad.png', deco: decoCAD,
     clearMsg: 'ESCAPOU DA VANITA!',
     objetivo: 'Fuja da escola e chegue na porta da entrada (entre os leoes) sem ser pego.',
     desafios: [

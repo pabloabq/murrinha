@@ -68,6 +68,10 @@ const G = {
   },
 };
 
+// pré-carrega os cenários gerados por IA
+import * as assets from './assets.js';
+assets.load(['art/cad.png']);
+
 input.init();
 G.toTitle();
 window.MURR = { G, ctx, canvas, input, LEVELS }; // gancho de debug/testes

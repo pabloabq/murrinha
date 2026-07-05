@@ -1,6 +1,7 @@
 // level.js — motor de plataforma: física, colisões, entidades, câmera, HUD
 import { W, H, drawText, drawTextC, drawTextO, drawBox, textWidth } from './gfx.js';
 import * as S from './sprites.js';
+import * as assets from './assets.js';
 import * as input from './input.js';
 import * as audio from './audio.js';
 
@@ -638,7 +639,10 @@ export class Level {
     }
     this.camX = camX;
 
-    this.def.bg(ctx, camX, camY, this.time);
+    // fundo: imagem de cenário (gerada) OU desenho em código
+    const bgi = this.def.bgImg && assets.get(this.def.bgImg);
+    if (bgi) this.drawBgImage(ctx, bgi, camX, camY);
+    else this.def.bg(ctx, camX, camY, this.time);
 
     ctx.save();
     ctx.translate(-Math.round(camX), -Math.round(camY));
@@ -713,6 +717,14 @@ export class Level {
       drawBox(ctx, W / 2 - bw / 2, 58, bw, 18, '#7a1010', '#f2d24e');
       drawTextC(ctx, this.deathMsg, W / 2, 64, '#fff');
     }
+  }
+
+  // desenha uma imagem de cenário preenchendo a altura, repetida no eixo X
+  // com parallax suave (fica atrás do chão/plataformas em código)
+  drawBgImage(ctx, im, camX, camY) {
+    const tw = Math.max(1, Math.round(im.width * H / im.height));
+    const off = -(((camX * 0.5) % tw + tw) % tw);
+    for (let x = off - tw; x < W + tw; x += tw) ctx.drawImage(im, Math.round(x), 0, tw, H);
   }
 
   drawPlayer(ctx) {
