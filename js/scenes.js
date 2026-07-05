@@ -4,6 +4,7 @@ import * as S from './sprites.js';
 import * as input from './input.js';
 import * as audio from './audio.js';
 import * as save from './save.js';
+import * as assets from './assets.js';
 import { NODES, EDGES, LEVELS } from './levels.js';
 
 // ==================== TÍTULO ====================
@@ -25,68 +26,30 @@ export class Title {
   }
   draw(ctx) {
     if (this.help) { this.drawHelp(ctx); return; }
-    // céu de fim de manhã
-    ctx.fillStyle = '#8ed0f0'; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#c9ecfa'; ctx.fillRect(0, 0, W, 30);
-    // sol
-    ctx.fillStyle = '#f8e858'; ctx.fillRect(W - 58, 18, 22, 22);
-    ctx.fillStyle = '#fff8b0'; ctx.fillRect(W - 54, 22, 14, 14);
-    // skyline (padrão repetido para qualquer largura de tela)
-    for (let x = 0; x < W + 300; x += 300) {
-      ctx.fillStyle = '#a8bccc';
-      ctx.fillRect(x, 96, 60, 60); ctx.fillRect(x + 70, 82, 40, 74); ctx.fillRect(x + 120, 100, 48, 56);
-      ctx.fillRect(x + 178, 70, 44, 86); ctx.fillRect(x + 196, 56, 4, 16); // TELPA
-      ctx.fillRect(x + 232, 92, 60, 64);
-      ctx.fillStyle = '#c8d8e4';
-      for (let i = 0; i < 3; i++) for (let j = 0; j < 5; j++) ctx.fillRect(x + 184 + i * 13, 76 + j * 14, 7, 8);
+    const art = assets.get('art/title.png');
+    if (art) {
+      // capa gerada por IA preenchendo a tela (cover)
+      const sc = Math.max(W / art.width, H / art.height);
+      const dw = art.width * sc, dh = art.height * sc;
+      ctx.drawImage(art, Math.round((W - dw) / 2), Math.round((H - dh) / 2), Math.round(dw), Math.round(dh));
+    } else {
+      ctx.fillStyle = '#e07838'; ctx.fillRect(0, 0, W, H);
+      drawTextO(ctx, 'CAMPINA 86', W / 2 - textWidth('CAMPINA 86', 3) / 2, 40, '#f2d24e', '#14284a', 3);
     }
-    // chão de calçadão
-    for (let i = 0; i < W / 16 + 1; i++) for (let j = 0; j < 2; j++)
-      ctx.drawImage(S.TILES[j ? 'L3' : (i % 2 ? 'L2' : 'L')], i * 16, 148 + j * 16);
-
-    // ---- placa do título (estilo Super Mario World) ----
-    const bob = Math.round(Math.sin(this.t * 0.05) * 2);
-    const pw = 216, ph = 74;
-    const px = Math.round(W / 2 - pw / 2), py = 22 + bob;
-    ctx.fillStyle = 'rgba(20,10,20,0.35)'; ctx.fillRect(px + 4, py + 4, pw, ph); // sombra
-    ctx.fillStyle = '#4a1008'; ctx.fillRect(px - 2, py - 2, pw + 4, ph + 4);
-    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(px, py, pw, ph);        // moldura bege
-    ctx.fillStyle = '#a01810'; ctx.fillRect(px + 4, py + 4, pw - 8, ph - 8);
-    ctx.fillStyle = '#c8281c'; ctx.fillRect(px + 4, py + 4, pw - 8, 10); // brilho
-    // parafusos da placa
-    ctx.fillStyle = '#f4f0e6';
-    for (const [rx, ry] of [[px + 2, py + 2], [px + pw - 4, py + 2], [px + 2, py + ph - 4], [px + pw - 4, py + ph - 4]])
-      ctx.fillRect(rx, ry, 2, 2);
-    // logo em letras gordas
-    const lw = this.logo.width * 2, lh = this.logo.height * 2;
-    ctx.drawImage(this.logo, Math.round(W / 2 - lw / 2), py + 12, lw, lh);
-    ctx.drawImage(this.logo2, Math.round(W / 2 - this.logo2.width / 2), py + 46);
-    // listras vermelhas da farda na base da placa
-    ctx.fillStyle = '#f8f8f8'; ctx.fillRect(px + 12, py + ph - 12, pw - 24, 6);
-    ctx.fillStyle = '#c8281c'; ctx.fillRect(px + 12, py + ph - 11, pw - 24, 1); ctx.fillRect(px + 12, py + ph - 8, pw - 24, 1);
-
-    // leões guardiões no calçadão, flanqueando a placa
-    ctx.drawImage(S.leao, px - 30, 122);
-    ctx.drawImage(S.leao, px + pw + 10, 122);
-
-    // Murrinha andando na tela
+    // Murrinha andando na base
     const wx = (this.t * 0.8) % (W + 60) - 30;
     const img = Math.floor(this.t / 8) % 2 ? S.murrWalk1 : S.murrWalk2;
-    ctx.drawImage(img, Math.round(wx), 124);
-    // pombo que acompanha
-    const pi = Math.floor(this.t / 10) % 2 ? S.pomboFly1L : S.pomboFly2L;
-    ctx.drawImage(pi, Math.round(wx - 34), 104 + Math.sin(this.t * 0.1) * 4);
+    ctx.drawImage(img, Math.round(wx), 138);
 
     if (Math.floor(this.t / 32) % 2 === 0)
       drawTextO(ctx, input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR',
-        W / 2 - textWidth(input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR') / 2, 106, '#f8f8f8', '#14284a');
-    // dica de controles (o segredo do pulo longo: CORRER!)
+        W / 2 - textWidth(input.isTouch() ? 'TOQUE PARA COMECAR' : 'APERTE Z PARA COMECAR') / 2, 118, '#f8f8f8', '#14284a');
+    // dica de controles + guia
     const ctrl = input.isTouch() ? 'D-PAD ANDAR - A PULAR - B CORRER (PULO LONGO)' : 'SETAS ANDAR - Z PULAR - X CORRER (PULO LONGO)';
-    drawTextC(ctx, ctrl, W / 2, 146, '#bcd0e4');
-    drawTextC(ctx, input.isTouch() ? 'BOTAO B = COMO JOGAR' : 'APERTE X = COMO JOGAR', W / 2, 156, '#f2d24e');
-    // faixa escura do rodapé para legibilidade
-    ctx.fillStyle = 'rgba(16,16,28,0.7)'; ctx.fillRect(0, 166, W, 14);
-    drawTextC(ctx, 'PRACA DA BANDEIRA - CAMPINA GRANDE - PB', W / 2, 170, '#f2d24e');
+    ctx.fillStyle = 'rgba(16,16,28,0.62)'; ctx.fillRect(0, 150, W, 30);
+    drawTextC(ctx, ctrl, W / 2, 153, '#dce6f2');
+    drawTextC(ctx, input.isTouch() ? 'BOTAO B = COMO JOGAR' : 'APERTE X = COMO JOGAR', W / 2, 162, '#f2d24e');
+    drawTextC(ctx, 'MURRINHA, O GAZEADOR - CAMPINA GRANDE, PB', W / 2, 172, '#bcd0e4');
   }
 
   drawHelp(ctx) {

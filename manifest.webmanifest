@@ -1,13 +1,13 @@
 {
-  "name": "Murrinha — O Gazeador",
-  "short_name": "Murrinha",
-  "description": "Plataforma 16-bits: gazeie aula no centro de Campina Grande sem ser pego!",
+  "name": "CAMPINA 86",
+  "short_name": "CAMPINA 86",
+  "description": "CAMPINA 86 — plataforma 16-bits: gazeie aula no centro de Campina Grande com o Murrinha!",
   "start_url": ".",
   "scope": ".",
   "display": "fullscreen",
   "orientation": "landscape",
-  "background_color": "#101018",
-  "theme_color": "#101018",
+  "background_color": "#2a1840",
+  "theme_color": "#2a1840",
   "lang": "pt-BR",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

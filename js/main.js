@@ -70,7 +70,7 @@ const G = {
 
 // pré-carrega os cenários gerados por IA
 import * as assets from './assets.js';
-assets.load(['art/cad.png', 'art/praca.png', 'art/bras.png', 'art/play.png']);
+assets.load(['art/title.png', 'art/cad.png', 'art/praca.png', 'art/bras.png', 'art/play.png']);
 
 input.init();
 G.toTitle();

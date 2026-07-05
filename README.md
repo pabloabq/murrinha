@@ -1,8 +1,8 @@
-# MURRINHA — O Gazeador 🦁🐦
+# CAMPINA 86 🦁🐦
 
 Um jogo de plataforma 16-bits (estilo Super Mario World) sobre **gazear aula**
-no centro de Campina Grande — PB. Praça da Bandeira, CAD, pombos, Vanita,
-trombadinhas e o ônibus lotado de volta pra casa.
+no centro de Campina Grande — PB, nos anos 80. Você é o **Murrinha, o gazeador**.
+Praça da Bandeira, CAD, pombos, Vanita, trombadinhas e o ônibus lotado de volta pra casa.
 
 **Jogue no browser, instale como app (PWA) e jogue em tela cheia no celular.**
 

@@ -641,9 +641,10 @@ export class Level {
     }
     this.camX = camX;
 
-    // fundo: imagem de cenário (gerada) OU desenho em código
-    const bgi = this.def.bgImg && assets.get(this.def.bgImg);
-    if (bgi) this.drawBgImage(ctx, bgi, camX, camY);
+    // fundo: sequência de cenários (gerados por IA) OU desenho em código
+    const paths = this.def.bgImgs || (this.def.bgImg ? [this.def.bgImg] : []);
+    const imgs = paths.map(p => assets.get(p));
+    if (paths.length && imgs.every(Boolean)) this.drawBgImages(ctx, imgs, camX);
     else this.def.bg(ctx, camX, camY, this.time);
 
     ctx.save();
@@ -723,12 +724,18 @@ export class Level {
     }
   }
 
-  // desenha uma imagem de cenário preenchendo a altura, repetida no eixo X
-  // com parallax suave (fica atrás do chão/plataformas em código)
-  drawBgImage(ctx, im, camX, camY) {
-    const tw = Math.max(1, Math.round(im.width * H / im.height));
-    const off = -(((camX * 0.5) % tw + tw) % tw);
-    for (let x = off - tw; x < W + tw; x += tw) ctx.drawImage(im, Math.round(x), 0, tw, H);
+  // desenha uma SEQUÊNCIA de cenários lado a lado (não repete de tela em tela;
+  // a sequência inteira só recomeça a cada N telas). Alinhada 1:1 com o mundo.
+  drawBgImages(ctx, imgs, camX) {
+    const tws = imgs.map(im => Math.max(1, Math.round(im.width * H / im.height)));
+    const seqW = tws.reduce((a, b) => a + b, 0);
+    let x = -(((camX % seqW) + seqW) % seqW);
+    let idx = 0;
+    while (x < W + 2) {
+      const k = idx % imgs.length;
+      ctx.drawImage(imgs[k], Math.round(x), 0, tws[k], H);
+      x += tws[k]; idx++;
+    }
   }
 
   drawPlayer(ctx) {
