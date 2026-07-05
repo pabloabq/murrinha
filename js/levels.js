@@ -4,7 +4,7 @@
 //  = laje (one-way) | b banco (one-way) | c coluna(deco) | i tronco | A copa
 //  P início | C checkpoint | G objetivo | f ficha | h chocolate | p pipoca
 //  1 Liginha | g trombadinha | o pombo | d aluno das DAMAS
-import { W, H, drawTextC } from './gfx.js';
+import { W, H, drawTextC, drawText, drawTextO, textWidth } from './gfx.js';
 import * as S from './sprites.js';
 
 // junta blocos horizontais de 20 colunas, com padding automático
@@ -672,32 +672,54 @@ const pl6 = [ // a porta de SAÍDA (objetivo)
 ];
 
 export function bgPlay(ctx, camX, camY, t) {
-  ctx.fillStyle = '#0e0e22'; ctx.fillRect(0, 0, W, H);
-  // neon parallax
-  const par = camX * 0.4;
-  for (let x = -((par) % 80) - 80; x < W + 80; x += 80) {
-    ctx.fillStyle = '#1a1a3a'; ctx.fillRect(x + 8, 30, 60, 92);
-    ctx.fillStyle = (Math.floor(t / 20) + x) % 2 ? '#f02080' : '#20d0f0';
-    ctx.fillRect(x + 8, 30, 60, 2);
-    ctx.fillStyle = '#20d0f0';
-    for (let j = 0; j < 5; j++) ctx.fillRect(x + 12, 40 + j * 14, 52, 1);
+  // salão escuro do fliperama
+  ctx.fillStyle = '#120a20'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#1a0e2e'; ctx.fillRect(0, 120, W, H);
+  // tubos de neon no teto (piscando)
+  for (let x = -((camX * 0.6) % 90); x < W; x += 90) {
+    const on = (Math.floor(t / 8) + x) % 3;
+    ctx.fillStyle = on === 0 ? '#f02090' : on === 1 ? '#20d0f0' : '#f2d24e';
+    ctx.fillRect(x + 10, 6, 70, 3);
+    ctx.globalAlpha = 0.15; ctx.fillRect(x + 6, 3, 78, 12); ctx.globalAlpha = 1;
   }
-  // grade de piso brilhante ao fundo
-  ctx.strokeStyle = 'rgba(32,208,240,0.25)'; ctx.lineWidth = 1;
-  for (let x = -(camX % 24); x < W; x += 24) { ctx.beginPath(); ctx.moveTo(x, 118); ctx.lineTo(x - 30, H); ctx.stroke(); }
+  // fileira de fliperamas ao fundo (parallax), com telas CRT brilhando
+  const par = camX * 0.5;
+  for (let x = -((par) % 46) - 46; x < W + 46; x += 46) {
+    ctx.fillStyle = '#241436'; ctx.fillRect(x + 4, 40, 38, 82);        // gabinete
+    ctx.fillStyle = '#0a0a16'; ctx.fillRect(x + 8, 48, 30, 24);        // moldura da tela
+    const scr = (Math.floor(t / 10) + x) % 4;
+    ctx.fillStyle = ['#20d0f0', '#f02090', '#40e060', '#f2d24e'][scr];
+    ctx.fillRect(x + 10, 50, 26, 20);                                  // CRT aceso
+    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x + 10, 50, 26, 4);
+    ctx.fillStyle = '#f2d24e'; ctx.fillRect(x + 12, 78, 22, 3);        // marquise
+    ctx.fillStyle = '#3a2a4a'; ctx.fillRect(x + 10, 86, 8, 6); ctx.fillRect(x + 26, 86, 8, 6); // botões
+    ctx.fillStyle = '#120a20'; ctx.fillRect(x + 42, 40, 4, 82);        // vão entre gabinetes
+  }
+  // letreiro PLAYTIME em neon (fixo no fundo)
+  const bob = 40;
+  ctx.globalAlpha = 0.9;
+  drawTextO(ctx, 'PLAYTIME', W / 2 - textWidth('PLAYTIME', 2) / 2, 20, (Math.floor(t / 16) % 2 ? '#f02090' : '#f050a0'), '#40103a', 2);
+  ctx.globalAlpha = 1;
+  // grade de piso neon (perspectiva)
+  ctx.strokeStyle = 'rgba(240,32,144,0.30)'; ctx.lineWidth = 1;
+  for (let x = -(camX % 22); x < W + 40; x += 22) { ctx.beginPath(); ctx.moveTo(x, 130); ctx.lineTo(x - 50, H); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(32,208,240,0.22)';
+  for (let yy = 132; yy < H; yy += 10) { ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W, yy); ctx.stroke(); }
 }
 function decoPlay(ctx, lvl) {
-  // fliperamas embaixo das lajes '=' (procura tiles de laje na base)
+  // fliperamas jogáveis embaixo das lajes '=' (plataformas)
   for (let i = 0; i < lvl.w; i++) for (let j = 0; j < lvl.h; j++) {
     if (lvl.rows[j][i] === '=' && lvl.rows[j - 1] && lvl.rows[j - 1][i] !== '=' && (i === 0 || lvl.rows[j][i - 1] !== '=')) {
       ctx.drawImage(S.fliperama, i * 16 + 1, j * 16 + 2);
+      if (Math.floor(lvl.time / 24) % 2 === 0) drawText(ctx, 'JOGA!', i * 16 + 1, j * 16 - 8, '#f2d24e');
     }
   }
   const gx = lvl.goalX;
   // porta de SAÍDA verde neon
-  ctx.fillStyle = '#0a2a1a'; ctx.fillRect(gx - 10, 156, 28, 36);
-  ctx.fillStyle = '#20f060'; ctx.fillRect(gx - 10, 156, 28, 4);
-  drawTextC(ctx, 'SAIDA', gx + 4, 160, '#20f060');
+  ctx.fillStyle = '#0a2a1a'; ctx.fillRect(gx - 10, 150, 30, 42);
+  ctx.fillStyle = '#20f060'; ctx.fillRect(gx - 10, 150, 30, 4);
+  ctx.fillStyle = '#0e3a24'; ctx.fillRect(gx - 6, 156, 22, 34);
+  drawTextC(ctx, 'SAIDA', gx + 5, 160, '#20f060');
 }
 
 // ================= FASE 6 — CALÇADÃO =================
@@ -799,14 +821,31 @@ const ca6 = [ // Carrapeta 2 e a saída do calçadão (objetivo)
 ];
 
 export function bgCalc(ctx, camX, camY, t) {
-  bgPraca(ctx, camX, camY, t); // mesma praça/centro, com barracas na frente
-  const par = camX * 0.7;
-  for (let x = -((par) % 72) - 72; x < W + 72; x += 72) {
-    // toldos de barraca coloridos ao fundo
-    ctx.fillStyle = '#c03028'; ctx.fillRect(x + 10, 116, 40, 6);
-    ctx.fillStyle = '#f8f8f8'; ctx.fillRect(x + 10, 116, 40, 2);
-    ctx.fillStyle = '#8a5a2c'; ctx.fillRect(x + 12, 122, 3, 18); ctx.fillRect(x + 45, 122, 3, 18);
+  // fim de tarde ameno no calçadão (paleta quente, diferente da praça)
+  ctx.fillStyle = '#f2c078'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#f6d49a'; ctx.fillRect(0, 0, W, 40);
+  ctx.fillStyle = '#fce6be'; ctx.fillRect(0, 0, W, 16);
+  // fileira de sobrados coloridos do centro histórico (parallax 0.5)
+  const par = camX * 0.5;
+  const cores = ['#c8704a', '#7a9a6a', '#b8905a', '#9a6a8a', '#6a8a9a'];
+  for (let x = -((par) % 360) - 360, k = 0; x < W + 360; x += 60, k++) {
+    ctx.fillStyle = cores[((k % 5) + 5) % 5];
+    ctx.fillRect(x, 66, 58, 74);
+    ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(x, 66, 58, 5);
+    ctx.fillStyle = 'rgba(0,0,0,0.20)';
+    for (let wj = 0; wj < 3; wj++) for (let wi = 0; wi < 2; wi++) ctx.fillRect(x + 10 + wi * 26, 78 + wj * 20, 14, 12);
+    ctx.fillStyle = '#5a3a24'; ctx.fillRect(x, 64, 58, 3); // beiral
   }
+  // varal de bandeirinhas de feira balançando entre os postes
+  const bl = camX * 0.85;
+  for (let x = -((bl) % 24) - 24; x < W + 24; x += 24) {
+    const col = ['#e23838', '#f2c020', '#38a0e2', '#38c060'][(Math.floor(x / 24) % 4 + 4) % 4];
+    ctx.fillStyle = col;
+    const yy = 128 + Math.sin((x + t) * 0.05) * 2;
+    ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + 10, yy); ctx.lineTo(x + 5, yy + 8); ctx.closePath(); ctx.fill();
+  }
+  ctx.strokeStyle = '#3a2a18'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, 128); ctx.lineTo(W, 128); ctx.stroke();
 }
 function decoCalc(ctx, lvl) {
   for (const e of lvl.ents) if (e.t === 'check') ctx.drawImage(S.busto, e.x - 26, e.y - 4);
@@ -1154,30 +1193,58 @@ const bu6 = [ // a porta da frente: descer no ponto certo (objetivo)
 ];
 
 export function bgBus(ctx, camX, camY, t) {
-  const sway = Math.sin(t * 0.06) * 2;
-  ctx.fillStyle = '#c8c0a8'; ctx.fillRect(0, 0, W, H);         // teto/parede do ônibus
-  ctx.fillStyle = '#b0a888'; ctx.fillRect(0, 96, W, H);
-  // janelas do ônibus com a cidade passando
-  ctx.fillStyle = '#3a3a44'; ctx.fillRect(0, 20 + sway, W, 6); // barra superior
-  for (let x = -((camX * 1.2) % 72); x < W; x += 72) {
-    ctx.fillStyle = '#2a2a34'; ctx.fillRect(x + 4, 28 + sway, 60, 48);
-    ctx.fillStyle = '#8ec8e8'; ctx.fillRect(x + 6, 30 + sway, 56, 44);
-    // cidade correndo do lado de fora
-    ctx.fillStyle = '#c8b89c';
-    const o = (camX * 2.4) % 40;
-    ctx.fillRect(x + 6 + ((10 - o) % 56 + 56) % 56, 44 + sway, 14, 30);
-    ctx.fillRect(x + 6 + ((36 - o) % 56 + 56) % 56, 50 + sway, 12, 24);
-    ctx.fillStyle = '#2a2a34'; ctx.fillRect(x + 4, 28 + sway, 60, 2);
+  const sway = Math.sin(t * 0.05) * 1.5;         // balanço do ônibus
+  const S2 = y => y - camY + sway;               // mundo -> tela
+  // parede interna creme
+  ctx.fillStyle = '#e2dcc6'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#d0c8ac'; ctx.fillRect(0, S2(120), W, H);
+  // teto metálico com nervuras
+  ctx.fillStyle = '#9aa0a8'; ctx.fillRect(0, S2(28), W, 20);
+  ctx.fillStyle = '#8a9098'; for (let x = -(camX % 20); x < W; x += 20) ctx.fillRect(x, S2(30), 2, 16);
+  ctx.fillStyle = '#6a7078'; ctx.fillRect(0, S2(46), W, 2);
+  // faixa de janelas com a cidade passando
+  const wy = S2(52);
+  ctx.fillStyle = '#3a3a42'; ctx.fillRect(0, wy - 2, W, 52);
+  for (let x = -((camX * 1.1) % 76); x < W; x += 76) {
+    ctx.fillStyle = '#bfe6f2'; ctx.fillRect(x + 5, wy + 2, 64, 42);   // vidro (céu)
+    ctx.fillStyle = '#d8f0f8'; ctx.fillRect(x + 5, wy + 2, 64, 10);
+    // cidade correndo lá fora (parallax rápido)
+    const o = (camX * 2.6) % 68;
+    ctx.fillStyle = '#a9b6c2';
+    ctx.fillRect(x + 5 + ((8 - o + 68) % 68), wy + 20, 16, 24);
+    ctx.fillRect(x + 5 + ((40 - o + 68) % 68), wy + 26, 13, 18);
+    ctx.fillStyle = '#8aa0b0'; ctx.fillRect(x + 5 + ((24 - o + 68) % 68), wy + 14, 10, 30);
+    ctx.fillStyle = '#3a3a42'; ctx.fillRect(x, wy - 2, 6, 48);        // montante entre janelas
   }
-  // barra de apoio (onde os passageiros seguram)
-  ctx.fillStyle = '#8a8a96'; ctx.fillRect(0, 84 + sway, W, 3);
+  ctx.fillStyle = '#2a2a32'; ctx.fillRect(0, wy + 44, W, 3);
+  // barra de apoio horizontal do teto + alças penduradas
+  ctx.fillStyle = '#b8bcc4'; ctx.fillRect(0, S2(112), W, 3);
+  for (let x = -((camX) % 40) + 12; x < W; x += 40) {
+    ctx.strokeStyle = '#7a5a30'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x, S2(115)); ctx.lineTo(x, S2(126)); ctx.stroke();
+    ctx.fillStyle = '#3a2a18'; ctx.fillRect(x - 3, S2(126), 7, 5);   // alça
+  }
+  // fileira de bancos ao fundo (atrás dos passageiros), acima do piso
+  const seatY = S2(150);
+  for (let x = -((camX) % 48); x < W; x += 48) {
+    ctx.fillStyle = '#2a52a0'; ctx.fillRect(x + 2, seatY, 42, 22);      // assento
+    ctx.fillStyle = '#3a68c0'; ctx.fillRect(x + 2, seatY, 42, 6);
+    ctx.fillStyle = '#1a3a78'; ctx.fillRect(x + 2, seatY + 22, 42, 4);  // sombra
+    ctx.fillStyle = '#8a8a92'; ctx.fillRect(x + 22, seatY + 22, 3, 14); // pé do banco
+  }
 }
 function decoBus(ctx, lvl) {
+  // barras de apoio verticais fixas (nos montantes)
+  for (let i = 6; i < lvl.w; i += 6) {
+    ctx.fillStyle = '#c0c4cc'; ctx.fillRect(i * 16, 44, 3, 148);
+    ctx.fillStyle = '#e8ecf0'; ctx.fillRect(i * 16, 44, 1, 148);
+  }
   const gx = lvl.goalX;
-  // porta da frente aberta no objetivo
-  ctx.fillStyle = '#1a1a22'; ctx.fillRect(gx - 2, 150, 20, 42);
-  ctx.fillStyle = '#3a6a9a'; ctx.fillRect(gx - 2, 150, 4, 42);
-  drawTextC(ctx, 'DESCER', gx + 8, 144, '#f2d24e');
+  // porta dianteira sanfonada (saída)
+  ctx.fillStyle = '#20242c'; ctx.fillRect(gx - 4, 150, 24, 42);
+  ctx.fillStyle = '#3a6a9a'; ctx.fillRect(gx - 4, 150, 5, 42); ctx.fillRect(gx + 14, 150, 5, 42);
+  ctx.fillStyle = '#8ec8e8'; ctx.fillRect(gx + 1, 156, 12, 20);
+  if (Math.floor(lvl.time / 18) % 2 === 0) drawTextC(ctx, 'DESCER AQUI', gx + 8, 142, '#f2d24e');
 }
 
 // ================= REGISTRO DAS FASES =================
