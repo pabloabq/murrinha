@@ -193,6 +193,7 @@ export function bgCAD(ctx, camX, camY, t) {
 }
 
 function decoCAD(ctx, lvl) {
+  if (lvl.def.bgImg) return; // a imagem de cenário já tem os leões, a porta e o letreiro
   const gx = lvl.goalX;
   // porta larga
   ctx.fillStyle = '#5a3a16';
