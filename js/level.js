@@ -116,7 +116,7 @@ export class Level {
         case 'd': this.ents.push({ t: 'damas', x, y: feetY(i, j, 24), w: 16, h: 24, anim: (i * 13) % 60 }); break;
         // --- perseguidores (pule por cima!) ---
         case 'F': this.ents.push({ t: 'chaser', skin: 'fiscal', x, y: feetY(i, j, 24), w: 12, h: 24, vx: -0.6, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.0, range: 96 }); break;
-        case 'Q': this.ents.push({ t: 'chaser', skin: 'cacimba', x, y: feetY(i, j, 24), w: 12, h: 24, vx: 0.7, dir: 1, mode: 'patrol', anim: 0, saw: 0, spd: 1.05, range: 88, beijo: 90 }); break;
+        case 'Q': this.ents.push({ t: 'chaser', skin: 'cacimba', x, y: feetY(i, j, 24), w: 12, h: 24, vx: 0.8, dir: 1, mode: 'patrol', anim: 0, saw: 0, spd: 1.3, range: 220, aggressive: true }); break;
         case 'Y': this.ents.push({ t: 'chaser', skin: 'ratinho', x, y: feetY(i, j, 24), w: 12, h: 24, vx: -0.8, dir: -1, mode: 'patrol', anim: 0, saw: 0, spd: 1.2, range: 110 }); break;
         // --- obstáculos que andam (jump-over, não pisáveis) ---
         case 'O': this.ents.push({ t: 'bigwalk', skin: 'gordo', x, y: feetY(i, j, 20), w: 20, h: 20, vx: -0.3, dir: -1, anim: 0 }); break;
@@ -226,7 +226,7 @@ export class Level {
     if (p.stun > 0) p.stun--;
     const stunned = p.stun > 0;
     const dir = stunned ? 0 : (input.held('right') ? 1 : 0) - (input.held('left') ? 1 : 0);
-    const slow = (p.charm > 0 || p.stink > 0) ? 0.5 : 1;   // apaixonado/fedido => lerdo
+    const slow = p.charm > 0 ? 0.72 : (p.stink > 0 ? 0.6 : 1);   // apaixonado/fedido => lerdo (mas dá pra correr)
     const max = (input.held('b') ? RUN : WALK) * (p.boost > 0 ? 1.55 : 1) * slow;
     if (dir !== 0) {
       p.dir = dir;
@@ -448,30 +448,38 @@ export class Level {
       this.hurt(false, 'PEGO PELA VANITA!');
   }
 
-  // perseguidor genérico (fiscal, cacimba, ratinho) — igual Liginha, com skin/vel
+  // perseguidor (fiscal, cacimba, ratinho). Os "agressivos" (Cacimba) caçam
+  // de qualquer direção, mais rápido e com pouca desistência.
   upChaser(e, p) {
     e.anim++;
     const dx = (p.x + p.w / 2) - (e.x + e.w / 2), dy = Math.abs(p.y - e.y);
+    const agg = e.aggressive;
     if (e.mode === 'patrol') {
-      if (dy < 44 && Math.abs(dx) < (e.range || 100) && Math.sign(dx) === e.dir) { e.mode = 'chase'; e.saw = 40; audio.sfx('apito'); }
+      // agressivo: vê o jogador de qualquer lado; comum: só na direção que encara
+      const sees = dy < (agg ? 70 : 44) && Math.abs(dx) < (e.range || 100) && (agg || Math.sign(dx) === e.dir);
+      if (sees) { e.mode = 'chase'; e.saw = 40; audio.sfx('apito'); if (agg) this.say('CACIMBA VEM DANCAR COLADINHO! CORRE!'); }
       if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
       if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
     } else {
       if (e.saw > 0) e.saw--;
       e.dir = Math.sign(dx) || e.dir;
-      e.vx = e.dir * (e.spd || 1.15);
-      if (this.onGround(e) && this.edgeAhead(e)) e.vx = 0; else this.moveX(e, e.vx);
-      if (Math.abs(dx) > 190 || dy > 60) { e.mode = 'patrol'; e.vx = e.dir * 0.5; }
+      // rebola ao andar (dança) e persegue sem parar
+      const wobble = agg ? Math.sin(e.anim * 0.3) * 0.25 : 0;
+      e.vx = e.dir * ((e.spd || 1.15) + wobble);
+      // no chão plano do fliperama não há beiras; se houver buraco, não cai
+      if (this.onGround(e) && this.edgeAhead(e) && !agg) e.vx = 0; else this.moveX(e, e.vx);
+      const leashX = agg ? 360 : 190, leashY = agg ? 100 : 60;
+      if (Math.abs(dx) > leashX || dy > leashY) { e.mode = 'patrol'; e.vx = e.dir * 0.5; }
     }
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
     // CACIMBA lança beijos teleguiados: apaixona e deixa lerdo (não mata)
     if (e.skin === 'cacimba') {
       e.kiss = (e.kiss || 90) - 1;
-      if (e.kiss <= 0 && Math.abs(dx) < 150 && this.state === 'play') {
-        e.kiss = 120;
-        const a = Math.atan2((p.y + 8) - (e.y + 6), dx);
-        this.kisses.push({ x: e.x + 6, y: e.y + 6, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, life: 150 });
+      if (e.kiss <= 0 && Math.abs(dx) < 190 && dy < 70 && this.state === 'play') {
+        e.kiss = e.mode === 'chase' ? 100 : 150;
+        const d = Math.hypot(dx, (p.y + 8) - (e.y + 6)) || 1;
+        this.kisses.push({ x: e.x + 6, y: e.y + 6, vx: dx / d * 1.7, vy: ((p.y + 8) - (e.y + 6)) / d * 1.7, life: 160 });
         audio.sfx('coin');
       }
     }
