@@ -35,12 +35,19 @@ function drawAI(ctx, e, img, flip) {
 const AI_CHAR = {
   'chaser:cacimba': 'art/char_cacimba_cut.png',
   'chaser:fiscal': 'art/char_fiscal_cut.png',
+  'chaser:ratinho': 'art/char_ratinho_cut.png',
   tromba: 'art/char_trombadinha_cut.png',
   liginha: 'art/char_vanita_cut.png',
   bigwalk: 'art/char_gordo_cut.png',
+  crosser: 'art/char_tavinho_cut.png',
+  whistler: 'art/char_carrapeta_cut.png',
+  galego: 'art/char_galego_cut.png',
+  damas: 'art/char_damas_cut.png',
+  passenger: 'art/char_passageiro_cut.png',
+  cobrador: 'art/char_cobrador_cut.png',
 };
-// imagem de IA da entidade (por tipo ou tipo:skin), ou null
-function aiImg(e) { const p = AI_CHAR[e.skin ? e.t + ':' + e.skin : e.t]; return p ? assets.get(p) : null; }
+// imagem de IA da entidade (por tipo ou tipo:skin quando skin é texto), ou null
+function aiImg(e) { const p = AI_CHAR[(typeof e.skin === 'string') ? e.t + ':' + e.skin : e.t]; return p ? assets.get(p) : null; }
 
 // nome do personagem (discreto) acima da cabeça, pra saber de quem é
 const ENT_NAMES = {
@@ -878,7 +885,6 @@ export class Level {
           ctx.drawImage(img, Math.round(e.x - 2), Math.round(e.y - 2));
         }
         break;
-      case 'damas': foot(ctx, e, S.damas, 0); break;
       case 'chaser': {
         const aiPath = AI_CHAR['chaser:' + e.skin];
         const ai = aiPath && assets.get(aiPath);
@@ -888,17 +894,22 @@ export class Level {
         break;
       }
       case 'bigwalk': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.gordo[e.dir < 0 ? 0 : 1], -2); break; }
-      case 'crosser':
-        foot(ctx, e, S.tavinho[(e.dir < 0 ? 0 : 2) + f], -2);
+      case 'crosser': {
+        const ai = aiImg(e);
+        if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.tavinho[(e.dir < 0 ? 0 : 2) + f], -2);
         if (Math.floor(e.anim / 12) % 2 === 0) drawText(ctx, 'BLA BLA', Math.round(e.x - 8), Math.round(e.y - 8), '#fff');
         break;
-      case 'whistler': foot(ctx, e, S.carrapeta[(e.dir < 0 ? 0 : 2) + f], -2); break;
-      case 'galego':
-        foot(ctx, e, S.galego, 0);
+      }
+      case 'whistler': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.carrapeta[(e.dir < 0 ? 0 : 2) + f], -2); break; }
+      case 'galego': {
+        const ai = aiImg(e);
+        if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.galego, 0);
         ctx.drawImage(S.panela, Math.round(e.x + 12), Math.round(e.y + e.h - S.panela.height));
         break;
-      case 'passenger': foot(ctx, e, S.passageiros[e.skin], -2); break;
-      case 'cobrador': foot(ctx, e, S.cobrador, -1); break;
+      }
+      case 'damas': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.damas, 0); break; }
+      case 'passenger': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.skin % 2 ? true : false); else foot(ctx, e, S.passageiros[e.skin], -2); break; }
+      case 'cobrador': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.cobrador, -1); break; }
       case 'roller': {
         const a = (e.anim * 0.12) % (Math.PI / 2); // rotação simulada
         ctx.save(); ctx.translate(Math.round(e.x + 5), Math.round(e.y + 5)); ctx.rotate(e.dir * a);

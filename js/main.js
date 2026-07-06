@@ -74,7 +74,11 @@ assets.load(['art/title.png', 'art/cad.png', 'art/praca.png', 'art/bras.png', 'a
   'art/calc.png', 'art/fisk.png', 'art/fila.png', 'art/bus.png',
   'art/char_cacimba_cut.png', 'art/char_murrinha_cut.png',
   'art/char_trombadinha_cut.png', 'art/char_vanita_cut.png',
-  'art/char_fiscal_cut.png', 'art/char_gordo_cut.png']);
+  'art/char_fiscal_cut.png', 'art/char_gordo_cut.png',
+  'art/char_ratinho_cut.png', 'art/char_tavinho_cut.png',
+  'art/char_carrapeta_cut.png', 'art/char_galego_cut.png',
+  'art/char_damas_cut.png', 'art/char_passageiro_cut.png',
+  'art/char_cobrador_cut.png']);
 
 input.init();
 G.toTitle();

@@ -1,5 +1,5 @@
 // sw.js — service worker: stale-while-revalidate (funciona offline, atualiza sozinho)
-const VERSION = 'murrinha-v24';
+const VERSION = 'murrinha-v25';
 const ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,10 @@ const ASSETS = [
   './art/char_cacimba_cut.png', './art/char_murrinha_cut.png',
   './art/char_trombadinha_cut.png', './art/char_vanita_cut.png',
   './art/char_fiscal_cut.png', './art/char_gordo_cut.png',
+  './art/char_ratinho_cut.png', './art/char_tavinho_cut.png',
+  './art/char_carrapeta_cut.png', './art/char_galego_cut.png',
+  './art/char_damas_cut.png', './art/char_passageiro_cut.png',
+  './art/char_cobrador_cut.png',
   './icons/icon-192.png', './icons/icon-512.png',
 ];
 
