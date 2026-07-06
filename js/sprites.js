@@ -24,70 +24,79 @@ const PAL = {
   m: '#88b8e0', // azul claro (aluno DAMAS)
   z: '#f2e8d0', // papel
   x: '#606068',
+  j: '#5e3c18', // cabelo tom médio (Murrinha)
+  l: '#f8d8b0', // pele clara (highlight)
+  f: '#e0e4ee', // caderno/papel na mão
 };
 
 const sp = rows => sprite(rows, PAL);
 
-// ==================== MURRINHA (16x24) ====================
+// ==================== MURRINHA (16x26, repaginado) ====================
+// cabeça com cabelo de lado, rostinho amigável; camisa branca gola V do CAD
+// (gola/punhos vermelhos, listra e "CAD"), bermuda azul, tênis, caderno na mão.
 const MURR_HEAD = [
-  '....kkkkkkkk....',
-  '...khhhhhhhhk...',
-  '..khhhhhhhhhhk..',
-  '..khhhhhhhhhhk..',
-  '..khhsssssshhk..',
-  '..kssksssskssk..',
-  '..kssksssskssk..',
-  '..kssssssssssk..',
-  '..kssskkkksssk..',
-  '...kssssssssk...',
-  '....kkkkkkkk....',
+  '....kkkkkkk.....',
+  '..kkjjjjjjjkk...',
+  '.kjjhhhhhhhjjk..',
+  '.kjhhhhhhhhhjk..',
+  '.khhlsssssslhk..',
+  '.khlssssssssk...',
+  '.khsskssksssk...',
+  '.khslssslsssk...',
+  '.khssssssssSk...',
+  '.khsskkkksssk...',
+  '..khsssssssk....',
+  '...kksskkk......',
 ];
 const MURR_BODY = [
-  '...kwwwrrwwwwk..',
-  '..kswwwrrwwwwsk.',
-  '..kswrrrrrrrwsk.',
-  '..kswwwwwwwwwsk.',
-  '..kswrrrrrrrwsk.',
-  '...kwwwrwrwwwk..',
-  '...kwwwwwwwwk...',
-  '...kbbbbbbbbk...',
+  '..krwwwwwwwrk...',
+  '.krwwwrrwwwwrk..',
+  '.krwwrwwrwwwrk.f',
+  '.kswwwwwwwwwskf',
+  '.kswrRrRrRwwsk.',
+  '..kwwwwwwwwwk...',
+  '..kwwwwwwwwk....',
 ];
 export const murrIdle = sp([...MURR_HEAD, ...MURR_BODY,
-  '...kbbk..kbbk...',
-  '...kssk..kssk...',
-  '..kttttkkttttk..',
-  '..kggggkkggggk..',
+  '..kbbbbbbbbk....',
+  '..kbbk.kbbk.....',
+  '..kssk.kssk.....',
+  '.ktttk.ktttk....',
+  '.kggggkkgggk....',
 ]);
 export const murrWalk1 = sp([...MURR_HEAD, ...MURR_BODY,
-  '..kbbk....kbbk..',
-  '..kssk....kssk..',
-  '.kttttk..kttttk.',
-  '.kggggk..kggggk.',
+  '..kbbbbbbbbk....',
+  '.kbbk...kbbk....',
+  '.kssk...kssk....',
+  'kttttk.ktttk....',
+  'kgggk..kgggk....',
 ]);
 export const murrWalk2 = sp([...MURR_HEAD, ...MURR_BODY,
-  '....kbbkkbbk....',
-  '....kssk.kssk...',
-  '...kttttkttttk..',
-  '...kggggkggggk..',
+  '..kbbbbbbbbk....',
+  '...kbbkkbbk.....',
+  '...ksskkssk.....',
+  '..ktttkttttk....',
+  '..kgggkkgggk....',
 ]);
 export const murrJump = sp([...MURR_HEAD, ...MURR_BODY,
-  '..kbbk....kbbk..',
-  '.kssk......kssk.',
-  'kttttk....kttttk',
-  'kggggk....kggggk',
+  '..kbbbbbbbbk....',
+  '.kbbk...kbbk....',
+  'kssk.....kssk...',
+  'ktttk....ktttk..',
+  'kgggk....kgggk..',
 ]);
 export const murrIdleL = flipped(murrIdle), murrWalk1L = flipped(murrWalk1),
   murrWalk2L = flipped(murrWalk2), murrJumpL = flipped(murrJump);
 
 // rostinho para HUD (8x8)
 export const murrFace = sp([
-  '.kkkkkk.',
-  'khhhhhhk',
-  'khhhhhhk',
-  'kssssssk',
-  'kskssksk',
-  'kssssssk',
-  'kskkkksk',
+  '.kjjjjk.',
+  'kjhhhhjk',
+  'khlssslk',
+  'kssksskk',
+  'ksssssSk',
+  'ksskkssk',
+  'kkssssk.',
   '.kkkkkk.',
 ]);
 

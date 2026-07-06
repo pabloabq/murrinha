@@ -10,6 +10,8 @@ const SOLID = new Set(['#', 'M', 'L', 'E', 'D', 'X', 'K', 'R', 'S', 'T', 'y', 'u
 const ONEWAY = new Set(['=', 'b', 'r', 'm']);
 // tiles puramente decorativos (árvore, coluna) — escondidos quando há cenário de IA
 const DECO_TILES = new Set(['A', 'i', 'c']);
+// tiles de PISO/CHÃO — escondidos quando há cenário de IA (a imagem já traz o chão)
+const FLOOR_FILL = new Set(['#', '#2', 'y', 'u', 'S', 'R', 'L', 'L2', 'L3', 'T']);
 const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
 
@@ -639,24 +641,28 @@ export class Level {
       camY += (((this.time * 7) % 5) - 2) * s * 0.4;
       this.shake = Math.max(0, this.shake - 0.5);
     }
-    this.camX = camX;
+    this.camX = camX; this.camY = camY;
 
     // fundo: sequência de cenários (gerados por IA) OU desenho em código
     const paths = this.def.bgImgs || (this.def.bgImg ? [this.def.bgImg] : []);
     const imgs = paths.map(p => assets.get(p));
-    if (paths.length && imgs.every(Boolean)) this.drawBgImages(ctx, imgs, camX);
+    const useImg = paths.length && imgs.every(Boolean);
+    if (useImg) { ctx.fillStyle = this.def.bgFill || '#12101c'; ctx.fillRect(0, 0, W, H); }
     else this.def.bg(ctx, camX, camY, this.time);
 
     ctx.save();
     ctx.translate(-Math.round(camX), -Math.round(camY));
 
+    // cenário de IA em ESPAÇO DE MUNDO (sobe/desce junto com o chão -> pulo correto)
+    if (useImg) this.drawBgImagesWorld(ctx, imgs);
+
     // tiles (somente os visíveis)
     const i0 = Math.floor(camX / TS), i1 = Math.min(this.w - 1, Math.ceil((camX + W) / TS));
     const j0 = Math.floor(camY / TS), j1 = Math.min(this.h - 1, Math.ceil((camY + H) / TS));
-    const hideDeco = !!this.def.bgImg; // com cenário de IA, as árvores/colunas vêm da imagem
+    const hasImg = !!(this.def.bgImg || this.def.bgImgs); // cenário de IA cobre deco e chão
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       let t = this.tileAt(i, j);
-      if (hideDeco && DECO_TILES.has(t)) continue;
+      if (hasImg && (DECO_TILES.has(t) || FLOOR_FILL.has(t))) continue;
       // miolo de blocos empilhados não repete o topo (grama/friso/onda)
       if ((t === 'E' || t === '#') && this.tileAt(i, j - 1) === t) t += '2';
       else if (t === 'L') t = this.tileAt(i, j - 1) === 'L' ? 'L3' : (i % 2 ? 'L2' : 'L');
@@ -724,16 +730,19 @@ export class Level {
     }
   }
 
-  // desenha uma SEQUÊNCIA de cenários lado a lado (não repete de tela em tela;
-  // a sequência inteira só recomeça a cada N telas). Alinhada 1:1 com o mundo.
-  drawBgImages(ctx, imgs, camX) {
-    const tws = imgs.map(im => Math.max(1, Math.round(im.width * H / im.height)));
+  // desenha a SEQUÊNCIA de cenários em ESPAÇO DE MUNDO: preenche a altura
+  // do nível (chão da imagem no chão do mundo) e sobe/desce com a câmera,
+  // então pular NÃO faz o piso "descer". Não repete de tela em tela.
+  drawBgImagesWorld(ctx, imgs) {
+    const hh = this.ph;
+    const tws = imgs.map(im => Math.max(1, Math.round(im.width * hh / im.height)));
     const seqW = tws.reduce((a, b) => a + b, 0);
-    let x = -(((camX % seqW) + seqW) % seqW);
+    let x = Math.floor(this.camX / seqW) * seqW - seqW;
     let idx = 0;
-    while (x < W + 2) {
+    const right = this.camX + W + 2;
+    while (x < right) {
       const k = idx % imgs.length;
-      ctx.drawImage(imgs[k], Math.round(x), 0, tws[k], H);
+      ctx.drawImage(imgs[k], Math.round(x), 0, tws[k], hh);
       x += tws[k]; idx++;
     }
   }
