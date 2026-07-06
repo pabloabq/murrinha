@@ -72,8 +72,11 @@ const AI_STRIP = {
   whistler: { path: 'art/char_carrapeta_strip.png', frames: 3 },
 };
 function aiKey(e) { return (typeof e.skin === 'string') ? e.t + ':' + e.skin : e.t; }
+// 10 passageiros distintos (homens/mulheres, adultos/idosos, roupas variadas)
+const N_PASS = 10;
 // info do sprite de IA da entidade: { img, frames } ou null
 function aiInfo(e) {
+  if (e.t === 'passenger') { const im = assets.get('art/char_passageiro' + (e.skin % N_PASS) + '_cut.png'); return im ? { img: im, frames: 1 } : null; }
   const k = aiKey(e);
   const st = AI_STRIP[k]; if (st) { const im = assets.get(st.path); if (im) return { img: im, frames: st.frames }; }
   const sp = AI_CHAR[k]; if (sp) { const im = assets.get(sp); if (im) return { img: im, frames: 1 }; }
@@ -197,7 +200,7 @@ export class Level {
         // --- Galego: chuva de pipoca (bônus) ---
         case 'q': this.ents.push({ t: 'galego', x, y: feetY(i, j, 24), w: 14, h: 24, anim: 0, pop: 40 }); break;
         // --- passageiro do ônibus (obstáculo que balança) ---
-        case 'z': this.ents.push({ t: 'passenger', x: x - 1, y: feetY(i, j, 28), w: 14, h: 28, skin: (i * 7) % 5, anim: 0, homeX: x - 1 }); break;
+        case 'z': this.ents.push({ t: 'passenger', x: x - 1, y: feetY(i, j, 28), w: 14, h: 28, skin: (this.ents.length * 7 + i) % 10, anim: 0, homeX: x - 1 }); break;
         case 'Z': this.ents.push({ t: 'cobrador', x, y: feetY(i, j, 24), w: 14, h: 24, anim: 0 }); break;
         // --- bola de fliperama: rola pelo chão, empurra o Murrinha (pule!) ---
         case 'B': this.ents.push({ t: 'roller', x, y: feetY(i, j, 10), w: 10, h: 10, vx: -1.4, dir: -1, anim: 0 }); break;

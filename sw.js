@@ -1,5 +1,5 @@
 // sw.js — service worker: stale-while-revalidate (funciona offline, atualiza sozinho)
-const VERSION = 'murrinha-v27';
+const VERSION = 'murrinha-v28';
 const ASSETS = [
   './',
   './index.html',
@@ -14,8 +14,12 @@ const ASSETS = [
   './art/char_fiscal_cut.png', './art/char_gordo_cut.png',
   './art/char_ratinho_cut.png', './art/char_tavinho_cut.png',
   './art/char_carrapeta_cut.png', './art/char_galego_cut.png',
-  './art/char_damas_cut.png', './art/char_passageiro_cut.png',
-  './art/char_cobrador_cut.png',
+  './art/char_damas_cut.png', './art/char_cobrador_cut.png',
+  './art/char_passageiro0_cut.png', './art/char_passageiro1_cut.png',
+  './art/char_passageiro2_cut.png', './art/char_passageiro3_cut.png',
+  './art/char_passageiro4_cut.png', './art/char_passageiro5_cut.png',
+  './art/char_passageiro6_cut.png', './art/char_passageiro7_cut.png',
+  './art/char_passageiro8_cut.png', './art/char_passageiro9_cut.png',
   './art/char_cacimba_strip.png', './art/char_murrinha_strip.png',
   './art/char_fiscal_strip.png', './art/char_ratinho_strip.png',
   './art/char_trombadinha_strip.png', './art/char_vanita_strip.png',
