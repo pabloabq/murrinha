@@ -1,5 +1,5 @@
 // main.js — boot, loop principal e gerenciamento de cenas
-import { W, H, drawTextC } from './gfx.js';
+import { W, H, SS, drawTextC } from './gfx.js';
 import * as input from './input.js';
 import * as audio from './audio.js';
 import * as save from './save.js';
@@ -16,15 +16,16 @@ const ctx = canvas.getContext('2d');
 function resize() {
   const vw = innerWidth || 320, vh = innerHeight || 180;
   const aspect = Math.max(16 / 9, Math.min(vw / vh, 21 / 9));
-  const w = Math.round(H * aspect / 2) * 2; // par, entre 320 e 420
-  if (w !== canvas.width || canvas.height !== H) {
+  const w = Math.round(H * aspect / 2) * 2; // par, entre 320 e 420 (lógico)
+  if (w !== W || canvas.width !== w * SS) {
     setW(w);
-    canvas.width = w; canvas.height = H;
+    // buffer com SS× a densidade; a lógica segue em W×H
+    canvas.width = w * SS; canvas.height = H * SS;
     ctx.imageSmoothingEnabled = false;
   }
-  let scale = Math.min(vw / canvas.width, vh / H);
+  let scale = Math.min(vw / w, vh / H);            // escala de tela em unidades lógicas
   if (scale > 1.5) scale = Math.floor(scale * 2) / 2; // meio-inteiro para nitidez
-  canvas.style.width = canvas.width * scale + 'px';
+  canvas.style.width = w * scale + 'px';
   canvas.style.height = H * scale + 'px';
 }
 addEventListener('resize', resize);
@@ -79,7 +80,11 @@ assets.load(['art/title.png', 'art/cad.png', 'art/praca.png', 'art/bras.png', 'a
   'art/char_carrapeta_cut.png', 'art/char_galego_cut.png',
   'art/char_damas_cut.png', 'art/char_passageiro_cut.png',
   'art/char_cobrador_cut.png',
-  'art/char_cacimba_strip.png']);
+  'art/char_cacimba_strip.png', 'art/char_murrinha_strip.png',
+  'art/char_fiscal_strip.png', 'art/char_ratinho_strip.png',
+  'art/char_trombadinha_strip.png', 'art/char_vanita_strip.png',
+  'art/char_gordo_strip.png', 'art/char_tavinho_strip.png',
+  'art/char_carrapeta_strip.png']);
 
 input.init();
 G.toTitle();
@@ -128,6 +133,8 @@ function frame(now) {
     ran = true;
   }
   if (ran) {
+    // base do supersampling: tudo desenha em unidades lógicas W×H
+    ctx.setTransform(SS, 0, 0, SS, 0, 0);
     G.scene.draw(ctx);
     if (pauseOverlay) drawPause();
   }

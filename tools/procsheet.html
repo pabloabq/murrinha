@@ -13,17 +13,44 @@
 <script type="module">
 const log = (m) => document.getElementById('log').textContent += m + '\n';
 const q = new URLSearchParams(location.search);
-const src = q.get('src');
-const outName = q.get('out') || (src||'sheet').replace('.png','') + '_strip';
-const frames = +(q.get('frames') || 3);
-const targetH = +(q.get('h') || 46);
-const tol = +(q.get('tol') || 82);
+// lote: jobs=src|out|frames|h|tol,src2|...
+let jobs;
+const jp = q.get('jobs');
+if (jp) jobs = jp.split(',').map(s => { const [src,out,frames,h,tol]=s.split('|'); return { src, out: out||src.replace('.png','')+'_strip', frames:+frames||3, h:+h||46, tol:+tol||82 }; });
+else jobs = [{ src:q.get('src'), out:q.get('out')||(q.get('src')||'sheet').replace('.png','')+'_strip', frames:+(q.get('frames')||3), h:+(q.get('h')||46), tol:+(q.get('tol')||82) }];
 
-const img = new Image(); img.crossOrigin='anonymous';
-img.onload = () => { try { run(); } catch(e){ log('ERR '+e.message+'\n'+e.stack); } };
-img.onerror = () => log('nao carregou '+src);
-img.src = '/tools/' + src + '?' + Date.now();
+(async () => {
+  for (const j of jobs) {
+    log('=== ' + j.src + ' (frames='+j.frames+' h='+j.h+') ===');
+    await new Promise((resolve) => {
+      const img = new Image(); img.crossOrigin='anonymous';
+      img.onload = async () => { try { await run(img, j.out, j.frames, j.h, j.tol); } catch(e){ log('ERR '+e.message); } resolve(); };
+      img.onerror = () => { log('nao carregou '+j.src); resolve(); };
+      img.src = '/tools/' + j.src + '?' + Date.now();
+    });
+  }
+  window.__allDone = true; log('##### FIM DO LOTE #####');
+})();
 
+// reconstrói um contorno escuro de `t` px ao redor da silhueta (dilata a borda)
+function addOutline(cv, color, t) {
+  const x = cv.getContext('2d'), w = cv.width, h = cv.height;
+  for (let pass = 0; pass < t; pass++) {
+    const im = x.getImageData(0, 0, w, h), d = im.data;
+    const op = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) op[i] = d[i * 4 + 3] > 128 ? 1 : 0;
+    for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+      const i = y * w + xx; if (op[i]) continue;
+      let near = false;
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]) {
+        const nx = xx + dx, ny = y + dy;
+        if (nx>=0&&nx<w&&ny>=0&&ny<h&&op[ny*w+nx]) { near = true; break; }
+      }
+      if (near) { const k = i*4; d[k]=color[0]; d[k+1]=color[1]; d[k+2]=color[2]; d[k+3]=255; }
+    }
+    x.putImageData(im, 0, 0);
+  }
+}
 // downscale por etapas (área) -> nitidez
 function shrink(canvas, fw, fh) {
   let cur = canvas;
@@ -38,7 +65,7 @@ function shrink(canvas, fw, fh) {
   return out;
 }
 
-function run() {
+async function run(img, outName, frames, targetH, tol) {
   const W=img.width, H=img.height;
   const c=document.createElement('canvas'); c.width=W; c.height=H;
   const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(img,0,0);
@@ -69,8 +96,11 @@ function run() {
 
   const cellH = gBot-gTop+1;
   const maxFW = Math.max(...runs.map(r=>r[1]-r[0]+1));
-  const scale = targetH/cellH;
-  const fhOut = targetH, fwOut = Math.round(maxFW*scale);
+  const PAD = 2;                          // margem p/ o contorno preto
+  const contentH = targetH - PAD*2;
+  const scale = contentH/cellH;
+  const cellWOut = Math.max(1, Math.round(maxFW*scale));
+  const fhOut = targetH, fwOut = cellWOut + PAD*2;
 
   const strip=document.createElement('canvas'); strip.width=fwOut*runs.length; strip.height=fhOut;
   const sx=strip.getContext('2d');
@@ -79,11 +109,15 @@ function run() {
     // slab alinhado: célula com o frame centralizado, pé no gBot
     const cell=document.createElement('canvas'); cell.width=maxFW; cell.height=cellH;
     cell.getContext('2d').drawImage(c, r[0], gTop, fw, cellH, Math.round((maxFW-fw)/2), 0, fw, cellH);
-    const small=shrink(cell, fwOut, fhOut);
-    // alpha binário leve
-    const sc=small.getContext('2d'); const oi=sc.getImageData(0,0,fwOut,fhOut),od=oi.data;
+    const small=shrink(cell, cellWOut, contentH);
+    // alpha binário -> silhueta limpa
+    const sc=small.getContext('2d'); const oi=sc.getImageData(0,0,cellWOut,contentH),od=oi.data;
     for(let k=0;k<od.length;k+=4){ od[k+3]= od[k+3]<90?0:255; } sc.putImageData(oi,0,0);
-    sx.drawImage(small, i*fwOut, 0);
+    // monta o quadro com margem e RECONSTRÓI o contorno preto de 2px
+    const frame=document.createElement('canvas'); frame.width=fwOut; frame.height=fhOut;
+    frame.getContext('2d').drawImage(small, PAD, PAD);
+    addOutline(frame, [18,14,22], PAD);
+    sx.drawImage(frame, i*fwOut, 0);
   });
   log('strip '+strip.width+'x'+strip.height+' | frames='+runs.length+' frameW='+fwOut);
 
@@ -92,8 +126,9 @@ function run() {
   const vx=v.getContext('2d'); vx.imageSmoothingEnabled=false; vx.drawImage(strip,0,0,v.width,v.height);
   document.getElementById('row').appendChild(v);
 
-  fetch('/shot?name='+outName,{method:'POST',body:strip.toDataURL('image/png')})
-    .then(()=>{ log('salvo: tools/'+outName+'.png ('+strip.width+'x'+strip.height+', '+runs.length+' frames)'); window.__done={frames:runs.length,frameW:fwOut,h:fhOut}; })
-    .catch(e=>log('save err '+e));
+  try {
+    await fetch('/shot?name='+outName,{method:'POST',body:strip.toDataURL('image/png')});
+    log('salvo: tools/'+outName+'.png ('+strip.width+'x'+strip.height+', '+runs.length+' frames, frameW='+fwOut+')');
+  } catch(e){ log('save err '+e); }
 }
 </script>

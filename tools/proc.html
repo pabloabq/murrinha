@@ -35,6 +35,25 @@ if (jobsParam) {
   window.__done = true; log('=== FIM ===');
 })();
 
+// reconstrói contorno escuro de `t` px ao redor da silhueta
+function addOutline(cv, color, t) {
+  const x = cv.getContext('2d'), w = cv.width, h = cv.height;
+  for (let pass = 0; pass < t; pass++) {
+    const im = x.getImageData(0, 0, w, h), d = im.data;
+    const op = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) op[i] = d[i * 4 + 3] > 128 ? 1 : 0;
+    for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+      const i = y * w + xx; if (op[i]) continue;
+      let near = false;
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]) {
+        const nx = xx + dx, ny = y + dy;
+        if (nx>=0&&nx<w&&ny>=0&&ny<h&&op[ny*w+nx]) { near = true; break; }
+      }
+      if (near) { const k = i*4; d[k]=color[0]; d[k+1]=color[1]; d[k+2]=color[2]; d[k+3]=255; }
+    }
+    x.putImageData(im, 0, 0);
+  }
+}
 async function run(img, outName, targetH, tol) {
   const W = img.width, H = img.height;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -92,15 +111,20 @@ async function run(img, outName, targetH, tol) {
     nx.drawImage(cur, 0, 0, nc.width, nc.height);
     cur = nc; curScale *= 0.5;
   }
-  const fh = targetH, fw = Math.round(bw * scale);
+  const PAD = 2;
+  const ch = targetH - PAD*2, cw = Math.max(1, Math.round(bw * (ch/bh)));
+  const content = document.createElement('canvas'); content.width=cw; content.height=ch;
+  const cx2 = content.getContext('2d'); cx2.imageSmoothingEnabled=true; cx2.imageSmoothingQuality='high';
+  cx2.drawImage(cur, 0, 0, cw, ch);
+  // alpha binário: silhueta limpa
+  const oi = cx2.getImageData(0,0,cw,ch); const od = oi.data;
+  for (let i=0;i<od.length;i+=4){ od[i+3] = od[i+3]<90 ? 0 : 255; }
+  cx2.putImageData(oi,0,0);
+  // monta final com margem e RECONSTRÓI o contorno preto de 2px
+  const fw = cw + PAD*2, fh = targetH;
   const out = document.createElement('canvas'); out.width=fw; out.height=fh;
-  const ox = out.getContext('2d'); ox.imageSmoothingEnabled=true; ox.imageSmoothingQuality='high';
-  ox.drawImage(cur, 0, 0, fw, fh);
-
-  // alpha binário leve: corta franjas semi-transparentes do downscale
-  const oi = ox.getImageData(0,0,fw,fh); const od = oi.data;
-  for (let i=0;i<od.length;i+=4){ if(od[i+3]<90) od[i+3]=0; else od[i+3]=255; }
-  ox.putImageData(oi,0,0);
+  out.getContext('2d').drawImage(content, PAD, PAD);
+  addOutline(out, [18,14,22], PAD);
   log('final ' + fw + 'x' + fh);
 
   // mostra: original, recortado, final (5x)

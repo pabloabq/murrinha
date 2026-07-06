@@ -1,6 +1,10 @@
 // gfx.js — fábrica de sprites pixel-art e fonte bitmap 3x5
 // Altura interna fixa (180); largura se adapta à proporção da tela do
 // aparelho (16:9 até ~21:9) para preencher o celular sem tarjas.
+// SS = supersampling: o buffer de render tem SS× a densidade de pixels
+// (HD pixel art). A LÓGICA e o desenho continuam nas unidades W×H; só a
+// nitidez dobra. Assets em alta resolução são desenhados dividindo por SS.
+export const SS = 2;
 export let W = 320;
 export const H = 180;
 export function setW(w) { W = w; }

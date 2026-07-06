@@ -1,5 +1,5 @@
 // level.js — motor de plataforma: física, colisões, entidades, câmera, HUD
-import { W, H, drawText, drawTextC, drawTextO, drawBox, textWidth } from './gfx.js';
+import { W, H, SS, drawText, drawTextC, drawTextO, drawBox, textWidth } from './gfx.js';
 import * as S from './sprites.js';
 import * as assets from './assets.js';
 import * as input from './input.js';
@@ -29,18 +29,20 @@ function frameFor(e, frames) {
   return pat[Math.floor(e.anim / 7) % pat.length];
 }
 // desenha personagem de IA: pé no chão, centralizado, animando o quadro certo.
-// info = { img, frames }. Com 1 quadro, dá um leve gingado; com strip, anima.
+// info = { img, frames }. A fonte é alta-res (SS×), então desenha em tamanho
+// lógico = px/SS -> mesmo tamanho de antes, porém com o dobro do detalhe.
 function drawAI(ctx, e, info, flip) {
   const img = info.img, frames = info.frames;
   const fw = Math.floor(img.width / frames);
+  const lw = fw / SS, lh = img.height / SS;          // tamanho lógico
   const bob = frames > 1 ? 0 : Math.round(Math.abs(Math.sin(e.anim * 0.14)));
-  const dx = Math.round(e.x + e.w / 2 - fw / 2);
-  const dy = Math.round(e.y + e.h - img.height - bob);
+  const dx = Math.round(e.x + e.w / 2 - lw / 2);
+  const dy = Math.round(e.y + e.h - lh - bob);
   const sx = frameFor(e, frames) * fw;
   if (flip) {
-    ctx.save(); ctx.translate(dx + fw, dy); ctx.scale(-1, 1);
-    ctx.drawImage(img, sx, 0, fw, img.height, 0, 0, fw, img.height); ctx.restore();
-  } else ctx.drawImage(img, sx, 0, fw, img.height, dx, dy, fw, img.height);
+    ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1);
+    ctx.drawImage(img, sx, 0, fw, img.height, 0, 0, lw, lh); ctx.restore();
+  } else ctx.drawImage(img, sx, 0, fw, img.height, dx, dy, lw, lh);
 }
 // mapa entidade -> sprite de IA (quando existir, substitui o sprite de código)
 // sprites de 1 quadro (fallback enquanto não há strip animado)
@@ -61,6 +63,13 @@ const AI_CHAR = {
 // strips animados (walk-cycle) — têm prioridade sobre o sprite de 1 quadro
 const AI_STRIP = {
   'chaser:cacimba': { path: 'art/char_cacimba_strip.png', frames: 3 },
+  'chaser:fiscal': { path: 'art/char_fiscal_strip.png', frames: 3 },
+  'chaser:ratinho': { path: 'art/char_ratinho_strip.png', frames: 3 },
+  tromba: { path: 'art/char_trombadinha_strip.png', frames: 3 },
+  liginha: { path: 'art/char_vanita_strip.png', frames: 3 },
+  bigwalk: { path: 'art/char_gordo_strip.png', frames: 3 },
+  crosser: { path: 'art/char_tavinho_strip.png', frames: 3 },
+  whistler: { path: 'art/char_carrapeta_strip.png', frames: 3 },
 };
 function aiKey(e) { return (typeof e.skin === 'string') ? e.t + ':' + e.skin : e.t; }
 // info do sprite de IA da entidade: { img, frames } ou null
@@ -84,7 +93,7 @@ function nameTag(ctx, e) {
   if (!nm) return;
   // topo do sprite (IA transborda pra cima da hitbox) pra a tag ficar acima da cabeça
   const ai = aiImg(e);
-  const top = ai ? (e.y + e.h - ai.height) : e.y;
+  const top = ai ? (e.y + e.h - ai.height / SS) : e.y;
   const w = textWidth(nm), tx = Math.round(e.x + e.w / 2 - w / 2), ty = Math.round(top - 9);
   ctx.fillStyle = 'rgba(10,10,22,0.55)'; ctx.fillRect(tx - 2, ty - 1, w + 4, 7);
   drawText(ctx, nm, tx, ty, '#f4e29a');
@@ -835,15 +844,26 @@ export class Level {
     if (p.inv > 0 && (p.inv % 6 < 3) && this.state === 'play') return;
     let img;
     const right = p.dir >= 0;
-    const aip = assets.get('art/char_murrinha_cut.png');
+    const strip = assets.get('art/char_murrinha_strip.png');
+    const aip = strip || assets.get('art/char_murrinha_cut.png');
     if (aip) {
-      // sprite de IA: pé no chão, centralizado, com leve gingado ao andar
+      const frames = strip ? 3 : 1;
+      const fw = Math.floor(aip.width / frames);
+      const lw = fw / SS, lh = aip.height / SS;   // tamanho lógico (fonte alta-res)
+      // quadro: no ar usa passo aberto; andando faz ping-pong; parado, neutro
+      let fr = 0;
+      if (frames > 1) {
+        if (!p.ground) fr = 2;
+        else if (Math.abs(p.vx) > 0.25) fr = [0, 1, 2, 1][Math.floor(p.anim / 6) % 4];
+        else fr = 1;
+      }
       let bob = 0;
-      if (p.ground && Math.abs(p.vx) > 0.2) bob = Math.round(Math.abs(Math.sin(p.anim * 0.25)));
-      const dx = Math.round(p.x + p.w / 2 - aip.width / 2);
-      const dy = Math.round(p.y + p.h - aip.height - bob);
-      if (right) ctx.drawImage(aip, dx, dy);
-      else { ctx.save(); ctx.translate(dx + aip.width, dy); ctx.scale(-1, 1); ctx.drawImage(aip, 0, 0); ctx.restore(); }
+      if (frames === 1 && p.ground && Math.abs(p.vx) > 0.2) bob = Math.round(Math.abs(Math.sin(p.anim * 0.25)));
+      const dx = Math.round(p.x + p.w / 2 - lw / 2);
+      const dy = Math.round(p.y + p.h - lh - bob);
+      const sxp = fr * fw;
+      if (right) ctx.drawImage(aip, sxp, 0, fw, aip.height, dx, dy, lw, lh);
+      else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(aip, sxp, 0, fw, aip.height, 0, 0, lw, lh); ctx.restore(); }
     } else {
       if (this.state === 'dying') img = right ? S.murrJump : S.murrJumpL;
       else if (!p.ground) img = right ? S.murrJump : S.murrJumpL;
