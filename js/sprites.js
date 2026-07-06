@@ -197,6 +197,20 @@ export const bola = sprite([
   '..kkkk..',
 ], { k: '#141420', w: '#f8f8f8', g: '#a8a8b4', x: '#5a5a66' });
 
+// canivete arremessado pelo trombadinha na FISK (9x4)
+export const canivete = sprite([
+  '..ttttttk',
+  '.tWWWWttk',
+  'kcccWttk.',
+  '.kcck....',
+], { k: '#141420', t: '#c8ccd4', W: '#f8f8f8', c: '#6a4020' });
+export const caniveteL = flipped(sprite([
+  '..ttttttk',
+  '.tWWWWttk',
+  'kcccWttk.',
+  '.kcck....',
+], { k: '#141420', t: '#c8ccd4', W: '#f8f8f8', c: '#6a4020' }));
+
 // beijo do Cacimba (coração rosa 5x5)
 export const beijo = sp([
   '.e.e.',

@@ -1439,13 +1439,13 @@ export const LEVELS = {
   fisk: {
     id: 'fisk', name: 'FISK E O GALEGO', music: 'praca',
     map: join(fk1, fk2, fk3, fk4, fk5, fk6),
-    bg: bgFisk, bgImg: 'art/fisk.png', deco: decoFisk,
+    bg: bgFisk, bgImg: 'art/fisk.png', deco: decoFisk, throwKnives: true,
     clearMsg: 'CORREU DO RATINHO!',
     objetivo: 'Pegue a pipoca do Galego e corra do Ratinho ate o ponto de onibus.',
     desafios: [
       { spr: 'galego', nm: 'GALEGO', tip: 'Pegue os graos que pulam da panela: cada um vale uma ficha!' },
       { spr: 'ratinho', nm: 'RATINHO', tip: 'Quer roubar seu tenis. Nao deixe ele te alcancar!' },
-      { spr: 'tromba', nm: 'ALUNOS DAS DAMAS', tip: 'Multidao na saida. Pise neles.' },
+      { spr: 'tromba', nm: 'TROMBADINHAS', tip: 'Lancam CANIVETES! Pule por cima ou desvie dos arremessos.' },
     ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Regiao da FISK. Pega a pipoca do Galego pulando da panela!' },

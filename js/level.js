@@ -23,7 +23,8 @@ function foot(ctx, e, img, dx = 0) {
 // nome do personagem (discreto) acima da cabeça, pra saber de quem é
 const ENT_NAMES = {
   liginha: 'VANITA', bigwalk: 'GORDO', crosser: 'TAVINHO', whistler: 'CARRAPETA',
-  galego: 'GALEGO', cobrador: 'COBRADOR', damas: 'DAMAS',
+  galego: 'GALEGO', cobrador: 'COBRADOR', damas: 'DAMAS', tromba: 'TROMBADINHA',
+  passenger: 'PASSAGEIRO', roller: 'PINBALL',
   'chaser:fiscal': 'FISCAL', 'chaser:cacimba': 'CACIMBA', 'chaser:ratinho': 'RATINHO',
 };
 function nameTag(ctx, e) {
@@ -90,6 +91,7 @@ export class Level {
     this.grains = [];
     this.kisses = [];   // beijos do Cacimba
     this.clouds = [];   // nuvens de peido do Gordo
+    this.knives = [];   // canivetes dos trombadinhas (FISK)
     this.shake = 0;
     this.combo = 0;
     // y tal que um NPC de altura h fique com os PÉS no primeiro chão abaixo da linha j
@@ -342,6 +344,16 @@ export class Level {
     }
     this.clouds = this.clouds.filter(c => !c.gone);
 
+    // canivetes dos trombadinhas (FISK) — voam reto; PULE ou não deixe te acertar
+    for (const kn of this.knives) {
+      kn.x += kn.vx; kn.spin = (kn.spin || 0) + 0.5;
+      if (kn.x < this.camX - 30 || kn.x > this.camX + W + 30) { kn.gone = true; continue; }
+      if (p.inv <= 0 && this.state === 'play' && this.overlap(p, { x: kn.x - 4, y: kn.y - 2, w: 8, h: 5 })) {
+        kn.gone = true; this.hurt(false, 'CANIVETE DO TROMBADINHA!');
+      }
+    }
+    this.knives = this.knives.filter(k => !k.gone);
+
     // cagadas de pombo
     for (const q of this.poops) {
       q.vy += 0.16; q.y += q.vy;
@@ -418,6 +430,17 @@ export class Level {
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
     this.moveY(e, e.vy);
+    // na FISK, o trombadinha arremessa CANIVETE na direção do Murrinha
+    if (this.def.throwKnives) {
+      const dx = (p.x + p.w / 2) - (e.x + e.w / 2);
+      e.knifeT = (e.knifeT || 60 + (e.x % 90)) - 1;
+      if (e.knifeT <= 0 && Math.abs(dx) < 130 && Math.abs(p.y - e.y) < 30 && this.state === 'play') {
+        e.knifeT = 150;
+        const dir = Math.sign(dx) || 1; e.dir = dir;
+        this.knives.push({ x: e.x + 5, y: e.y + 6, vx: dir * 3.2, spin: 0 });
+        audio.sfx('kick');
+      }
+    }
     if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e)) {
       // pisão generoso: se o pé do Murrinha está acima do meio do trombadinha (e não subindo forte), pisa
       if (p.vy > -1.5 && p.y + p.h < e.y + e.h * 0.6) {
@@ -659,10 +682,12 @@ export class Level {
     // tiles (somente os visíveis)
     const i0 = Math.floor(camX / TS), i1 = Math.min(this.w - 1, Math.ceil((camX + W) / TS));
     const j0 = Math.floor(camY / TS), j1 = Math.min(this.h - 1, Math.ceil((camY + H) / TS));
-    const hasImg = !!(this.def.bgImg || this.def.bgImgs); // cenário de IA cobre deco e chão
+    const hasImg = !!(this.def.bgImg || this.def.bgImgs); // cenário de IA cobre a cenografia
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       let t = this.tileAt(i, j);
-      if (hasImg && (DECO_TILES.has(t) || FLOOR_FILL.has(t))) continue;
+      // com cenário de IA escondemos só a DECO; o PISO em código continua
+      // desenhado (na linha da colisão) pra o personagem sempre pisar firme
+      if (hasImg && DECO_TILES.has(t)) continue;
       // miolo de blocos empilhados não repete o topo (grama/friso/onda)
       if ((t === 'E' || t === '#') && this.tileAt(i, j - 1) === t) t += '2';
       else if (t === 'L') t = this.tileAt(i, j - 1) === 'L' ? 'L3' : (i % 2 ? 'L2' : 'L');
@@ -689,6 +714,9 @@ export class Level {
 
     // beijos do Cacimba (corações)
     for (const k of this.kisses) ctx.drawImage(S.beijo, Math.round(k.x - 2), Math.round(k.y - 2 + Math.sin(k.life * 0.3)));
+
+    // canivetes
+    for (const kn of this.knives) ctx.drawImage(kn.vx < 0 ? S.caniveteL : S.canivete, Math.round(kn.x - 4), Math.round(kn.y - 2));
 
     // nuvens de peido do Gordo (verde fedido)
     for (const c of this.clouds) {
