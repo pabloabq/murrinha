@@ -93,7 +93,7 @@ fM = STAND_MURR / refM
 for pose, src in [('idle', 'murr_idle'), ('jump', 'murr_jump'), ('fall', 'murr_fall'),
                   ('crouch', 'murr_crouch'), ('hide', 'murr_hide'), ('slide', 'murr_slide')]:
     save_pose(os.path.join(SP, src + '.png'), 'art/char_murrinha_%s.png' % pose, fM)
-nfw = save_walk([os.path.join(SP, 'mw_%d.png' % i) for i in (1, 2, 3, 4)], 'art/char_murrinha_walk.png', STAND_MURR)
+nfw = save_walk([os.path.join(SP, 'mw_%d.png' % i) for i in (1, 3)], 'art/char_murrinha_walk.png', STAND_MURR)
 print('MURRINHA fator %.4f (refH %d), walk %s' % (fM, refM, nfw))
 
 # ---- VANITA ----
@@ -101,5 +101,5 @@ refV = key_trim(os.path.join(SP, 'van_idle.png')).height
 fV = STAND_VAN / refV
 for pose, src in [('idle', 'van_idle'), ('whistle', 'van_whistle')]:
     save_pose(os.path.join(SP, src + '.png'), 'art/char_vanita_%s.png' % pose, fV)
-nvw = save_walk([os.path.join(SP, 'van_w%d.png' % i) for i in (1, 2, 3, 4)], 'art/char_vanita_walk.png', STAND_VAN)
+nvw = save_walk([os.path.join(SP, 'van_w%d.png' % i) for i in (1, 3)], 'art/char_vanita_walk.png', STAND_VAN)
 print('VANITA fator %.4f (refH %d), walk %s' % (fV, refV, nvw))

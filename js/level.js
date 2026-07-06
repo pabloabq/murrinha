@@ -889,23 +889,24 @@ export class Level {
     const walk = assets.get('art/char_murrinha_walk.png');   // ciclo de 4 quadros
     const idle = assets.get('art/char_murrinha_idle.png');
     if (walk && idle) {
-      const WF = 4, wfw = Math.floor(walk.width / WF);
+      const WF = 2, wfw = Math.floor(walk.width / WF);
       const A = n => assets.get('art/char_murrinha_' + n + '.png') || idle;
-      let src, fw, fr = 0;
+      let src, fw, fr = 0, bob = 0;
       if (!p.ground) {                       // no ar: subindo = pulo, descendo = queda
         src = p.vy < 0 ? A('jump') : A('fall'); fw = src.width;
       } else if (p.hiding) {                 // escondido (agachado e parado)
         src = A('hide'); fw = src.width;
       } else if (p.crouch) {                 // agachado
         src = A('crouch'); fw = src.width;
-      } else if (Math.abs(p.vx) > 0.3) {     // andando: quadro pela distância andada
+      } else if (Math.abs(p.vx) > 0.3) {     // andando: passada pela distância andada + bob
         src = walk; fw = wfw; fr = ((Math.floor(p.x / WALK_STRIDE)) % WF + WF) % WF;
+        bob = fr;                            // 1px de sobe-desce entre os passos
       } else {                               // parado
         src = idle; fw = idle.width;
       }
       const lw = fw / SS, lh = src.height / SS;
       const dx = Math.round(p.x + p.w / 2 - lw / 2);
-      const dy = Math.round(p.y + p.h - lh);
+      const dy = Math.round(p.y + p.h - lh - bob);
       const sxp = fr * fw;
       if (right) ctx.drawImage(src, sxp, 0, fw, src.height, dx, dy, lw, lh);
       else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(src, sxp, 0, fw, src.height, 0, 0, lw, lh); ctx.restore(); }
@@ -980,13 +981,13 @@ export class Level {
         const vwalk = assets.get('art/char_vanita_walk.png');
         const vidle = assets.get('art/char_vanita_idle.png');
         if (vwalk && vidle) {
-          const WF = 4, cw = Math.floor(vwalk.width / WF);
-          let src, fw, fr = 0;
+          const WF = 2, cw = Math.floor(vwalk.width / WF);
+          let src, fw, fr = 0, bob = 0;
           if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: aponta e grita
-          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = ((Math.floor(e.x / WALK_STRIDE)) % WF + WF) % WF; }
+          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = ((Math.floor(e.x / WALK_STRIDE)) % WF + WF) % WF; bob = fr; }
           else { src = vidle; fw = vidle.width; }
           const lw = fw / SS, lh = src.height / SS;
-          const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh);
+          const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh - bob);
           if (e.dir >= 0) ctx.drawImage(src, fr * fw, 0, fw, src.height, dx, dy, lw, lh);
           else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(src, fr * fw, 0, fw, src.height, 0, 0, lw, lh); ctx.restore(); }
         } else {
