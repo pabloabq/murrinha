@@ -100,34 +100,37 @@ export const murrFace = sp([
   '.kkkkkk.',
 ]);
 
-// ==================== LIGINHA (16x28) ====================
+// ==================== VANITA — a diretora (16x28) ====================
+// coque grisalho severo, óculos gatinho, sobrancelha arqueada e brava,
+// blazer teal com gola branca e broche dourado. A vilã-mor.
 const LIG_HEAD = [
-  '.....kkkkk......',
-  '....kGGGGGk.....',
-  '...kGGkkkGGk....',
-  '..kGGkGGGkGGk...',
-  '..kGGGGGGGGGk...',
-  '..kGsssssssGk...',
-  '..kskkskksksk...',  // óculos + olhos bravos
-  '..kskkskksksk...',
-  '..kssssssssssk..',
-  '..ksskkkkkssk...',  // boca séria
-  '...kssssssss k..',
-  '....kkkkkkkk....',
+  '.......kk.......',
+  '......kGGk......',
+  '.....kGGGGk.....',   // coque
+  '...kkGGGGGkk....',
+  '..kGGGGGGGGGk...',   // topo do cabelo
+  '..kGGGGGGGGGGk..',
+  '..kGlsssssslGk..',   // testa (brilho nas têmporas)
+  '..kSkkSkkkSkkSk.',   // sobrancelhas bravas + óculos gatinho
+  '..kGxxkGGkxxkGk.',   // lentes (x) com armação erguida
+  '..kGssssssssGk..',
+  '..kGssekkessGk..',   // boca franzida (batom e)
+  '...kGssssssGk...',
+  '....kkkkkkk.....',
 ];
 const LIG_BODY = [
-  '...kddddddddk...',
-  '..ksddddddddsk..',
-  '..ksdkddddkdsk..',
-  '..ksddddddddsk..',
-  '...kdddddddd k..',
-  '...kddddddddk...',
-  '...kddddddddk...',
-  '..kddddddddddk..',
-  '..kddddddddddk..',
-  '.kddddddddddddk.',
-  '.kddddddddddddk.',
-  '.kkkkkkkkkkkkkk.',
+  '...kwwdddwwk....',   // gola branca aberta
+  '..kdwdddddwdk...',
+  '.kdswddydwsdk...',   // ombros + broche dourado (y), braços (s)
+  '.ksdDddddddsk...',
+  '.ksdDdddddDsk...',   // vinco de sombra (D)
+  '.ksdDdddddDsk...',
+  '..kdDdddddDdk...',
+  '..kdddddddddk...',
+  '..kdddddddddk...',
+  '.kdddddddddddk..',
+  '.kddddddddddDk..',
+  '.kkkkkkkkkkkkk..',
 ];
 export const ligWalk1 = sp([...LIG_HEAD, ...LIG_BODY,
   '...kssk..kssk...',
@@ -592,39 +595,39 @@ const LEGS_B = ['....kMMkkMMk....', '....kssk.kssk...', '...kttttkttttk..', '...
 // Fiscal das Brasileiras (uniforme azul, boné, crachá)
 const FISCAL_PAL = { ...PAL, M: '#26407a', N: '#1a2c56' };
 export const fiscal = walker2([
-  '....kkkkkkkk....',
-  '...kNNNNNNNNk...',   // boné
-  '...kNNNNNNNNk...',
-  '..kkssssssssk...',
-  '..kssksssskssk..',
-  '..kssssssssssk..',
-  '..kssskkkksssk..',
+  '...kNNNNNNNNk...',   // boné (topo)
+  '..kNNNNNNNNNNk..',
+  '..kkkkkkkkkkkk..',   // aba do boné
+  '...klssssssk....',   // testa
+  '...ksksssksk....',   // olhos sérios
   '...kssssssssk...',
+  '...ksskkkkssk...',   // boca reta
   '....kkkkkkkk....',
-  '...kMMMMMMMMk...',
-  '..kMMMwMMMMMMk..',   // crachá branco
+  '..kwMMMMMMMMwk..',   // dragonas (ombreiras) brancas
   '..kMMMMMMMMMMk..',
+  '..kMyMMMMwwMMk..',   // crachá dourado + apito branco
   '..kMMMMMMMMMMk..',
-  '...kMMMMMMMMk...',
+  '.kNMMMMMMMMMNk..',   // cinto/torso com sombra N
+  '..kNMMMMMMMMNk..',
 ], FISCAL_PAL, LEGS_A, LEGS_B);
 
 // Cacimba (camiseta rosa, short curto, braços pra cima dançando)
 const CAC_PAL = { ...PAL, M: '#e05ea0', N: '#b03c7c', L: '#f2c184' };
 export const cacimba = walker2([
   'k..kkkkkkkk..k..',
-  'Lk.khhhhhhhhk.kL',   // braços erguidos (L=pele)
+  'Lk.kHHhhhhHHk.kL',   // braços erguidos (L=pele) + cabelo com brilho
   'Lk.khhhhhhhhk.kL',
-  '.k.kssssssssk.k.',
-  '...kssksssksk...',
+  '.k.klsssssslk.k.',   // testa com brilho
+  '...ksksssksk....',   // olhinhos
   '...kssssssssk...',
-  '...kssekkessk...',   // sorriso
-  '....kssssssk....',
+  '...kseeeeeesk...',   // bocão (lábios e)
+  '...ksskwwkssk...',   // dentes brancos
   '....kkkkkkkk....',
-  '...kMMMMMMMMk...',
+  '..kNMMMMMMMMNk..',   // camisa (ombros com sombra N)
+  '..kMMMLLMMMMk...',   // peito aberto (L=pele)
   '..kMMMMMMMMMMk..',
-  '..kMMMMMMMMMMk..',
+  '..kNMMMMMMMMNk..',
   '...kkkkkkkkkk...',   // short curto
-  '...kLLk..kLLk...',
 ], CAC_PAL, ['...kLLk..kLLk...', '..kttttkkttttk..', '..kggggkkggggk..', '................'],
    ['....kLLkkLLk....', '...kttttkttttk..', '...kggggkggggk..', '................']);
 
@@ -663,19 +666,19 @@ export const assovio = sprite([
 // Tavinho Miranda (boné virado, ombreiras retas, camisa)
 const TAV_PAL = { ...PAL, M: '#8040a0', N: '#5c2c78', m: '#f2d24e' };
 export const tavinho = walker2([
-  '...kkkkkkkkm....',   // aba do boné pro lado
-  '..kNNNNNNNNk....',
-  '..kNNNNNNNNk....',
-  '..kssssssssk....',
-  '..kssksssskssk..',
+  '...kkkkkkkkkm...',   // boné (aba amarela pro lado)
+  '..kNNNNNNNNNk...',
+  '..kNNNNNNNNNk...',
+  '..klssssssslk...',   // testa
+  '..kkxxkkxxkkk...',   // óculos escuros (x)
   '..kssssssssssk..',
-  '..kssskkkksssk..',
-  '...kssssssssk...',
-  'kkkkkkkkkkkkkkk.',   // ombreiras retas e largas
+  '..ksssekkessk...',   // sorriso metido
+  '...kkkkkkkkk.....',
+  'kwkkkkkkkkkkkwk.',   // ombreiras (brilho w nas pontas)
   'kMMMMMMMMMMMMMk.',
-  'kMMMMMMMMMMMMMk.',
-  '.kMMMMMMMMMMk...',
-  '.kMMMMMMMMMMk...',
+  'kMMMNMMMMMMMMMk.',   // zíper (N)
+  '.kMMNMMMMMMMk...',
+  '.kMMNMMMMMMMk...',
   '.kMMMMMMMMMMk...',
 ], TAV_PAL, LEGS_A, LEGS_B);
 
@@ -684,20 +687,20 @@ export const gordo = (() => {
   const P = { ...PAL, M: '#4a8a4a', N: '#356835' };
   const a = sprite([
     '......kkkkkkkk......',
-    '.....khhhhhhhhk.....',
+    '.....kjhhhhhhjk.....',   // cabelo com brilho (j)
+    '....klssssssssk.....',   // testa com brilho
+    '....ksksssssksk.....',   // olhinhos
     '....kssssssssssk....',
-    '....ksskssssksk.....',
-    '....kssssssssssk....',
-    '....ksssseesssk.....',
-    '.....kssssssssk.....',
+    '....kssseeeessk.....',   // boca
+    '.....ksSsssSssk.....',   // papada (sombra S)
     '......kkkkkkkk......',
-    '...kMMMMMMMMMMMMk...',
-    '..kMMMMMMMMMMMMMMk..',
-    '.kMMMMMMMMMMMMMMMMk.',
-    '.kMMMMMMMMMMMMMMMMk.',
-    '.kMMMMMMMMMMMMMMMMk.',
-    '.kMMMMMMMMMMMMMMMMk.',
-    '..kMMMMMMMMMMMMMMk..',
+    '...kMwMMMMMMMMMk...',   // gola (w)
+    '..kMMMMMMMMMMMMNk..',
+    '.kMMMMMMMMMMMMMMNk.',
+    '.kMMMMMMMNMMMMMMNk.',   // vinco/umbigo (N)
+    '.kMMMMMMMNMMMMMMNk.',
+    '.kMMMMMMMMMMMMMMNk.',
+    '..kMMMMMMMMMMMMMNk..',
     '...kMMMMMMMMMMMMk...',
     '....kkk......kkk....',
     '....kssk....kssk....',
@@ -744,22 +747,23 @@ export const panela = sprite([
 export const pipocaGrao = sprite(['.ww.', 'wwww', 'wwww', '.ww.'], { w: '#f8f0d8' });
 
 // Ratinho (batedor de carteiras, roupas velhas, bravo)
-const RAT_PAL = { ...PAL, M: '#6a5a3a', N: '#4a3e28', h: '#2a2a2a' };
+const RAT_PAL = { ...PAL, M: '#6a5a3a', N: '#4a3e28', h: '#242024',
+  s: '#d6c49a', S: '#a89066', l: '#ecdcb4' };  // pele encardida
 export const ratinho = walker2([
-  '....kkkkkkkk....',
-  '...khhhhhhhhk...',
-  '..khhhhhhhhhhk..',
-  '..khhsssssshhk..',
-  '..kssksssskssk..',   // olhar bravo
-  '..kssssssssssk..',
-  '..ksskkkkkkssk..',   // careta
-  '...kssssssssk...',
-  '....kkkkkkkk....',
-  '...kMMkNNkMMk...',   // camisa rasgada
-  '..kMMNMMMMNMMk..',
-  '..kMMMMMMMMMMk..',
-  '..kNMMMMMMMMNk..',
-  '...kMMMMMMMMk...',
+  '...kkkkkkkkk....',
+  '..khhhhhhhhhk...',   // cabelo preto engordurado
+  '..khhhhhhhhhk...',
+  '..khslssslshk...',   // testa
+  '..kskksskksk....',   // olhos apertados (bravo)
+  '..ksssssssssk...',
+  '..ksSskkksSsk...',   // bochechas cavadas (S)
+  '..kssknnkssk....',   // rosnado (dentes n)
+  '...kkkkkkkk.....',
+  '..kMMkNNkMMMk...',   // colete rasgado (buracos N)
+  '.kMMNMMMMMNMMk..',
+  '.kMMMMMMMMMMMk..',
+  '.kNMMMMMMMMMNk..',
+  '..kNMMMMMMMMk...',
 ], RAT_PAL, LEGS_A, LEGS_B);
 
 // cobrador do ônibus (atrás da catraca)

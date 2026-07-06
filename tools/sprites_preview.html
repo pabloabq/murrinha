@@ -1,0 +1,49 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sprites</title>
+<style>
+  body { margin:0; background:#20202c; color:#e8e8f0; font:12px monospace; }
+  #wrap { display:flex; flex-wrap:wrap; gap:10px; padding:12px; }
+  .cell { background:#2c2c3a; border:1px solid #44445a; border-radius:6px; padding:6px 8px 8px; text-align:center; }
+  .cell canvas { display:block; image-rendering:pixelated; background:#3a3a4c; margin:0 auto 4px; }
+  .cell div { font-size:11px; letter-spacing:.5px; }
+</style>
+<div id="wrap"></div>
+<script type="module">
+import * as S from '../js/sprites.js';
+
+const SCALE = 5;
+const wrap = document.getElementById('wrap');
+
+// nomes que queremos inspecionar (personagens)
+const names = [
+  'murrIdle','murrWalk1','murrWalk2','murrJump',
+  'ligWalk1','ligWalk2',
+  'troWalk1','troWalk2',
+  'damas',
+  'fiscal','cacimba','carrapeta','tavinho','gordo','galego','ratinho','cobrador',
+  'passageiros',
+];
+
+function addOne(label, img) {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  const c = document.createElement('canvas');
+  c.width = img.width * SCALE; c.height = img.height * SCALE;
+  const x = c.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  x.drawImage(img, 0, 0, c.width, c.height);
+  const t = document.createElement('div');
+  t.textContent = label + ' ' + img.width + 'x' + img.height;
+  cell.appendChild(c); cell.appendChild(t);
+  wrap.appendChild(cell);
+}
+
+for (const n of names) {
+  const v = S[n];
+  if (!v) { const d = document.createElement('div'); d.className='cell'; d.textContent = n+' ?'; wrap.appendChild(d); continue; }
+  if (Array.isArray(v)) v.forEach((img, i) => addOne(n + '[' + i + ']', img));
+  else addOne(n, v);
+}
+window.__ready = true;
+</script>
