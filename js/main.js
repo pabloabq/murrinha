@@ -72,7 +72,9 @@ const G = {
 import * as assets from './assets.js';
 assets.load(['art/title.png', 'art/cad.png', 'art/praca.png', 'art/bras.png', 'art/play.png',
   'art/calc.png', 'art/fisk.png', 'art/fila.png', 'art/bus.png',
-  'art/char_cacimba_cut.png', 'art/char_murrinha_cut.png']);
+  'art/char_cacimba_cut.png', 'art/char_murrinha_cut.png',
+  'art/char_trombadinha_cut.png', 'art/char_vanita_cut.png',
+  'art/char_fiscal_cut.png', 'art/char_gordo_cut.png']);
 
 input.init();
 G.toTitle();

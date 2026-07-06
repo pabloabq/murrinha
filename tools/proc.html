@@ -13,17 +13,29 @@
 <script type="module">
 const log = (m) => document.getElementById('log').textContent += m + '\n';
 const q = new URLSearchParams(location.search);
-const src = q.get('src') || 'char_cacimba.png';
-const outName = q.get('out') || 'char_cacimba_cut';
-const targetH = +(q.get('h') || 46);          // altura final em px (tamanho de jogo)
-const tol = +(q.get('tol') || 76);            // tolerância de cor do fundo
+// modo lote: jobs=src|out|h|tol,src2|out2|h2|tol2  (; entre campos aceito tb)
+const jobsParam = q.get('jobs');
+let jobs;
+if (jobsParam) {
+  jobs = jobsParam.split(',').map(s => { const [src,out,h,tol] = s.split('|'); return { src, out, h:+h||42, tol:+tol||78 }; });
+} else {
+  jobs = [{ src: q.get('src') || 'char_cacimba.png', out: q.get('out') || 'char_cacimba_cut', h: +(q.get('h')||46), tol: +(q.get('tol')||78) }];
+}
 
-const img = new Image();
-img.crossOrigin = 'anonymous';
-img.onload = () => { try { run(); } catch (e) { log('ERR ' + e.message); } };
-img.src = '/tools/' + src + '?' + Date.now();
+(async () => {
+  for (const j of jobs) {
+    log('--- ' + j.src + ' (h=' + j.h + ' tol=' + j.tol + ') ---');
+    await new Promise((resolve) => {
+      const img = new Image(); img.crossOrigin = 'anonymous';
+      img.onload = async () => { try { await run(img, j.out, j.h, j.tol); } catch (e) { log('ERR ' + e.message); } resolve(); };
+      img.onerror = () => { log('nao carregou ' + j.src); resolve(); };
+      img.src = '/tools/' + j.src + '?' + Date.now();
+    });
+  }
+  window.__done = true; log('=== FIM ===');
+})();
 
-function run() {
+async function run(img, outName, targetH, tol) {
   const W = img.width, H = img.height;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d', { willReadFrequently: true });
@@ -97,11 +109,12 @@ function run() {
     const vx=v.getContext('2d'); vx.imageSmoothingEnabled=false; vx.drawImage(cv,0,0,v.width,v.height);
     document.getElementById('row').appendChild(v);
   };
-  show(c, 0.4); show(trimmed, 0.5); show(out, 5);
+  show(out, 5);
 
-  // salva o PNG final via /shot
-  fetch('/shot?name=' + outName, { method:'POST', body: out.toDataURL('image/png') })
-    .then(()=>log('salvo: tools/' + outName + '.png')).catch(e=>log('save err '+e));
-  window.__done = true;
+  // salva o PNG final via /shot (aguarda pra manter o lote em ordem)
+  try {
+    await fetch('/shot?name=' + outName, { method:'POST', body: out.toDataURL('image/png') });
+    log('salvo: tools/' + outName + '.png (' + fw + 'x' + fh + ')');
+  } catch (e) { log('save err ' + e); }
 }
 </script>

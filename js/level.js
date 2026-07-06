@@ -32,7 +32,15 @@ function drawAI(ctx, e, img, flip) {
   } else ctx.drawImage(img, dx, dy);
 }
 // mapa entidade -> sprite de IA (quando existir, substitui o sprite de código)
-const AI_CHAR = { 'chaser:cacimba': 'art/char_cacimba_cut.png' };
+const AI_CHAR = {
+  'chaser:cacimba': 'art/char_cacimba_cut.png',
+  'chaser:fiscal': 'art/char_fiscal_cut.png',
+  tromba: 'art/char_trombadinha_cut.png',
+  liginha: 'art/char_vanita_cut.png',
+  bigwalk: 'art/char_gordo_cut.png',
+};
+// imagem de IA da entidade (por tipo ou tipo:skin), ou null
+function aiImg(e) { const p = AI_CHAR[e.skin ? e.t + ':' + e.skin : e.t]; return p ? assets.get(p) : null; }
 
 // nome do personagem (discreto) acima da cabeça, pra saber de quem é
 const ENT_NAMES = {
@@ -44,7 +52,10 @@ const ENT_NAMES = {
 function nameTag(ctx, e) {
   const nm = ENT_NAMES[e.skin ? e.t + ':' + e.skin : e.t];
   if (!nm) return;
-  const w = textWidth(nm), tx = Math.round(e.x + e.w / 2 - w / 2), ty = Math.round(e.y - 9);
+  // topo do sprite (IA transborda pra cima da hitbox) pra a tag ficar acima da cabeça
+  const ai = aiImg(e);
+  const top = ai ? (e.y + e.h - ai.height) : e.y;
+  const w = textWidth(nm), tx = Math.round(e.x + e.w / 2 - w / 2), ty = Math.round(top - 9);
   ctx.fillStyle = 'rgba(10,10,22,0.55)'; ctx.fillRect(tx - 2, ty - 1, w + 4, 7);
   drawText(ctx, nm, tx, ty, '#f4e29a');
 }
@@ -846,12 +857,17 @@ export class Level {
       case 'maca': ctx.drawImage(S.maca, Math.round(e.x), Math.round(e.y)); break;
       case 'ticket': ctx.drawImage(S.ticket, Math.round(e.x), Math.round(e.y + Math.sin(e.anim * 0.1) * 2)); break;
       case 'check': ctx.drawImage(e.on ? S.checkSignOn : S.checkSign, Math.round(e.x), Math.round(e.y)); break;
-      case 'tromba':
-        if (e.dead) foot(ctx, e, S.troSquash, -1);
+      case 'tromba': {
+        if (e.dead) { foot(ctx, e, S.troSquash, -1); break; }
+        const ai = aiImg(e);
+        if (ai) drawAI(ctx, e, ai, e.dir < 0);
         else foot(ctx, e, e.dir < 0 ? (f ? S.troWalk1 : S.troWalk2) : (f ? S.troWalk1L : S.troWalk2L), -1);
         break;
+      }
       case 'liginha': {
-        foot(ctx, e, e.dir < 0 ? (f ? S.ligWalk1 : S.ligWalk2) : (f ? S.ligWalk1L : S.ligWalk2L), -2);
+        const ai = aiImg(e);
+        if (ai) drawAI(ctx, e, ai, e.dir < 0);
+        else foot(ctx, e, e.dir < 0 ? (f ? S.ligWalk1 : S.ligWalk2) : (f ? S.ligWalk1L : S.ligWalk2L), -2);
         if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
         break;
       }
@@ -871,7 +887,7 @@ export class Level {
         if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
         break;
       }
-      case 'bigwalk': foot(ctx, e, S.gordo[e.dir < 0 ? 0 : 1], -2); break;
+      case 'bigwalk': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.gordo[e.dir < 0 ? 0 : 1], -2); break; }
       case 'crosser':
         foot(ctx, e, S.tavinho[(e.dir < 0 ? 0 : 2) + f], -2);
         if (Math.floor(e.anim / 12) % 2 === 0) drawText(ctx, 'BLA BLA', Math.round(e.x - 8), Math.round(e.y - 8), '#fff');
