@@ -210,51 +210,51 @@ export const beijo = sp([
 export const poop = sp(['.ww.', 'wWww', '.ww.', '..w.']);
 export const splat = sp(['w.w.w', '.wWw.', 'wWWWw', '.wWw.', 'w.w.w']);
 
-// ==================== TROMBADINHA (12x16) ====================
+// ==================== TROMBADINHA (13x20, moleque de rua) ====================
+// cabelo bagunçado, olhar arteiro, regata puída, bermuda, sandália
 const TRO_TOP = [
-  '..kkkkkk....',
-  '.knnnnnnk...',
-  '.knnnnnnkk..',
-  '.kssssssk...',
-  '.kskssksk...',
-  '.kssssssk...',
-  '..kskksk....',
-  '..kwwwwk....',
-  '.kswwwwsk...',
-  '.kswwwwsk...',
-  '..kxxxxk....',
+  '...kkkkk.....',
+  '..kjjjjjkk...',
+  '.kjhhhhhhjk..',
+  '.khhssssshk..',
+  '.khsslsslsk..',
+  '.khskssksk...',
+  '.khssssssk...',
+  '.khkssskkk...',
+  '..kkssssk....',
+  '..kvvvvvk....',
+  '.kvvggvvvk...',
+  '.kvvvvvvvk...',
+  '..kvvvvvk....',
+  '..kxxxxxk....',
 ];
 export const troWalk1 = sp([...TRO_TOP,
-  '..kxk.kxk...',
-  '..ksk.ksk...',
-  '.kssk.kssk..',
-  '............',
-  '............',
+  '.kxxk.kxxk...',
+  '..ssk.kss....',
+  '.kSSk.kSSk...',
 ]);
 export const troWalk2 = sp([...TRO_TOP,
-  '...kxkxk....',
-  '...ksksk....',
-  '..kssksssk..',
-  '............',
-  '............',
+  '..kxxkxxk....',
+  '..kssksskk...',
+  '.kSSkkSSk....',
 ]);
 export const troSquash = sp([
-  '............',
-  '............',
-  '............',
-  '............',
-  '............',
-  '............',
-  '............',
-  '............',
-  '............',
-  '............',
-  '..kkkkkk....',
-  '.knnnnnnk...',
-  '.kssssssk...',
-  '.kwwwwwwk...',
-  'kkkkkkkkkk..',
-  '............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '.............',
+  '...kkkkkk....',
+  '..kjhhhhjk...',
+  '..ksssssk...',
+  '.kvvvvvvvk...',
+  'kkkkkkkkkkk..',
 ]);
 export const troWalk1L = flipped(troWalk1), troWalk2L = flipped(troWalk2);
 
@@ -456,29 +456,32 @@ export const busto = sp([
 ]);
 
 // aluno das DAMAS (NPC decorativo, 16x24)
+// ==================== ALUNA DAS DAMAS (uniforme azul, 16x26) ====================
 export const damas = sp([
-  '....kkkkkkkk....',
-  '...kHHHHHHHHk...',
-  '..kHHHHHHHHHHk..',
-  '..kHHsssssHHHk..',
-  '..kssksssskssk..',
-  '..kssssssssssk..',
-  '..kssskkkksssk..',
-  '...kssssssssk...',
-  '....kkkkkkkk....',
-  '...kmmmwwmmmk...',
-  '..ksmmmwwmmmsk..',
-  '..ksmBBBBBBmsk..',
-  '..ksmmmmmmmmsk..',
-  '..ksmBBBBBBmsk..',
-  '...kmmmwmwmmk...',
-  '...kmmmmmmmmk...',
-  '...kBBBBBBBBk...',
-  '...kBBBBBBBBk...',
-  '...kssk..kssk...',
-  '...kssk..kssk...',
-  '..kttttkkttttk..',
-  '..kggggkkggggk..',
+  '...kkkkkkk......',
+  '..kHHHHHHHHkk...',
+  '.kHHHHHHHHHHHk..',
+  '.kHHssssssssHk..',
+  '.kHslssssssHHk..',
+  '.kHskssksssHk...',
+  '.kHssssssssHk...',
+  '.kHssskkkssHk...',
+  '.kHHsssssssHk...',
+  '..kkssssskk.....',
+  '..kmmmwwmmmk....',
+  '.kmmmmwwmmmmk...',
+  '.kmBBBBBBBBmk...',
+  '.kmmmmmmmmmmk...',
+  '.kmBBBBBBBBmk...',
+  '.kmmmwmwmmmmk...',
+  '..kmmmmmmmmk....',
+  '..kBBBBBBBBk....',
+  '..kBBBBBBBBk....',
+  '..kBBBBBBBBk....',
+  '..kssk.kssk.....',
+  '..kssk.kssk.....',
+  '.kwwwk.kwwwk....',
+  '.kgggk.kgggk....',
 ]);
 
 // ==================== RETRATOS (cutscene, 24x24) ====================
@@ -764,34 +767,45 @@ export const cobrador = sprite([
   '...kMMMMMMMMk...',
 ], COB_PAL);
 
-// passageiro genérico do ônibus (segurando na barra) — cores variadas
-function passageiro(cor, cor2) {
-  const P = { ...PAL, M: cor, N: cor2, h: '#3a2a1a' };
+// passageiro ADULTO do ônibus (bem maior que o Murrinha, criança) — segura na barra
+function passageiro(cor, cor2, hair) {
+  const P = { ...PAL, M: cor, N: cor2, h: hair || '#3a2a1a' };
   return sprite([
-    '..k.kkkkkk.k....',
-    '..kkhhhhhhkk....',   // braço erguido segurando barra
-    '...khhhhhhk.....',
+    '......kk........',   // mão erguida na barra do teto
+    '.....khhk.......',
+    '...kkhhhhkk.....',
+    '..khhhhhhhhk....',
+    '..khsssssshk....',
+    '..khslsslshk....',
+    '..khsksskshk....',
+    '..khsssssshk....',
+    '..khsskkssshk...',
     '...kssssssk.....',
-    '...ksskssksk....',
-    '...kssssssk.....',
-    '...ksskkssk.....',
-    '....kkkkkk......',
-    '...kMMMMMMk.....',
+    '..kMMMMMMMMk....',   // torso largo de adulto
+    '.kMMMMMMMMMMk...',
+    '.kMMMMMMMMMMk...',
+    '.kMMMMMMMMMMk...',
+    '.kMMMMMMMMMMk...',
+    '.kMMMMMMMMMMk...',
+    '.kMMMMMMMMMMk...',
     '..kMMMMMMMMk....',
-    '..kMMMMMMMMk....',
-    '..kMMMMMMMMk....',
-    '...kMMMMMMk.....',
-    '...kNNkkNNk.....',
-    '...kNNk.kNNk....',
-    '...kssk.kssk....',
+    '..kNNNNNNNNk....',   // calça
+    '..kNNNNNNNNk....',
+    '..kNNNNNNNNk....',
+    '..kNNNNNNNNk....',
+    '..kNNkkNNNk.....',
+    '..kNNk.kNNk.....',
+    '..kNNk.kNNk.....',
+    '.ktttk.ktttk....',   // sapatos
+    '.kgggk.kgggk....',
   ], P);
 }
 export const passageiros = [
-  passageiro('#c85050', '#9a3838'),
-  passageiro('#5070c8', '#38509a'),
-  passageiro('#50a060', '#387844'),
-  passageiro('#c8a040', '#9a7828'),
-  passageiro('#8050a0', '#5c3878'),
+  passageiro('#c85050', '#3a3a4a', '#3a2a1a'),  // camisa vermelha
+  passageiro('#5070c8', '#2a2a34', '#141414'),  // azul, cabelo preto
+  passageiro('#50a060', '#4a3a24', '#6a4a24'),  // verde
+  passageiro('#c8a040', '#3a3a4a', '#a8a8b0'),  // amarelo, grisalho
+  passageiro('#a0a0a8', '#2a2a34', '#2a1a10'),  // cinza
 ];
 
 // fliperama do Playtime (gabinete de arcade)

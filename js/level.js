@@ -131,7 +131,7 @@ export class Level {
         // --- Galego: chuva de pipoca (bônus) ---
         case 'q': this.ents.push({ t: 'galego', x, y: feetY(i, j, 24), w: 14, h: 24, anim: 0, pop: 40 }); break;
         // --- passageiro do ônibus (obstáculo que balança) ---
-        case 'z': this.ents.push({ t: 'passenger', x: x + 1, y: feetY(i, j, 24), w: 12, h: 24, skin: (i * 7) % 5, anim: 0, homeX: x + 1 }); break;
+        case 'z': this.ents.push({ t: 'passenger', x: x - 1, y: feetY(i, j, 28), w: 14, h: 28, skin: (i * 7) % 5, anim: 0, homeX: x - 1 }); break;
         case 'Z': this.ents.push({ t: 'cobrador', x, y: feetY(i, j, 24), w: 14, h: 24, anim: 0 }); break;
         // --- bola de fliperama: rola pelo chão, empurra o Murrinha (pule!) ---
         case 'B': this.ents.push({ t: 'roller', x, y: feetY(i, j, 10), w: 10, h: 10, vx: -1.4, dir: -1, anim: 0 }); break;
