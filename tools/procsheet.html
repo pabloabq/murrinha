@@ -1,0 +1,99 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>procsheet</title>
+<style>
+  body { margin:0; background:#20202c; color:#e8e8f0; font:13px monospace; padding:12px; }
+  canvas { image-rendering:pixelated; background:
+    repeating-conic-gradient(#3a3a4c 0% 25%, #2c2c3a 0% 50%) 50% / 20px 20px;
+    border:1px solid #44445a; margin:6px; vertical-align:bottom; }
+  #log { white-space:pre-wrap; color:#8fe; }
+</style>
+<div id="row"></div>
+<div id="log"></div>
+<script type="module">
+const log = (m) => document.getElementById('log').textContent += m + '\n';
+const q = new URLSearchParams(location.search);
+const src = q.get('src');
+const outName = q.get('out') || (src||'sheet').replace('.png','') + '_strip';
+const frames = +(q.get('frames') || 3);
+const targetH = +(q.get('h') || 46);
+const tol = +(q.get('tol') || 82);
+
+const img = new Image(); img.crossOrigin='anonymous';
+img.onload = () => { try { run(); } catch(e){ log('ERR '+e.message+'\n'+e.stack); } };
+img.onerror = () => log('nao carregou '+src);
+img.src = '/tools/' + src + '?' + Date.now();
+
+// downscale por etapas (área) -> nitidez
+function shrink(canvas, fw, fh) {
+  let cur = canvas;
+  while (cur.width/2 > fw && cur.height/2 > fh) {
+    const nc=document.createElement('canvas'); nc.width=Math.round(cur.width/2); nc.height=Math.round(cur.height/2);
+    const nx=nc.getContext('2d'); nx.imageSmoothingEnabled=true; nx.imageSmoothingQuality='high';
+    nx.drawImage(cur,0,0,nc.width,nc.height); cur=nc;
+  }
+  const out=document.createElement('canvas'); out.width=fw; out.height=fh;
+  const ox=out.getContext('2d'); ox.imageSmoothingEnabled=true; ox.imageSmoothingQuality='high';
+  ox.drawImage(cur,0,0,fw,fh);
+  return out;
+}
+
+function run() {
+  const W=img.width, H=img.height;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(img,0,0);
+  const im=x.getImageData(0,0,W,H), d=im.data;
+  // semente = média dos cantos
+  const cr=(px,py)=>{const i=(py*W+px)*4;return [d[i],d[i+1],d[i+2]];};
+  const sd=[cr(0,0),cr(W-1,0),cr(0,H-1),cr(W-1,H-1)];
+  const seed=[0,1,2].map(k=>Math.round(sd.reduce((a,s)=>a+s[k],0)/4));
+  // flood-fill bordas
+  const seen=new Uint8Array(W*H), st=[];
+  const push=(px,py)=>{if(px>=0&&px<W&&py>=0&&py<H&&!seen[py*W+px]){seen[py*W+px]=1;st.push(px,py);}};
+  for(let px=0;px<W;px++){push(px,0);push(px,H-1);} for(let py=0;py<H;py++){push(0,py);push(W-1,py);}
+  const near=(i)=>{const a=d[i]-seed[0],b=d[i+1]-seed[1],e=d[i+2]-seed[2];return Math.sqrt(a*a+b*b+e*e)<tol;};
+  while(st.length){const py=st.pop(),px=st.pop(),i=(py*W+px)*4; if(!near(i))continue; d[i+3]=0; push(px+1,py);push(px-1,py);push(px,py+1);push(px,py-1);}
+  x.putImageData(im,0,0);
+
+  // colunas com conteúdo -> agrupa em frames
+  const colHas=new Array(W).fill(false);
+  let gTop=H, gBot=0;
+  for(let px=0;px<W;px++){ for(let py=0;py<H;py++){ if(d[(py*W+px)*4+3]>24){ colHas[px]=true; if(py<gTop)gTop=py; if(py>gBot)gBot=py; } } }
+  // runs de colunas cheias
+  let runs=[], s=-1;
+  for(let px=0;px<=W;px++){ if(px<W&&colHas[px]){ if(s<0)s=px; } else { if(s>=0){ runs.push([s,px-1]); s=-1; } } }
+  runs.sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]));         // maiores primeiro
+  runs = runs.slice(0, frames).sort((a,b)=>a[0]-b[0]); // pega N e ordena por x
+  log('frames detectados: '+runs.length+' | topo '+gTop+' base '+gBot+' | runs '+JSON.stringify(runs));
+  if(runs.length<1){ log('sem frames'); return; }
+
+  const cellH = gBot-gTop+1;
+  const maxFW = Math.max(...runs.map(r=>r[1]-r[0]+1));
+  const scale = targetH/cellH;
+  const fhOut = targetH, fwOut = Math.round(maxFW*scale);
+
+  const strip=document.createElement('canvas'); strip.width=fwOut*runs.length; strip.height=fhOut;
+  const sx=strip.getContext('2d');
+  runs.forEach((r,i)=>{
+    const fw=r[1]-r[0]+1;
+    // slab alinhado: célula com o frame centralizado, pé no gBot
+    const cell=document.createElement('canvas'); cell.width=maxFW; cell.height=cellH;
+    cell.getContext('2d').drawImage(c, r[0], gTop, fw, cellH, Math.round((maxFW-fw)/2), 0, fw, cellH);
+    const small=shrink(cell, fwOut, fhOut);
+    // alpha binário leve
+    const sc=small.getContext('2d'); const oi=sc.getImageData(0,0,fwOut,fhOut),od=oi.data;
+    for(let k=0;k<od.length;k+=4){ od[k+3]= od[k+3]<90?0:255; } sc.putImageData(oi,0,0);
+    sx.drawImage(small, i*fwOut, 0);
+  });
+  log('strip '+strip.width+'x'+strip.height+' | frames='+runs.length+' frameW='+fwOut);
+
+  // preview 5x
+  const v=document.createElement('canvas'); v.width=strip.width*5; v.height=strip.height*5;
+  const vx=v.getContext('2d'); vx.imageSmoothingEnabled=false; vx.drawImage(strip,0,0,v.width,v.height);
+  document.getElementById('row').appendChild(v);
+
+  fetch('/shot?name='+outName,{method:'POST',body:strip.toDataURL('image/png')})
+    .then(()=>{ log('salvo: tools/'+outName+'.png ('+strip.width+'x'+strip.height+', '+runs.length+' frames)'); window.__done={frames:runs.length,frameW:fwOut,h:fhOut}; })
+    .catch(e=>log('save err '+e));
+}
+</script>

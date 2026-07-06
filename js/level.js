@@ -20,18 +20,30 @@ function foot(ctx, e, img, dx = 0) {
   ctx.drawImage(img, Math.round(e.x + dx), Math.round(e.y + e.h - img.height));
 }
 
-// desenha um sprite de personagem gerado por IA: centralizado na hitbox,
-// com os pés no chão e um leve "gingado" pra dar vida. Espelha se flip.
-function drawAI(ctx, e, img, flip) {
-  const bob = Math.round(Math.abs(Math.sin(e.anim * 0.14)));
-  const dx = Math.round(e.x + e.w / 2 - img.width / 2);
+// escolhe o quadro do walk-cycle: parado usa o quadro neutro; andando faz
+// ping-pong pelos passos (pernas/braços se mexem de verdade).
+function frameFor(e, frames) {
+  if (frames <= 1) return 0;
+  if (Math.abs(e.vx || 0) < 0.25) return Math.min(1, frames - 1); // neutro/parado
+  const pat = frames >= 3 ? [0, 1, 2, 1] : [0, 1];
+  return pat[Math.floor(e.anim / 7) % pat.length];
+}
+// desenha personagem de IA: pé no chão, centralizado, animando o quadro certo.
+// info = { img, frames }. Com 1 quadro, dá um leve gingado; com strip, anima.
+function drawAI(ctx, e, info, flip) {
+  const img = info.img, frames = info.frames;
+  const fw = Math.floor(img.width / frames);
+  const bob = frames > 1 ? 0 : Math.round(Math.abs(Math.sin(e.anim * 0.14)));
+  const dx = Math.round(e.x + e.w / 2 - fw / 2);
   const dy = Math.round(e.y + e.h - img.height - bob);
+  const sx = frameFor(e, frames) * fw;
   if (flip) {
-    ctx.save(); ctx.translate(dx + img.width, dy); ctx.scale(-1, 1);
-    ctx.drawImage(img, 0, 0); ctx.restore();
-  } else ctx.drawImage(img, dx, dy);
+    ctx.save(); ctx.translate(dx + fw, dy); ctx.scale(-1, 1);
+    ctx.drawImage(img, sx, 0, fw, img.height, 0, 0, fw, img.height); ctx.restore();
+  } else ctx.drawImage(img, sx, 0, fw, img.height, dx, dy, fw, img.height);
 }
 // mapa entidade -> sprite de IA (quando existir, substitui o sprite de código)
+// sprites de 1 quadro (fallback enquanto não há strip animado)
 const AI_CHAR = {
   'chaser:cacimba': 'art/char_cacimba_cut.png',
   'chaser:fiscal': 'art/char_fiscal_cut.png',
@@ -46,8 +58,19 @@ const AI_CHAR = {
   passenger: 'art/char_passageiro_cut.png',
   cobrador: 'art/char_cobrador_cut.png',
 };
-// imagem de IA da entidade (por tipo ou tipo:skin quando skin é texto), ou null
-function aiImg(e) { const p = AI_CHAR[(typeof e.skin === 'string') ? e.t + ':' + e.skin : e.t]; return p ? assets.get(p) : null; }
+// strips animados (walk-cycle) — têm prioridade sobre o sprite de 1 quadro
+const AI_STRIP = {
+  'chaser:cacimba': { path: 'art/char_cacimba_strip.png', frames: 3 },
+};
+function aiKey(e) { return (typeof e.skin === 'string') ? e.t + ':' + e.skin : e.t; }
+// info do sprite de IA da entidade: { img, frames } ou null
+function aiInfo(e) {
+  const k = aiKey(e);
+  const st = AI_STRIP[k]; if (st) { const im = assets.get(st.path); if (im) return { img: im, frames: st.frames }; }
+  const sp = AI_CHAR[k]; if (sp) { const im = assets.get(sp); if (im) return { img: im, frames: 1 }; }
+  return null;
+}
+function aiImg(e) { const i = aiInfo(e); return i ? i.img : null; } // p/ posicionar a nameTag
 
 // nome do personagem (discreto) acima da cabeça, pra saber de quem é
 const ENT_NAMES = {
@@ -866,13 +889,13 @@ export class Level {
       case 'check': ctx.drawImage(e.on ? S.checkSignOn : S.checkSign, Math.round(e.x), Math.round(e.y)); break;
       case 'tromba': {
         if (e.dead) { foot(ctx, e, S.troSquash, -1); break; }
-        const ai = aiImg(e);
+        const ai = aiInfo(e);
         if (ai) drawAI(ctx, e, ai, e.dir < 0);
         else foot(ctx, e, e.dir < 0 ? (f ? S.troWalk1 : S.troWalk2) : (f ? S.troWalk1L : S.troWalk2L), -1);
         break;
       }
       case 'liginha': {
-        const ai = aiImg(e);
+        const ai = aiInfo(e);
         if (ai) drawAI(ctx, e, ai, e.dir < 0);
         else foot(ctx, e, e.dir < 0 ? (f ? S.ligWalk1 : S.ligWalk2) : (f ? S.ligWalk1L : S.ligWalk2L), -2);
         if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
@@ -886,30 +909,29 @@ export class Level {
         }
         break;
       case 'chaser': {
-        const aiPath = AI_CHAR['chaser:' + e.skin];
-        const ai = aiPath && assets.get(aiPath);
-        if (ai) { drawAI(ctx, e, ai, e.dir < 0); }  // sprite de IA (cacimba)
+        const ai = aiInfo(e);
+        if (ai) drawAI(ctx, e, ai, e.dir < 0);
         else { const set = { fiscal: S.fiscal, cacimba: S.cacimba, ratinho: S.ratinho }[e.skin]; foot(ctx, e, set[(e.dir < 0 ? 0 : 2) + f], -2); }
         if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
         break;
       }
-      case 'bigwalk': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.gordo[e.dir < 0 ? 0 : 1], -2); break; }
+      case 'bigwalk': { const ai = aiInfo(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.gordo[e.dir < 0 ? 0 : 1], -2); break; }
       case 'crosser': {
-        const ai = aiImg(e);
+        const ai = aiInfo(e);
         if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.tavinho[(e.dir < 0 ? 0 : 2) + f], -2);
         if (Math.floor(e.anim / 12) % 2 === 0) drawText(ctx, 'BLA BLA', Math.round(e.x - 8), Math.round(e.y - 8), '#fff');
         break;
       }
-      case 'whistler': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.carrapeta[(e.dir < 0 ? 0 : 2) + f], -2); break; }
+      case 'whistler': { const ai = aiInfo(e); if (ai) drawAI(ctx, e, ai, e.dir < 0); else foot(ctx, e, S.carrapeta[(e.dir < 0 ? 0 : 2) + f], -2); break; }
       case 'galego': {
-        const ai = aiImg(e);
+        const ai = aiInfo(e);
         if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.galego, 0);
         ctx.drawImage(S.panela, Math.round(e.x + 12), Math.round(e.y + e.h - S.panela.height));
         break;
       }
-      case 'damas': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.damas, 0); break; }
-      case 'passenger': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, e.skin % 2 ? true : false); else foot(ctx, e, S.passageiros[e.skin], -2); break; }
-      case 'cobrador': { const ai = aiImg(e); if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.cobrador, -1); break; }
+      case 'damas': { const ai = aiInfo(e); if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.damas, 0); break; }
+      case 'passenger': { const ai = aiInfo(e); if (ai) drawAI(ctx, e, ai, e.skin % 2 ? true : false); else foot(ctx, e, S.passageiros[e.skin], -2); break; }
+      case 'cobrador': { const ai = aiInfo(e); if (ai) drawAI(ctx, e, ai, false); else foot(ctx, e, S.cobrador, -1); break; }
       case 'roller': {
         const a = (e.anim * 0.12) % (Math.PI / 2); // rotação simulada
         ctx.save(); ctx.translate(Math.round(e.x + 5), Math.round(e.y + 5)); ctx.rotate(e.dir * a);
