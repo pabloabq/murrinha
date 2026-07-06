@@ -14,6 +14,9 @@ const DECO_TILES = new Set(['A', 'i', 'c']);
 const FLOOR_FILL = new Set(['#', '#2', 'y', 'u', 'S', 'R', 'L', 'L2', 'L3', 'T']);
 const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
+// px lógicos por quadro do walk-cycle: a animação avança pela DISTÂNCIA andada
+// (não por relógio), então o passo cola no chão e não patina em nenhuma velocidade.
+const WALK_STRIDE = 5.0;
 
 // desenha um sprite de personagem com a BASE alinhada aos pés do hitbox (no chão)
 function foot(ctx, e, img, dx = 0) {
@@ -24,9 +27,14 @@ function foot(ctx, e, img, dx = 0) {
 // ping-pong pelos passos (pernas/braços se mexem de verdade).
 function frameFor(e, frames) {
   if (frames <= 1) return 0;
-  if (Math.abs(e.vx || 0) < 0.25) return Math.min(1, frames - 1); // neutro/parado
-  const pat = frames >= 3 ? [0, 1, 2, 1] : [0, 1];
-  return pat[Math.floor(e.anim / 7) % pat.length];
+  const moving = Math.abs(e.vx || 0) >= 0.25;
+  if (frames === 3) {                                  // strips legado (ping-pong)
+    if (!moving) return 1;                             // quadro neutro no meio
+    return [0, 1, 2, 1][Math.floor(e.anim / 7) % 4];
+  }
+  // ciclo completo (>=4 quadros): anima pela distância percorrida (sem patinar)
+  if (!moving) return 0;
+  return ((Math.floor(e.x / WALK_STRIDE)) % frames + frames) % frames;
 }
 // desenha personagem de IA: pé no chão, centralizado, animando o quadro certo.
 // info = { img, frames }. A fonte é alta-res (SS×), então desenha em tamanho
@@ -66,7 +74,7 @@ const AI_STRIP = {
   'chaser:fiscal': { path: 'art/char_fiscal_strip.png', frames: 3 },
   'chaser:ratinho': { path: 'art/char_ratinho_strip.png', frames: 3 },
   tromba: { path: 'art/char_trombadinha_strip.png', frames: 3 },
-  liginha: { path: 'art/char_vanita_strip.png', frames: 3 },
+  liginha: { path: 'art/char_vanita_walk.png', frames: 6 },
   bigwalk: { path: 'art/char_gordo_strip.png', frames: 3 },
   crosser: { path: 'art/char_tavinho_strip.png', frames: 3 },
   whistler: { path: 'art/char_carrapeta_strip.png', frames: 3 },
@@ -177,7 +185,7 @@ export class Level {
         case 'n': this.ents.push({ t: 'nota', x: x + 2, y: y + 4, w: 12, h: 9, key, anim: 0 }); break;
         case 'a': this.ents.push({ t: 'maca', x: x + 4, y: y + 4, w: 8, h: 9, key }); break;
         case 't': this.ents.push({ t: 'ticket', x: x + 3, y: y + 5, w: 10, h: 5, key, anim: 0 }); break;
-        case '1': this.ents.push({ t: 'liginha', x, y: feetY(i, j, 26), w: 12, h: 26, vx: -0.5, dir: -1, mode: 'patrol', anim: 0, saw: 0 }); break;
+        case '1': this.ents.push({ t: 'liginha', x, y: feetY(i, j, 26), w: 12, h: 26, vx: -0.5, dir: -1, mode: 'patrol', anim: 0, saw: 0, susp: 0, look: 0, homeX: x, range: 60 }); break;
         case 'g': this.ents.push({ t: 'tromba', x: x + 2, y: feetY(i, j, 16), w: 10, h: 16, vx: -0.45, dir: -1, anim: 0, dead: 0 }); break;
         case 'o': this.ents.push({ t: 'pombo', x: x + 3, y: y + 8, w: 10, h: 8, mode: 'perch', vx: 0, anim: 0, drop: 0, homeY: y + 8 }); break;
         case 'C': { // ancora a placa no chão abaixo dela
@@ -311,6 +319,9 @@ export class Level {
       if (Math.abs(p.vx) < FRIC) p.vx = 0; else p.vx -= FRIC * Math.sign(p.vx);
     }
     p.ground = this.onGround(p);
+    // agachar (↓ no chão) = esconder: some do campo de visão da Vanita quando parado
+    p.crouch = !stunned && input.held('down') && p.ground;
+    p.hiding = p.crouch && Math.abs(p.vx) < 0.5;
     if (!stunned && input.pressed('a') && p.ground) {
       p.vy = -(4.7 + Math.abs(p.vx) * 0.30);
       p.jumpHeld = true;
@@ -518,27 +529,55 @@ export class Level {
     }
   }
 
+  // VANITA — stealth: campo de visão (cone) + barra de suspeita.
+  // Ela varre o corredor; de vez em quando abaixa o olhar pra anotar na prancheta
+  // (cone off = sua brecha). Ela te vê se você estiver NO CONE e NÃO escondido
+  // (agachado). Ser visto enche a suspeita; cheia = APITO + perseguição.
   upLiginha(e, p) {
     e.anim++;
-    const dx = (p.x + p.w / 2) - (e.x + e.w / 2), dy = Math.abs(p.y - e.y);
+    if (e.susp === undefined) { e.susp = 0; e.look = 0; }
+    const dx = (p.x + p.w / 2) - (e.x + e.w / 2), dy = Math.abs((p.y + p.h / 2) - (e.y + e.h / 2));
+    // ciclo da prancheta: ~4.7s olhando, ~1.4s anotando (cega)
+    e.look = (e.look + 1) % 366;
+    e.looking = e.look >= 84;
+    // cone: à frente, alcance 96, altura 30
+    const inCone = Math.sign(dx) === e.dir && Math.abs(dx) < 96 && dy < 30;
+    const spots = e.looking && inCone && !p.hiding && this.state === 'play';
+    e.spots = spots;
+
     if (e.mode === 'patrol') {
-      if (dy < 44 && Math.abs(dx) < 105 && Math.sign(dx) === e.dir) {
-        e.mode = 'chase'; e.saw = 40; audio.sfx('apito');
+      if (spots) {
+        const near = 1 - Math.abs(dx) / 96 * 0.5;               // mais perto = enche mais rápido
+        e.susp += (Math.abs(p.vx) > WALK + 0.05 ? 4.5 : 2.6) * near;  // correndo denuncia mais
+      } else {
+        e.susp -= 3;
       }
-      if (this.onGround(e) && this.edgeAhead(e)) { e.vx *= -1; e.dir *= -1; }
-      if (this.moveX(e, e.vx)) { e.vx *= -1; e.dir *= -1; }
-    } else { // chase (mais devagar que a corrida do Murrinha — dá pra pular por cima)
+      e.susp = Math.max(0, Math.min(100, e.susp));
+      if (e.susp >= 100) { e.mode = 'chase'; e.saw = 40; audio.sfx('apito'); this.say('PAROU, GAZEADOR!'); }
+      // patrulha um trecho (pausa ao anotar); vira nos limites (home±range) e nas bordas/paredes
+      if (e.homeX === undefined) e.homeX = e.x;
+      const range = e.range || 64;
+      if ((e.x - e.homeX) > range && e.dir > 0) e.dir = -1;
+      else if ((e.x - e.homeX) < -range && e.dir < 0) e.dir = 1;
+      const step = e.looking ? (e.dir * 0.5) : 0;
+      if (step) {
+        if (this.onGround(e) && this.edgeAhead(e)) e.dir = -e.dir;
+        else if (this.moveX(e, step)) e.dir = -e.dir;
+      }
+      e.vx = step;
+    } else { // perseguição
       if (e.saw > 0) e.saw--;
-      const spd = 1.15;
       e.dir = Math.sign(dx) || e.dir;
-      e.vx = e.dir * spd;
-      if (this.onGround(e) && this.edgeAhead(e)) { e.vx = 0; } // não pula do prédio
-      else this.moveX(e, e.vx);
-      if (Math.abs(dx) > 170 || dy > 60) { e.mode = 'patrol'; e.vx = e.dir * 0.5; }
+      e.vx = e.dir * 1.15;
+      if (this.onGround(e) && this.edgeAhead(e)) e.vx = 0; else this.moveX(e, e.vx);
+      // perde de vista (longe, escondido ou fora do cone por um tempo) -> volta a patrulhar
+      const lost = Math.abs(dx) > 170 || dy > 60 || (p.hiding && Math.abs(dx) > 40);
+      e.susp = lost ? e.susp - 1.5 : 100;
+      if (e.susp <= 0) { e.mode = 'patrol'; e.susp = 0; e.vx = e.dir * 0.5; }
     }
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
-    // só pega se o Murrinha NÃO estiver claramente por cima dela (dá pra pular por cima!)
+    // pega no toque (mas ainda dá pra pular por cima)
     if (p.inv <= 0 && this.state === 'play' && this.overlap(p, e) && p.y + p.h > e.y + 10)
       this.hurt(false, 'PEGO PELA VANITA!');
   }
@@ -847,26 +886,29 @@ export class Level {
     if (p.inv > 0 && (p.inv % 6 < 3) && this.state === 'play') return;
     let img;
     const right = p.dir >= 0;
-    const strip = assets.get('art/char_murrinha_strip.png');
-    const aip = strip || assets.get('art/char_murrinha_cut.png');
-    if (aip) {
-      const frames = strip ? 3 : 1;
-      const fw = Math.floor(aip.width / frames);
-      const lw = fw / SS, lh = aip.height / SS;   // tamanho lógico (fonte alta-res)
-      // quadro: no ar usa passo aberto; andando faz ping-pong; parado, neutro
-      let fr = 0;
-      if (frames > 1) {
-        if (!p.ground) fr = 2;
-        else if (Math.abs(p.vx) > 0.25) fr = [0, 1, 2, 1][Math.floor(p.anim / 6) % 4];
-        else fr = 1;
+    const walk = assets.get('art/char_murrinha_walk.png');   // ciclo de 4 quadros
+    const idle = assets.get('art/char_murrinha_idle.png');
+    if (walk && idle) {
+      const WF = 4, wfw = Math.floor(walk.width / WF);
+      const A = n => assets.get('art/char_murrinha_' + n + '.png') || idle;
+      let src, fw, fr = 0;
+      if (!p.ground) {                       // no ar: subindo = pulo, descendo = queda
+        src = p.vy < 0 ? A('jump') : A('fall'); fw = src.width;
+      } else if (p.hiding) {                 // escondido (agachado e parado)
+        src = A('hide'); fw = src.width;
+      } else if (p.crouch) {                 // agachado
+        src = A('crouch'); fw = src.width;
+      } else if (Math.abs(p.vx) > 0.3) {     // andando: quadro pela distância andada
+        src = walk; fw = wfw; fr = ((Math.floor(p.x / WALK_STRIDE)) % WF + WF) % WF;
+      } else {                               // parado
+        src = idle; fw = idle.width;
       }
-      let bob = 0;
-      if (frames === 1 && p.ground && Math.abs(p.vx) > 0.2) bob = Math.round(Math.abs(Math.sin(p.anim * 0.25)));
+      const lw = fw / SS, lh = src.height / SS;
       const dx = Math.round(p.x + p.w / 2 - lw / 2);
-      const dy = Math.round(p.y + p.h - lh - bob);
+      const dy = Math.round(p.y + p.h - lh);
       const sxp = fr * fw;
-      if (right) ctx.drawImage(aip, sxp, 0, fw, aip.height, dx, dy, lw, lh);
-      else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(aip, sxp, 0, fw, aip.height, 0, 0, lw, lh); ctx.restore(); }
+      if (right) ctx.drawImage(src, sxp, 0, fw, src.height, dx, dy, lw, lh);
+      else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(src, sxp, 0, fw, src.height, 0, 0, lw, lh); ctx.restore(); }
     } else {
       if (this.state === 'dying') img = right ? S.murrJump : S.murrJumpL;
       else if (!p.ground) img = right ? S.murrJump : S.murrJumpL;
@@ -918,10 +960,48 @@ export class Level {
         break;
       }
       case 'liginha': {
-        const ai = aiInfo(e);
-        if (ai) drawAI(ctx, e, ai, e.dir < 0);
-        else foot(ctx, e, e.dir < 0 ? (f ? S.ligWalk1 : S.ligWalk2) : (f ? S.ligWalk1L : S.ligWalk2L), -2);
-        if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
+        // campo de visão (cone) — desenhado ATRÁS dela
+        if (e.looking || e.mode === 'chase') {
+          const eyeX = e.dir >= 0 ? e.x + e.w - 1 : e.x + 1;
+          const eyeY = e.y + 6, len = 96 * (e.dir >= 0 ? 1 : -1);
+          const t = (e.susp || 0) / 100;
+          const alpha = e.mode === 'chase' ? 0.42 : 0.24 + t * 0.18;
+          ctx.beginPath();
+          ctx.moveTo(eyeX, eyeY);
+          ctx.lineTo(eyeX + len, eyeY - 18);
+          ctx.lineTo(eyeX + len, eyeY + 18);
+          ctx.closePath();
+          // amarelo brilhante -> vermelho conforme a suspeita (sem perder brilho)
+          ctx.fillStyle = `rgba(255,${Math.round(230 - 150 * t)},${Math.round(120 - 95 * t)},${alpha})`;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(255,${Math.round(240 - 130 * t)},${Math.round(150 - 110 * t)},0.75)`;
+          ctx.lineWidth = 1; ctx.stroke();
+        }
+        const vwalk = assets.get('art/char_vanita_walk.png');
+        const vidle = assets.get('art/char_vanita_idle.png');
+        if (vwalk && vidle) {
+          const WF = 4, cw = Math.floor(vwalk.width / WF);
+          let src, fw, fr = 0;
+          if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: aponta e grita
+          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = ((Math.floor(e.x / WALK_STRIDE)) % WF + WF) % WF; }
+          else { src = vidle; fw = vidle.width; }
+          const lw = fw / SS, lh = src.height / SS;
+          const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh);
+          if (e.dir >= 0) ctx.drawImage(src, fr * fw, 0, fw, src.height, dx, dy, lw, lh);
+          else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(src, fr * fw, 0, fw, src.height, 0, 0, lw, lh); ctx.restore(); }
+        } else {
+          const ai = aiInfo(e);
+          if (ai) drawAI(ctx, e, ai, e.dir < 0);
+          else foot(ctx, e, e.dir < 0 ? (f ? S.ligWalk1 : S.ligWalk2) : (f ? S.ligWalk1L : S.ligWalk2L), -2);
+        }
+        // indicador de suspeita: ? enchendo (pisca mais rápido) -> ! na perseguição
+        if (e.mode === 'chase') {
+          if (e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
+        } else if ((e.susp || 0) > 6) {
+          const blink = Math.max(4, 20 - Math.floor(e.susp / 6));
+          if (Math.floor(e.anim / blink) % 2 === 0)
+            drawText(ctx, '?', Math.round(e.x + 5), Math.round(e.y - 10), e.susp > 60 ? '#f80' : '#fd0', 2);
+        }
         break;
       }
       case 'pombo':

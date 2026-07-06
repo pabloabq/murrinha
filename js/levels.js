@@ -149,6 +149,26 @@ const cad8 = [ // fachada: marquise + leões + saída
   '####################',
 ];
 
+// SALA DE STEALTH (fatia vertical p/ testar): corredor onde a VANITA patrulha o
+// meio com campo de visão. Passe por ela sem ser visto (agache ↓ quando o cone
+// vier; avance na brecha em que ela abaixa pra anotar). Fichas no caminho = risco.
+const sala1 = [
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '....................................................',
+  '..P.....f.......f........1........f.......f.......G..',
+  '....................................................',
+  '....................................................',
+  '####################################################',
+  '####################################################',
+];
+
 export function bgCAD(ctx, camX, camY, t) {
   const cy = camY * 0.5;
   // parede da escola: painel bege claro em cima, rodapé (lambril) mais escuro
@@ -1331,19 +1351,19 @@ function decoBus(ctx, lvl) {
 export const LEVELS = {
   cad: {
     id: 'cad', name: 'FUGA DO CAD', music: 'cad',
-    map: join(cad1, cad2, cad3, cad4, cad5, cad6, cad7, cad8),
+    map: sala1,
     bg: bgCAD, bgImg: 'art/cad.png', deco: decoCAD,
-    clearMsg: 'ESCAPOU DA VANITA!',
-    objetivo: 'Fuja da escola e chegue na porta da entrada (entre os leoes) sem ser pego.',
+    clearMsg: 'PASSOU PELA VANITA!',
+    objetivo: 'Passe pela Vanita sem entrar no campo de visao dela e chegue na saida.',
     desafios: [
-      { spr: 'vanita', nm: 'VANITA', tip: 'A diretora! Encostou, pegou. Corra e passe longe.' },
-      { spr: 'ficha', nm: 'FICHAS', tip: 'Colete 100 = 1 vida extra.' },
+      { spr: 'vanita', nm: 'VANITA', tip: 'Ela te ve pelo CONE de visao. Agache (para baixo) pra sumir; avance quando ela abaixar pra anotar.' },
+      { spr: 'ficha', nm: 'FICHAS', tip: 'No caminho da Vanita: pegar vale coragem. 100 = 1 vida.' },
     ],
     cutscene: [
       { who: 'murr', name: 'MURRINHA', text: 'Prova de matematica hoje? Hoje nao... HOJE NAO.' },
-      { who: 'murr', name: 'MURRINHA', text: 'Vou gazear. So preciso sair da escola sem a Vanita me ver.' },
+      { who: 'murr', name: 'MURRINHA', text: 'Vou gazear. So preciso passar pela Vanita sem ela me ver.' },
       { who: 'lig', name: 'VANITA', text: 'Eu SINTO cheiro de gazeador solto nesse colegio...' },
-      { who: 'murr', name: 'MURRINHA', text: 'Vixe. La vem ela. Perna, pra que te quero!' },
+      { who: 'murr', name: 'MURRINHA', text: 'Ela olha, anota, olha... na hora que ela abaixar, eu passo. Agachar pra sumir!' },
     ],
   },
   praca: {
@@ -1360,29 +1380,6 @@ export const LEVELS = {
       { who: 'murr', name: 'MURRINHA', text: 'Livre! Agora e so atravessar a Praca dos Pombos...' },
       { who: 'pombo', name: 'POMBO', text: 'PRU. PRU-PRU. (mirando com precisao cirurgica)' },
       { who: 'murr', name: 'MURRINHA', text: '...sem levar uma cagada na cabeca. E olho nos trombadinhas!' },
-    ],
-  },
-  flor: {
-    id: 'flor', name: 'TRAVESSIA DA FLORIANO', music: 'floriano',
-    map: FLOR_MAP,
-    bg: bgFloriano, deco: decoFloriano,
-    goalY: 55,                     // vence ao pisar na calçada da TELPA (lá em cima)
-    clearMsg: 'ALO, MAE? TO NA ESCOLA!',
-    objetivo: 'SUBA atravessando as 4 faixas da avenida ate a calcada da TELPA la em cima.',
-    desafios: [
-      { spr: 'carro', nm: 'CARROS E MOTOS', tip: 'Atropelam! So passe quando a faixa estiver limpa.' },
-      { spr: 'escada', nm: 'CANTEIROS', tip: 'Descanse neles com seguranca entre as faixas.' },
-    ],
-    laneTraffic: [
-      { topRow: 5,  dir: 1,  speed: 1.6, every: 135, types: ['carro', 'carro', 'moto'] },
-      { topRow: 8,  dir: -1, speed: 1.9, every: 120, types: ['carro', 'moto', 'carro'] },
-      { topRow: 11, dir: 1,  speed: 2.0, every: 118, types: ['moto', 'carro', 'moto'] },
-      { topRow: 14, dir: -1, speed: 1.6, every: 145, types: ['carro', 'carro', 'moto'] },
-    ],
-    cutscene: [
-      { who: 'murr', name: 'MURRINHA', text: 'A Floriano na hora do rush. Pra ligar da TELPA, tenho que atravessar ela toda.' },
-      { who: 'cego', name: 'CEGO DA FICHA', text: 'Sobe com juizo, menino. Descansa nos canteiros e passa quando a faixa tiver limpa.' },
-      { who: 'murr', name: 'MURRINHA', text: 'Subir faixa por faixa sem virar panqueca. Bora!' },
     ],
   },
   bras: {
@@ -1439,8 +1436,8 @@ export const LEVELS = {
   fisk: {
     id: 'fisk', name: 'FISK E O GALEGO', music: 'praca',
     map: join(fk1, fk2, fk3, fk4, fk5, fk6),
-    bg: bgFisk, bgImg: 'art/fisk.png', deco: decoFisk, throwKnives: true,
-    clearMsg: 'CORREU DO RATINHO!',
+    bg: bgFisk, bgImg: 'art/fisk.png', deco: decoFisk, throwKnives: true, ending: true,
+    clearMsg: 'CHEGOU NO PONTO! FIM DE TARDE!',
     objetivo: 'Pegue a pipoca do Galego e corra do Ratinho ate o ponto de onibus.',
     desafios: [
       { spr: 'galego', nm: 'GALEGO', tip: 'Pegue os graos que pulam da panela: cada um vale uma ficha!' },
@@ -1453,37 +1450,6 @@ export const LEVELS = {
       { who: 'murr', name: 'MURRINHA', text: 'E cuidado: o Ratinho ta rondando querendo meu tenis...' },
     ],
   },
-  fila: {
-    id: 'fila', name: 'FILA DO ONIBUS', music: 'cad',
-    map: join(fi1, fi2, fi3, fi4, fi5, fi6),
-    bg: bgFila, bgImg: 'art/fila.png', deco: decoFila,
-    clearMsg: 'ENTROU NO ONIBUS!',
-    objetivo: 'Chegue na porta de tras do onibus protegendo sua carteira.',
-    desafios: [
-      { spr: 'tromba', nm: 'TROMBADINHAS', tip: 'Enxame querendo bater sua carteira. Pule na cabeca deles!' },
-    ],
-    cutscene: [
-      { who: 'murr', name: 'MURRINHA', text: 'Fim de tarde. Hora de pegar o onibus como se tivesse saido da aula.' },
-      { who: 'murr', name: 'MURRINHA', text: 'A fila ta cheia de trombadinha querendo bater minha carteira. Pula neles!' },
-    ],
-  },
-  bus: {
-    id: 'bus', name: 'O ONIBUS LOTADO', music: 'floriano',
-    map: join(bu1, bu2, bu3, bu4, bu5, bu6),
-    bg: bgBus, bgImg: 'art/bus.png', deco: decoBus,
-    clearMsg: 'DESCEU NO PONTO CERTO!',
-    ending: true,
-    objetivo: 'Fure o onibus lotado da porta de tras ate a frente e desca no ponto certo.',
-    desafios: [
-      { spr: 'tromba', nm: 'PASSAGEIROS', tip: 'Empurram voce. Fure a multidao pra frente.' },
-      { spr: 'catraca', nm: 'CATRACA', tip: 'Pule por cima dela.' },
-      { spr: 'ratinho', nm: 'RATINHO', tip: 'Ele tambem pegou esse onibus! Cuidado.' },
-    ],
-    cutscene: [
-      { who: 'murr', name: 'MURRINHA', text: 'Entrei pela porta de tras. Agora atravessar o onibus LOTADO ate a frente.' },
-      { who: 'murr', name: 'MURRINHA', text: 'Fura a multidao, passa da catraca e desce no ponto certo. Ninguem vai saber!' },
-    ],
-  },
 };
 
 // ================= NÓS DO MAPA-MÚNDI =================
@@ -1493,12 +1459,9 @@ export const NODES = [
   { id: 'bras',   label: 'AS BRASILEIRAS', x: 196, y: 64,  playable: true },
   { id: 'play',   label: 'PLAYTIME',       x: 52,  y: 118, playable: true },
   { id: 'calc',   label: 'CALCADAO',       x: 128, y: 136, playable: true },
-  { id: 'flor',   label: 'AV. FLORIANO / TELPA', x: 226, y: 96, playable: true },
-  { id: 'fisk',   label: 'FISK / GALEGO',  x: 180, y: 140, playable: true },
-  { id: 'fila',   label: 'FILA DO ONIBUS', x: 262, y: 128, playable: true },
-  { id: 'bus',    label: 'ONIBUS LOTADO',  x: 292, y: 96,  playable: true },
+  { id: 'fisk',   label: 'FISK / GALEGO',  x: 200, y: 120, playable: true },
 ];
 export const EDGES = [
   ['cad', 'praca'], ['praca', 'bras'], ['cad', 'play'], ['praca', 'calc'],
-  ['bras', 'flor'], ['calc', 'fisk'], ['flor', 'fila'], ['fisk', 'fila'], ['fila', 'bus'],
+  ['calc', 'fisk'],
 ];

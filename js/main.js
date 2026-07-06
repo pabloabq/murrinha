@@ -72,7 +72,7 @@ const G = {
 // pré-carrega os cenários gerados por IA
 import * as assets from './assets.js';
 assets.load(['art/title.png', 'art/cad.png', 'art/praca.png', 'art/bras.png', 'art/play.png',
-  'art/calc.png', 'art/fisk.png', 'art/fila.png', 'art/bus.png',
+  'art/calc.png', 'art/fisk.png',
   'art/char_cacimba_cut.png', 'art/char_murrinha_cut.png',
   'art/char_trombadinha_cut.png', 'art/char_vanita_cut.png',
   'art/char_fiscal_cut.png', 'art/char_gordo_cut.png',
@@ -84,6 +84,10 @@ assets.load(['art/title.png', 'art/cad.png', 'art/praca.png', 'art/bras.png', 'a
   'art/char_passageiro4_cut.png', 'art/char_passageiro5_cut.png',
   'art/char_passageiro6_cut.png', 'art/char_passageiro7_cut.png',
   'art/char_passageiro8_cut.png', 'art/char_passageiro9_cut.png',
+  'art/char_murrinha_walk.png', 'art/char_vanita_walk.png',
+  'art/char_murrinha_idle.png', 'art/char_murrinha_jump.png', 'art/char_murrinha_fall.png',
+  'art/char_murrinha_crouch.png', 'art/char_murrinha_hide.png', 'art/char_murrinha_slide.png',
+  'art/char_vanita_idle.png', 'art/char_vanita_whistle.png',
   'art/char_cacimba_strip.png', 'art/char_murrinha_strip.png',
   'art/char_fiscal_strip.png', 'art/char_ratinho_strip.png',
   'art/char_trombadinha_strip.png', 'art/char_vanita_strip.png',

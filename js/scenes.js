@@ -266,7 +266,7 @@ export class WorldMap {
 
 // ==================== FINAL + CRÉDITOS ====================
 const ENDING_LINES = [
-  { who: 'murr', name: 'MURRINHA', text: 'Desci no ponto de sempre. Cheguei em casa na hora certa. Perfeito.' },
+  { who: 'murr', name: 'MURRINHA', text: 'Peguei o busao no ponto de sempre e cheguei em casa na hora certa. Perfeito.' },
   { who: 'mae', name: 'MAE', text: 'E a escola hoje, meu filho? Como foi a aula?' },
   { who: 'murr', name: 'MURRINHA', text: 'Foi otima, mae. Aprendi um monte de coisa. (piscadela)' },
   { who: 'lig', name: 'VANITA', text: 'Na diretoria... "Murrinha, faltou de novo. Da proxima, eu PEGO."' },
