@@ -3,47 +3,104 @@
 <title>sprites</title>
 <style>
   body { margin:0; background:#20202c; color:#e8e8f0; font:12px monospace; }
-  #wrap { display:flex; flex-wrap:wrap; gap:10px; padding:12px; }
+  h2 { padding:8px 12px 0; margin:0; color:#f2d24e; }
+  #wrap, #demo { display:flex; flex-wrap:wrap; gap:10px; padding:12px; align-items:flex-end; }
   .cell { background:#2c2c3a; border:1px solid #44445a; border-radius:6px; padding:6px 8px 8px; text-align:center; }
   .cell canvas { display:block; image-rendering:pixelated; background:#3a3a4c; margin:0 auto 4px; }
   .cell div { font-size:11px; letter-spacing:.5px; }
 </style>
+<h2>DEMO — capricho máximo (personagem maior + detalhado)</h2>
+<div id="demo"></div>
+<h2>Elenco atual (tamanho de jogo)</h2>
 <div id="wrap"></div>
 <script type="module">
 import * as S from '../js/sprites.js';
+import { sprite } from '../js/gfx.js';
 
-const SCALE = 5;
-const wrap = document.getElementById('wrap');
-
-// nomes que queremos inspecionar (personagens)
-const names = [
-  'murrIdle','murrWalk1','murrWalk2','murrJump',
-  'ligWalk1','ligWalk2',
-  'troWalk1','troWalk2',
-  'damas',
-  'fiscal','cacimba','carrapeta','tavinho','gordo','galego','ratinho','cobrador',
-  'passageiros',
+// ---- DEMO: Cacimba grande, desenhado à mão em alta resolução ----
+const DPAL = {
+  K:'#12101a', l:'#ffd8a6', s:'#edb37e', S:'#c88a54',
+  j:'#6b4422', h:'#412a12', H:'#271808',
+  p:'#f79dca', m:'#e15fa2', M:'#b23d7e',
+  d:'#3f56ad', b:'#6a86d8', D:'#283a72',
+  w:'#fff6ee', e:'#c53a68', g:'#9a9aa8',
+};
+const CACIMBA_BIG = [
+  '........HHHHHHHH........',
+  '......HHjjjjjjjjHH......',
+  '.....HjjjjjjjjjjjjH.....',
+  '....HjjhhhhhhhhhhjjH....',
+  '....KhhhhhhhhhhhhhhK....',
+  '...KhhllssssssssllhhK...',
+  '...KhlssssssssssssslhK..',
+  '...KhsHHssssssssHHshK...',
+  '...KhssswKwsswKwssshK...',
+  '...KhlssssssssssssslhK..',
+  '...KhssssSSsssssssshK...',
+  '...KhsseKwwwwwwKesshK...',
+  '...KhssseeeeeeeessshK...',
+  '....KhssssssssssshK.....',
+  '.......KssssssssK.......',
+  '......KSssssssssSK......',
+  '....KKmmmmmmmmmmmmKK....',
+  '...KmpmmmmmmmmmmmmpmK...',
+  '..KsssKmmmmmmmmmmKsssK..',
+  '..KslsKmMmmmmmmMmKslsK..',
+  '..KslsKmmmmmmmmmmKslsK..',
+  '..KslsKmmmmmmmmmmKslsK..',
+  '..KslsKmMmmmmmmMmKslsK..',
+  '..KssKKmmmmmmmmmmKKssK..',
+  '...KsssKmmmmmmmmKsssK...',
+  '...KsslKmmmmmmmmKlssK...',
+  '....KKKKmmmmmmmmKKKK....',
+  '....KddddddddddddddK....',
+  '....KdbddddddddddDDK....',
+  '....KddddddddddddDDK....',
+  '.....KsssK..KsssK......',
+  '.....KslsK..KslsK......',
+  '.....KslsK..KslsK......',
+  '.....KslsK..KslsK......',
+  '.....KssK...KssK.......',
+  '....KwwwwK.KwwwwK......',
+  '...KwwwwwwKKwwwwwwK....',
+  '...KwgggggKKwgggggK....',
+  '...KKKKKKK.KKKKKKK.....',
 ];
 
-function addOne(label, img) {
+const SCALE = 5;
+
+function addTo(parent, label, img, scale) {
   const cell = document.createElement('div');
   cell.className = 'cell';
   const c = document.createElement('canvas');
-  c.width = img.width * SCALE; c.height = img.height * SCALE;
+  c.width = img.width * scale; c.height = img.height * scale;
   const x = c.getContext('2d');
   x.imageSmoothingEnabled = false;
   x.drawImage(img, 0, 0, c.width, c.height);
   const t = document.createElement('div');
   t.textContent = label + ' ' + img.width + 'x' + img.height;
   cell.appendChild(c); cell.appendChild(t);
-  wrap.appendChild(cell);
+  parent.appendChild(cell);
 }
 
+const demo = document.getElementById('demo');
+const big = sprite(CACIMBA_BIG, DPAL);
+addTo(demo, 'CACIMBA grande (à mão)', big, 6);
+// comparação lado a lado no tamanho real de jogo
+addTo(demo, 'Cacimba grande @ jogo', big, 2);
+addTo(demo, 'Cacimba atual @ jogo', S.cacimba[0], 2);
+addTo(demo, 'Cacimba atual (zoom)', S.cacimba[0], 6);
+
+const wrap = document.getElementById('wrap');
+const names = [
+  'murrIdle','ligWalk1','troWalk1','damas',
+  'fiscal','cacimba','carrapeta','tavinho','gordo','galego','ratinho','cobrador',
+];
 for (const n of names) {
   const v = S[n];
-  if (!v) { const d = document.createElement('div'); d.className='cell'; d.textContent = n+' ?'; wrap.appendChild(d); continue; }
-  if (Array.isArray(v)) v.forEach((img, i) => addOne(n + '[' + i + ']', img));
-  else addOne(n, v);
+  if (!v) continue;
+  if (Array.isArray(v)) addTo(wrap, n + '[0]', v[0], SCALE);
+  else addTo(wrap, n, v, SCALE);
 }
 window.__ready = true;
 </script>
