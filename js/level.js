@@ -16,7 +16,7 @@ const GRAV = 0.30, GRAV_HOLD = 0.13, TERM = 5.2;
 const WALK = 1.35, RUN = 2.1, ACC = 0.09, FRIC = 0.12;
 // px lógicos por quadro do walk-cycle: a animação avança pela DISTÂNCIA andada
 // (não por relógio), então o passo cola no chão e não patina em nenhuma velocidade.
-const WALK_STRIDE = 5.0;
+const WALK_STRIDE = 11.0;
 
 // desenha um sprite de personagem com a BASE alinhada aos pés do hitbox (no chão)
 function foot(ctx, e, img, dx = 0) {
