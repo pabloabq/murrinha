@@ -20,6 +20,20 @@ function foot(ctx, e, img, dx = 0) {
   ctx.drawImage(img, Math.round(e.x + dx), Math.round(e.y + e.h - img.height));
 }
 
+// desenha um sprite de personagem gerado por IA: centralizado na hitbox,
+// com os pés no chão e um leve "gingado" pra dar vida. Espelha se flip.
+function drawAI(ctx, e, img, flip) {
+  const bob = Math.round(Math.abs(Math.sin(e.anim * 0.14)));
+  const dx = Math.round(e.x + e.w / 2 - img.width / 2);
+  const dy = Math.round(e.y + e.h - img.height - bob);
+  if (flip) {
+    ctx.save(); ctx.translate(dx + img.width, dy); ctx.scale(-1, 1);
+    ctx.drawImage(img, 0, 0); ctx.restore();
+  } else ctx.drawImage(img, dx, dy);
+}
+// mapa entidade -> sprite de IA (quando existir, substitui o sprite de código)
+const AI_CHAR = { 'chaser:cacimba': 'art/char_cacimba_cut.png' };
+
 // nome do personagem (discreto) acima da cabeça, pra saber de quem é
 const ENT_NAMES = {
   liginha: 'VANITA', bigwalk: 'GORDO', crosser: 'TAVINHO', whistler: 'CARRAPETA',
@@ -839,8 +853,10 @@ export class Level {
         break;
       case 'damas': foot(ctx, e, S.damas, 0); break;
       case 'chaser': {
-        const set = { fiscal: S.fiscal, cacimba: S.cacimba, ratinho: S.ratinho }[e.skin];
-        foot(ctx, e, set[(e.dir < 0 ? 0 : 2) + f], -2);
+        const aiPath = AI_CHAR['chaser:' + e.skin];
+        const ai = aiPath && assets.get(aiPath);
+        if (ai) { drawAI(ctx, e, ai, e.dir < 0); }  // sprite de IA (cacimba)
+        else { const set = { fiscal: S.fiscal, cacimba: S.cacimba, ratinho: S.ratinho }[e.skin]; foot(ctx, e, set[(e.dir < 0 ? 0 : 2) + f], -2); }
         if (e.mode === 'chase' && e.saw > 0 && e.saw % 10 < 6) drawText(ctx, '!', Math.round(e.x + 5), Math.round(e.y - 10), '#f22', 2);
         break;
       }

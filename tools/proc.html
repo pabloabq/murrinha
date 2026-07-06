@@ -1,0 +1,107 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>proc</title>
+<style>
+  body { margin:0; background:#20202c; color:#e8e8f0; font:13px monospace; padding:12px; }
+  canvas { image-rendering:pixelated; background:
+    repeating-conic-gradient(#3a3a4c 0% 25%, #2c2c3a 0% 50%) 50% / 20px 20px;
+    border:1px solid #44445a; margin:6px; vertical-align:top; }
+  #log { white-space:pre-wrap; color:#8fe; }
+</style>
+<div id="row"></div>
+<div id="log"></div>
+<script type="module">
+const log = (m) => document.getElementById('log').textContent += m + '\n';
+const q = new URLSearchParams(location.search);
+const src = q.get('src') || 'char_cacimba.png';
+const outName = q.get('out') || 'char_cacimba_cut';
+const targetH = +(q.get('h') || 46);          // altura final em px (tamanho de jogo)
+const tol = +(q.get('tol') || 76);            // tolerância de cor do fundo
+
+const img = new Image();
+img.crossOrigin = 'anonymous';
+img.onload = () => { try { run(); } catch (e) { log('ERR ' + e.message); } };
+img.src = '/tools/' + src + '?' + Date.now();
+
+function run() {
+  const W = img.width, H = img.height;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.drawImage(img, 0, 0);
+  const im = x.getImageData(0, 0, W, H);
+  const d = im.data;
+
+  // cor-semente = média dos 4 cantos
+  const corner = (px, py) => { const i = (py * W + px) * 4; return [d[i], d[i+1], d[i+2]]; };
+  const seeds = [corner(0,0), corner(W-1,0), corner(0,H-1), corner(W-1,H-1)];
+  const seed = [0,1,2].map(k => Math.round(seeds.reduce((a,s)=>a+s[k],0)/4));
+  log('semente fundo rgb=' + seed.join(','));
+
+  // flood-fill a partir das bordas; remove pixels perto da cor do fundo,
+  // para no contorno escuro do personagem
+  const seen = new Uint8Array(W * H);
+  const stack = [];
+  const push = (px, py) => { if (px>=0&&px<W&&py>=0&&py<H&&!seen[py*W+px]) { seen[py*W+px]=1; stack.push(px, py); } };
+  for (let px=0; px<W; px++){ push(px,0); push(px,H-1); }
+  for (let py=0; py<H; py++){ push(0,py); push(W-1,py); }
+  const near = (i) => {
+    const dr=d[i]-seed[0], dg=d[i+1]-seed[1], db=d[i+2]-seed[2];
+    return Math.sqrt(dr*dr+dg*dg+db*db) < tol;
+  };
+  let removed = 0;
+  while (stack.length) {
+    const py = stack.pop(), px = stack.pop();
+    const i = (py * W + px) * 4;
+    if (!near(i)) continue;         // parou no contorno / personagem
+    d[i+3] = 0; removed++;          // transparente
+    push(px+1,py); push(px-1,py); push(px,py+1); push(px,py-1);
+  }
+  log('pixels removidos: ' + removed);
+  x.putImageData(im, 0, 0);
+
+  // bounding box do que sobrou
+  let minx=W,miny=H,maxx=0,maxy=0;
+  for (let py=0; py<H; py++) for (let px=0; px<W; px++) {
+    if (d[(py*W+px)*4+3] > 16) { if(px<minx)minx=px; if(px>maxx)maxx=px; if(py<miny)miny=py; if(py>maxy)maxy=py; }
+  }
+  const bw = maxx-minx+1, bh = maxy-miny+1;
+  log('bbox ' + bw + 'x' + bh);
+  const trimmed = document.createElement('canvas'); trimmed.width=bw; trimmed.height=bh;
+  trimmed.getContext('2d').drawImage(c, minx, miny, bw, bh, 0, 0, bw, bh);
+
+  // downscale por etapas (área) até a altura alvo -> nitidez limpa
+  let cur = trimmed;
+  const scale = targetH / bh;
+  let curScale = 1;
+  while (curScale * 0.5 > scale) {
+    const nc = document.createElement('canvas');
+    nc.width = Math.max(1, Math.round(cur.width/2)); nc.height = Math.max(1, Math.round(cur.height/2));
+    const nx = nc.getContext('2d'); nx.imageSmoothingEnabled = true; nx.imageSmoothingQuality='high';
+    nx.drawImage(cur, 0, 0, nc.width, nc.height);
+    cur = nc; curScale *= 0.5;
+  }
+  const fh = targetH, fw = Math.round(bw * scale);
+  const out = document.createElement('canvas'); out.width=fw; out.height=fh;
+  const ox = out.getContext('2d'); ox.imageSmoothingEnabled=true; ox.imageSmoothingQuality='high';
+  ox.drawImage(cur, 0, 0, fw, fh);
+
+  // alpha binário leve: corta franjas semi-transparentes do downscale
+  const oi = ox.getImageData(0,0,fw,fh); const od = oi.data;
+  for (let i=0;i<od.length;i+=4){ if(od[i+3]<90) od[i+3]=0; else od[i+3]=255; }
+  ox.putImageData(oi,0,0);
+  log('final ' + fw + 'x' + fh);
+
+  // mostra: original, recortado, final (5x)
+  const show = (cv, sc, label) => {
+    const v=document.createElement('canvas'); v.width=cv.width*sc; v.height=cv.height*sc;
+    const vx=v.getContext('2d'); vx.imageSmoothingEnabled=false; vx.drawImage(cv,0,0,v.width,v.height);
+    document.getElementById('row').appendChild(v);
+  };
+  show(c, 0.4); show(trimmed, 0.5); show(out, 5);
+
+  // salva o PNG final via /shot
+  fetch('/shot?name=' + outName, { method:'POST', body: out.toDataURL('image/png') })
+    .then(()=>log('salvo: tools/' + outName + '.png')).catch(e=>log('save err '+e));
+  window.__done = true;
+}
+</script>
