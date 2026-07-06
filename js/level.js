@@ -794,11 +794,22 @@ export class Level {
     if (p.inv > 0 && (p.inv % 6 < 3) && this.state === 'play') return;
     let img;
     const right = p.dir >= 0;
-    if (this.state === 'dying') img = right ? S.murrJump : S.murrJumpL;
-    else if (!p.ground) img = right ? S.murrJump : S.murrJumpL;
-    else if (Math.abs(p.vx) > 0.2) img = (Math.floor(p.anim / 6) % 2 === 0) ? (right ? S.murrWalk1 : S.murrWalk1L) : (right ? S.murrWalk2 : S.murrWalk2L);
-    else img = right ? S.murrIdle : S.murrIdleL;
-    ctx.drawImage(img, Math.round(p.x - 3), Math.round(p.y - 2));
+    const aip = assets.get('art/char_murrinha_cut.png');
+    if (aip) {
+      // sprite de IA: pé no chão, centralizado, com leve gingado ao andar
+      let bob = 0;
+      if (p.ground && Math.abs(p.vx) > 0.2) bob = Math.round(Math.abs(Math.sin(p.anim * 0.25)));
+      const dx = Math.round(p.x + p.w / 2 - aip.width / 2);
+      const dy = Math.round(p.y + p.h - aip.height - bob);
+      if (right) ctx.drawImage(aip, dx, dy);
+      else { ctx.save(); ctx.translate(dx + aip.width, dy); ctx.scale(-1, 1); ctx.drawImage(aip, 0, 0); ctx.restore(); }
+    } else {
+      if (this.state === 'dying') img = right ? S.murrJump : S.murrJumpL;
+      else if (!p.ground) img = right ? S.murrJump : S.murrJumpL;
+      else if (Math.abs(p.vx) > 0.2) img = (Math.floor(p.anim / 6) % 2 === 0) ? (right ? S.murrWalk1 : S.murrWalk1L) : (right ? S.murrWalk2 : S.murrWalk2L);
+      else img = right ? S.murrIdle : S.murrIdleL;
+      ctx.drawImage(img, Math.round(p.x - 3), Math.round(p.y - 2));
+    }
     if (p.boost > 0 && p.boost % 4 < 2) {
       ctx.fillStyle = '#f2d24e';
       ctx.fillRect(Math.round(p.x - p.dir * 8), Math.round(p.y + 14), 3, 3);
