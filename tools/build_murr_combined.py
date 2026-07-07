@@ -5,7 +5,7 @@
 import numpy as np
 from PIL import Image
 
-SRC = 'art/fichas/fundo verde murrinha andando e parado.png'
+SRC = 'art/fichas/andar e parado.png'
 OUTLINE = (28, 20, 16)
 STAND = 62
 
@@ -64,8 +64,8 @@ for x0, x1 in runs:
     frames.append(Image.fromarray(rgba[ys.min():ys.max() + 1, x0:x1 + 1], 'RGBA'))
 print('quadros:', len(frames), 'alturas:', [f.height for f in frames])
 
-PARADO = 1                       # q1 = em pe
-WALK = [0, 3, 2, 4]              # contato, passagem, contato, passagem
+PARADO = 4                       # imagem 5 = em pe (Pablo confirmou)
+WALK = [0, 1, 2, 3]             # imagens 1-4 = ciclo de caminhada, na ordem
 factor = STAND / frames[PARADO].height
 
 
