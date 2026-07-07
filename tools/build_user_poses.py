@@ -7,7 +7,7 @@ from PIL import Image
 
 FICH = 'art/fichas'
 OUTLINE = (28, 20, 16)
-STAND = 62  # altura de pe do Murrinha (mesma do walk)
+STAND = 68  # bate com a altura de pe do idle (62 no personagem)
 
 
 def dilate(m, n=1):
