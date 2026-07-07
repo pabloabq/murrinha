@@ -889,7 +889,7 @@ export class Level {
     const walk = assets.get('art/char_murrinha_walk.png');   // ciclo de 4 quadros
     const idle = assets.get('art/char_murrinha_idle.png');
     if (walk && idle) {
-      const WF = 3, wfw = Math.floor(walk.width / WF);
+      const WF = 4, wfw = Math.floor(walk.width / WF);
       const A = n => assets.get('art/char_murrinha_' + n + '.png') || idle;
       let src, fw, fr = 0, bob = 0;
       if (!p.ground) {                       // no ar: subindo = pulo, descendo = queda
@@ -898,10 +898,9 @@ export class Level {
         src = A('hide'); fw = src.width;
       } else if (p.crouch) {                 // agachado
         src = A('crouch'); fw = src.width;
-      } else if (Math.abs(p.vx) > 0.3) {     // andando: contato→passagem→contato-oposto (ping-pong) pela distância
+      } else if (Math.abs(p.vx) > 0.3) {     // andando: ciclo completo de 4 quadros (bob já está na arte)
         src = walk; fw = wfw;
-        fr = [0, 1, 2, 1][(Math.floor(p.x / WALK_STRIDE) % 4 + 4) % 4];
-        bob = (fr === 1) ? 1 : 0;            // passagem: corpo sobe 1px
+        fr = (Math.floor(p.x / WALK_STRIDE) % WF + WF) % WF;
       } else {                               // parado
         src = idle; fw = idle.width;
       }
