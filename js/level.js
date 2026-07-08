@@ -559,7 +559,7 @@ export class Level {
       const range = e.range || 64;
       if ((e.x - e.homeX) > range && e.dir > 0) e.dir = -1;
       else if ((e.x - e.homeX) < -range && e.dir < 0) e.dir = 1;
-      const step = e.looking ? (e.dir * 0.5) : 0;
+      const step = e.looking ? (e.dir * 0.85) : 0;   // ritmo de passo visivel (0.5 era lento demais)
       if (step) {
         if (this.onGround(e) && this.edgeAhead(e)) e.dir = -e.dir;
         else if (this.moveX(e, step)) e.dir = -e.dir;
