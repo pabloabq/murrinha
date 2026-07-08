@@ -74,7 +74,7 @@ const AI_STRIP = {
   'chaser:fiscal': { path: 'art/char_fiscal_strip.png', frames: 3 },
   'chaser:ratinho': { path: 'art/char_ratinho_strip.png', frames: 3 },
   tromba: { path: 'art/char_trombadinha_strip.png', frames: 3 },
-  liginha: { path: 'art/char_vanita_walk.png', frames: 6 },
+  liginha: { path: 'art/char_vanita_walk.png', frames: 4 },
   bigwalk: { path: 'art/char_gordo_strip.png', frames: 3 },
   crosser: { path: 'art/char_tavinho_strip.png', frames: 3 },
   whistler: { path: 'art/char_carrapeta_strip.png', frames: 3 },
@@ -981,13 +981,13 @@ export class Level {
         const vwalk = assets.get('art/char_vanita_walk.png');
         const vidle = assets.get('art/char_vanita_idle.png');
         if (vwalk && vidle) {
-          const WF = 2, cw = Math.floor(vwalk.width / WF);
-          let src, fw, fr = 0, bob = 0;
-          if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: aponta e grita
-          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = ((Math.floor(e.x / WALK_STRIDE)) % WF + WF) % WF; bob = fr; }
+          const WF = 4, cw = Math.floor(vwalk.width / WF);
+          let src, fw, fr = 0;
+          if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: apita e grita
+          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor(e.x / WALK_STRIDE) % WF + WF) % WF; }  // ciclo de 4 (bob na arte)
           else { src = vidle; fw = vidle.width; }
           const lw = fw / SS, lh = src.height / SS;
-          const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh - bob);
+          const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh);
           if (e.dir >= 0) ctx.drawImage(src, fr * fw, 0, fw, src.height, dx, dy, lw, lh);
           else { ctx.save(); ctx.translate(dx + lw, dy); ctx.scale(-1, 1); ctx.drawImage(src, fr * fw, 0, fw, src.height, 0, 0, lw, lh); ctx.restore(); }
         } else {
