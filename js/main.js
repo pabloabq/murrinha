@@ -159,7 +159,10 @@ requestAnimationFrame(frame);
 // ---------- PWA ----------
 if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
   addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    // updateViaCache:'none' -> navegador NUNCA usa cache HTTP p/ o sw.js: checa versao nova na hora
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then(reg => reg.update())
+      .catch(() => {});
   });
   // quando uma versão nova assumir, recarrega sozinho (uma vez)
   let reloaded = false;
