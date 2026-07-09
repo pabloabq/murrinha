@@ -559,7 +559,7 @@ export class Level {
       const range = e.range || 64;
       if ((e.x - e.homeX) > range && e.dir > 0) e.dir = -1;
       else if ((e.x - e.homeX) < -range && e.dir < 0) e.dir = 1;
-      const step = e.looking ? (e.dir * 0.85) : 0;   // ritmo de passo visivel (0.5 era lento demais)
+      const step = e.looking ? (e.dir * 0.85) : 0;   // ritmo de passo visivel
       if (step) {
         if (this.onGround(e) && this.edgeAhead(e)) e.dir = -e.dir;
         else if (this.moveX(e, step)) e.dir = -e.dir;
@@ -984,7 +984,7 @@ export class Level {
           const WF = 8, cw = Math.floor(vwalk.width / WF);
           let src, fw, fr = 0;
           if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: apita e grita
-          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor(e.x / WALK_STRIDE) % WF + WF) % WF; }  // ciclo de 4 (bob na arte)
+          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor(e.x / 9.2) % WF + WF) % WF; }  // passos ~20% mais rapidos por distancia (stride 11 -> 9.2)
           else { src = vidle; fw = vidle.width; }
           const lw = fw / SS, lh = src.height / SS;
           const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh);
