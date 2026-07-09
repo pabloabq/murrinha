@@ -82,11 +82,11 @@ def save_walk(fs, out, factor):
     strip.save(out); print(out, strip.size, len(ims), 'quadros')
 
 
-anda = frames_of('art/fichas/vanita_anda.png')
+novo = frames_of('art/fichas/vanita_novo.png')   # 8 quadros: q0=parado, q1-q7=andar (CALCA)
 apita = frames_of('art/fichas/vanita_apita.png')
-f_anda = STAND / anda[4].height        # q4 = parado (ref de altura)
-f_apita = STAND / apita[0].height      # q0 = em pe (ref de altura nesse arquivo)
+f_novo = STAND / novo[0].height        # q0 = parado (ref de altura)
+f_apita = STAND / apita[0].height      # q0 = em pe (ref nesse arquivo)
 
-save_single(anda[4], 'art/char_vanita_idle.png', f_anda)
-save_walk([anda[0], anda[1], anda[2], anda[3]], 'art/char_vanita_walk.png', f_anda)
-save_single(apita[3], 'art/char_vanita_whistle.png', f_apita)   # q3 = soprando, inclinada
+save_single(novo[0], 'art/char_vanita_idle.png', f_novo)
+save_walk([novo[1], novo[2], novo[3], novo[4], novo[5], novo[6], novo[7]], 'art/char_vanita_walk.png', f_novo)
+save_single(apita[3], 'art/char_vanita_whistle.png', f_apita)   # q3 = soprando (ainda de saia)

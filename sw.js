@@ -1,5 +1,5 @@
 // sw.js — service worker: stale-while-revalidate (funciona offline, atualiza sozinho)
-const VERSION = 'murrinha-v38';
+const VERSION = 'murrinha-v39';
 const ASSETS = [
   './',
   './index.html',

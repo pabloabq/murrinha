@@ -74,7 +74,7 @@ const AI_STRIP = {
   'chaser:fiscal': { path: 'art/char_fiscal_strip.png', frames: 3 },
   'chaser:ratinho': { path: 'art/char_ratinho_strip.png', frames: 3 },
   tromba: { path: 'art/char_trombadinha_strip.png', frames: 3 },
-  liginha: { path: 'art/char_vanita_walk.png', frames: 4 },
+  liginha: { path: 'art/char_vanita_walk.png', frames: 7 },
   bigwalk: { path: 'art/char_gordo_strip.png', frames: 3 },
   crosser: { path: 'art/char_tavinho_strip.png', frames: 3 },
   whistler: { path: 'art/char_carrapeta_strip.png', frames: 3 },
@@ -981,7 +981,7 @@ export class Level {
         const vwalk = assets.get('art/char_vanita_walk.png');
         const vidle = assets.get('art/char_vanita_idle.png');
         if (vwalk && vidle) {
-          const WF = 4, cw = Math.floor(vwalk.width / WF);
+          const WF = 7, cw = Math.floor(vwalk.width / WF);
           let src, fw, fr = 0;
           if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: apita e grita
           else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor(e.x / WALK_STRIDE) % WF + WF) % WF; }  // ciclo de 4 (bob na arte)
