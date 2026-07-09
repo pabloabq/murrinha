@@ -987,7 +987,7 @@ export class Level {
           const WF = 8, cw = Math.floor(vwalk.width / WF);
           let src, fw, fr = 0;
           if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: apita e grita
-          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor((e.walk || 0) / 6.4) % WF + WF) % WF; }  // ciclo por DISTANCIA andada (toca sempre p/ frente nos 2 sentidos); stride 6.4 ~1s
+          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor((e.walk || 0) / 5.4) % WF + WF) % WF; }  // ciclo por DISTANCIA andada (p/ frente nos 2 sentidos); stride 5.4 ~0.85s (passos ~18% + rapidos)
           else { src = vidle; fw = vidle.width; }
           const lw = fw / SS, lh = src.height / SS;
           const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh);
