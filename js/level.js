@@ -575,6 +575,9 @@ export class Level {
       e.susp = lost ? e.susp - 1.5 : 100;
       if (e.susp <= 0) { e.mode = 'patrol'; e.susp = 0; e.vx = e.dir * 0.5; }
     }
+    // distancia andada (sempre cresce, nos dois sentidos) -> ciclo do passo toca
+    // SEMPRE pra frente, indo p/ direita ou p/ esquerda (sem moonwalk ao virar)
+    e.walk = (e.walk || 0) + Math.abs(e.vx || 0);
     e.vy = (e.vy || 0) + GRAV; e.vy = Math.min(e.vy, TERM);
     this.moveY(e, e.vy);
     // pega no toque (mas ainda dá pra pular por cima)
@@ -984,7 +987,7 @@ export class Level {
           const WF = 8, cw = Math.floor(vwalk.width / WF);
           let src, fw, fr = 0;
           if (e.mode === 'chase' && e.saw > 15) { src = assets.get('art/char_vanita_whistle.png') || vwalk; fw = src.width; }  // flagrou: apita e grita
-          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor(e.x / 6.4) % WF + WF) % WF; }  // ciclo ~1s na velocidade dela (stride 6.4): troca de passo ~dobro do original
+          else if (Math.abs(e.vx) > 0.2) { src = vwalk; fw = cw; fr = (Math.floor((e.walk || 0) / 6.4) % WF + WF) % WF; }  // ciclo por DISTANCIA andada (toca sempre p/ frente nos 2 sentidos); stride 6.4 ~1s
           else { src = vidle; fw = vidle.width; }
           const lw = fw / SS, lh = src.height / SS;
           const dx = Math.round(e.x + e.w / 2 - lw / 2), dy = Math.round(e.y + e.h - lh);
