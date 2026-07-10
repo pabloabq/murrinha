@@ -310,3 +310,60 @@ Fontes que adicionam dimensões que os indicadores de preço não têm:
 fora da amostra, combina só o que sobrevive num número calibrado de valor esperado, e cerca
 esse número com filtros de "não operar", dimensionamento e sobrevivência — aprendendo
 continuamente, porque todo edge decai.**
+
+---
+
+# Anexo — Custos, dados e esforço
+
+## Quanto de histórico (por timeframe)
+
+O que importa não é tempo de calendário, é **número de amostras e variedade de regimes**.
+Dado pré-2020 atrapalha (microestrutura diferente, sem derivativos profundos).
+
+| Timeframe | 2 anos | 3 anos | Leitura |
+|---|---|---|---|
+| 15m | ~70.000 velas | ~105.000 velas | Fartura para pesquisa de features |
+| 1h | ~17.500 velas | ~26.000 velas | Confortável |
+| 4h | ~4.380 velas | ~6.570 velas | **Gargalo** — poucas amostras, exige classificador simples |
+| Trades validados (~5/sem) | ~520 | ~780 | Suficiente para validar |
+
+- **Mínimo viável:** 18 meses.
+- **Núcleo confortável:** 2–3 anos (o padrão a usar).
+- **Holdout de robustez:** +1–2 anos mais antigos, só como teste final (nunca treino).
+- A restrição que manda é **variedade de regime** (alta/baixa/lateral), não contagem de velas.
+
+## O que precisa pagar (regra: pagar o mínimo; só pagar quando não-pagar estraga a análise)
+
+**Fase de pesquisa (provar se há edge): ~R$ 0.**
+
+| Item | Custo | Veredito |
+|---|---|---|
+| Velas 15m/1h/4h | R$ 0 (dumps Binance) | Nunca pagar |
+| Funding + trades (→ CVD) | R$ 0 (CCXT + dumps) | Nunca pagar |
+| OI atual/básico | R$ 0 (~30 dias) | Coletar de graça a partir de agora |
+| Compute de pesquisa | R$ 0 (notebook; dado ~1–2 GB; ML clássico, sem GPU) | Não pagar |
+| Servidor 24/7 (fase ao vivo) | R$ 0–~US$7/mês (Oracle free / Hetzner) | Barato, só ao vivo |
+| Entrega (Telegram Bot API) | R$ 0 | Grátis, padrão do setor |
+| Feed ao vivo (websocket Binance) | R$ 0 | Não pagar |
+
+**Pago opcional — só se a pesquisa provar ganho líquido:**
+
+| Item | Custo | Quando |
+|---|---|---|
+| Coinglass (OI/liquidação histórico) | ~US$29–79/mês | Só se OI histórico virar fator forte |
+| Glassnode/CryptoQuant (on-chain) | ~US$29–99/mês | Provável pular (lento demais p/ 15m) |
+| Opções/DVOL (Deribit) | Boa parte grátis via API | Nice-to-have, não dia 1 |
+
+## Esforço real (o custo verdadeiro é tempo, não dinheiro)
+
+1. Pipeline de dados (3 timeframes, sem lookahead) — dias
+2. Rotulagem (triple-barrier + MAE/MFE) — dias
+3. Feature engineering (point-in-time) — semanas *(o grosso)*
+4. Loop de pesquisa (feature importance, purged CV, anti-overfitting) — **semanas a meses** *(o mais difícil; onde se descobre se há edge)*
+5. Backtest com custo → motor ao vivo → entrega — semanas
+6. Monitoramento/decaimento — contínuo
+
+**Protótipo de pesquisa: ~1–3 meses. Produção: ~6–12 meses.**
+O resultado pode ser um honesto *"não há edge explorável no 15m após custos"* — e isso é
+uma conclusão válida, obtida barato. O custo real é **tempo qualificado + honestidade**,
+não desembolso.
